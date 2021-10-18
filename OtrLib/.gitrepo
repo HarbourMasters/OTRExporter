@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/otr64/OtrLib.git
+	branch = main
+	commit = 0d5c2a9850712dfb5248449725cf2347296c2df0
+	parent = 14dc15b2ec0202bf79998fc23d1ab4256aec0970
+	method = merge
+	cmdver = 0.4.3
