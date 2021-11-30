@@ -20,11 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CollisionExporter.h" />
+    <ClInclude Include="DisplayListExporter.h" />
+    <ClInclude Include="Main.h" />
     <ClInclude Include="RoomExporter.h" />
     <ClInclude Include="TextureExporter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionExporter.cpp" />
+    <ClCompile Include="DisplayListExporter.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="RoomExporter.cpp" />
     <ClCompile Include="TextureExporter.cpp" />
@@ -51,7 +54,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -90,6 +93,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\..\ZAPD\ZAPD;$(ProjectDir)..\..\ZAPD\lib\tinyxml2;$(ProjectDir)..\..\ZAPD\lib\libgfxd;$(ProjectDir)..\..\ZAPD\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\..\OtrLib\otrlib;$(LibraryPath)</LibraryPath>
+    <TargetName>ExporterExample</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -127,12 +133,16 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ZAPDUtils.lib;OTRLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

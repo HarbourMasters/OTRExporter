@@ -5,7 +5,7 @@
 
 class PolygonDlist;
 
-class ExporterExample_Room : public ZResourceExporter
+class OTRExporter_Room : public ZResourceExporter
 {
 public:
 	void WritePolyDList(BinaryWriter* writer, PolygonDlist* dlist);

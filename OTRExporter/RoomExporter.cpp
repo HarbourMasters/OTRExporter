@@ -19,9 +19,9 @@
 #include <ZRoom/Commands/SetSkyboxSettings.h>
 #include <ZRoom/Commands/SetLightingSettings.h>
 #include <ZRoom/Commands/SetEchoSettings.h>
-#include <CollisionExporter.h>
+#include "CollisionExporter.h"
 
-void ExporterExample_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
 	ZRoom* room = (ZRoom*)res;
 
@@ -238,7 +238,7 @@ void ExporterExample_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 		{
 			SetCollisionHeader* cmdCollHeader = (SetCollisionHeader*)cmd;
 
-			ExporterExample_Collision colExp = ExporterExample_Collision();
+			OTRExporter_Collision colExp = OTRExporter_Collision();
 			//colExp.Save(cmdCollHeader->collisionHeader, outPath, writer);
 		}
 		break;
@@ -313,7 +313,7 @@ void ExporterExample_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 	//File::WriteAllBytes(StringHelper::Sprintf("%s", res->GetName().c_str()), memStream->ToVector());
 }
 
-void ExporterExample_Room::WritePolyDList(BinaryWriter* writer, PolygonDlist* dlist)
+void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, PolygonDlist* dlist)
 {
 	writer->Write(dlist->polyType);
 

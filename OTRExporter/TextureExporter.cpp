@@ -1,7 +1,7 @@
 #include "TextureExporter.h"
 #include "../ZAPD/ZFile.h"
 
-void ExporterExample_Texture::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Texture::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
 	ZTexture* tex = (ZTexture*)res;
 
@@ -9,4 +9,6 @@ void ExporterExample_Texture::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 	for (int i = tex->GetRawDataIndex(); i < tex->GetRawDataIndex() + tex->GetRawDataSize(); i++)
 		writer->Write(data[i]);
+
+	//otrArchive->AddFile(file->GetName(), (uintptr_t)strem->ToVector().data(), strem->GetLength());
 }

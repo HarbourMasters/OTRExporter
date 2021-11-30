@@ -1,15 +1,16 @@
 #include <OTRArchive.h>
-#include <Factories/OTRArchiveFactory.h>
-#include <TextureExporter.h>
-#include <RoomExporter.h>
-#include <CollisionExporter.h>
+//#include <Factories/OTRArchiveFactory.h>
+#include "TextureExporter.h"
+#include "RoomExporter.h"
+#include "CollisionExporter.h"
+#include "DisplayListExporter.h"
 #include <Globals.h>
 #include <Utils/File.h>
 #include <Utils/Directory.h>
 #include <Utils/MemoryStream.h>
 #include <Utils/BinaryWriter.h>
 
-OtrLib::OTRArchive* otrArchive;
+std::shared_ptr<OtrLib::OTRArchive> otrArchive;
 BinaryWriter* fileWriter;
 
 enum class ExporterFileMode
@@ -61,27 +62,45 @@ static void ExporterFileBegin(ZFile* file)
 {
 	printf("ExporterFileBegin() called on ZFile %s.\n", file->GetName().c_str());
 
-	//MemoryStream* stream = new MemoryStream();
-	//fileWriter = new BinaryWriter(stream);
+	MemoryStream* stream = new MemoryStream();
+	fileWriter = new BinaryWriter(stream);
 }
 
 static void ExporterFileEnd(ZFile* file)
 {
 	printf("ExporterFileEnd() called on ZFile %s.\n", file->GetName().c_str());
 
+	//MemoryStream* strem = (MemoryStream*)fileWriter->GetStream().get();
+	//otrArchive->AddFile(file->GetName(), (uintptr_t)strem->ToVector().data(), strem->GetLength());
+
 	//File::WriteAllBytes(StringHelper::Sprintf("conv/%s"));
+}
+
+static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
+{
+	MemoryStream* strem = (MemoryStream*)writer.GetStream().get();
+
+	std::string fName = StringHelper::Sprintf("%s\\%s", res->parent->GetOutName().c_str(), res->GetName().c_str());
+
+	if (!otrArchive->HasFile(fName))
+		otrArchive->AddFile(fName, (uintptr_t)strem->ToVector().data(), writer.GetBaseAddress());
 }
 
 static void ExporterXMLBegin()
 {
 	printf("ExporterXMLBegin() called.\n");
 
-	otrArchive = OtrLib::OTRArchiveFactory::CreateArchive();
+	if (File::Exists("oot.otr"))
+		otrArchive = std::shared_ptr<OtrLib::OTRArchive>(new OtrLib::OTRArchive("oot.otr"));
+	else
+		otrArchive = OtrLib::OTRArchive::CreateArchive("oot.otr");
 }
 
 static void ExporterXMLEnd()
 {
 	printf("ExporterXMLEnd() called.\n");
+
+	//otrArchive;
 }
 
 static void ImportExporters()
@@ -90,18 +109,20 @@ static void ImportExporters()
 	// By running ZAPD with the argument -se EXAMPLE, we tell it that we want to use this exporter for our resources.
 	ExporterSet* exporterSet = new ExporterSet();
 	exporterSet->processFileModeFunc = ExporterProcessFileMode;
-	exporterSet->parseFileModeFunc = ExporterParseFileMode;
+	//exporterSet->parseFileModeFunc = ExporterParseFileMode;
 	exporterSet->parseArgsFunc = ExporterParseArgs;
 	exporterSet->beginFileFunc = ExporterFileBegin;
 	exporterSet->endFileFunc = ExporterFileEnd;
 	exporterSet->beginXMLFunc = ExporterXMLBegin;
 	exporterSet->endXMLFunc = ExporterXMLEnd;
-	exporterSet->exporters[ZResourceType::Texture] = new ExporterExample_Texture();
-	exporterSet->exporters[ZResourceType::Room] = new ExporterExample_Room();
-	exporterSet->exporters[ZResourceType::CollisionHeader] = new ExporterExample_Collision();
+	exporterSet->resSaveFunc = ExporterResourceEnd;
+	exporterSet->exporters[ZResourceType::Texture] = new OTRExporter_Texture();
+	exporterSet->exporters[ZResourceType::Room] = new OTRExporter_Room();
+	exporterSet->exporters[ZResourceType::CollisionHeader] = new OTRExporter_Collision();
+	exporterSet->exporters[ZResourceType::DisplayList] = new OTRExporter_DisplayList();
 
 	Globals::AddExporter("OTR", exporterSet);
 }
 
 // When ZAPD starts up, it will automatically call the below function, which in turn sets up our exporters.
-REGISTER_EXPORTER(ImportExporters)
+REGISTER_EXPORTER(ImportExporters);
