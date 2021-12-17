@@ -80,10 +80,27 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 {
 	MemoryStream* strem = (MemoryStream*)writer.GetStream().get();
 
-	std::string fName = StringHelper::Sprintf("%s\\%s", res->parent->GetOutName().c_str(), res->GetName().c_str());
+	if (res->GetName() != "")
+	{
+		std::string oName = res->parent->GetOutName();
+		std::string rName = res->GetName();
 
-	if (!otrArchive->HasFile(fName))
-		otrArchive->AddFile(fName, (uintptr_t)strem->ToVector().data(), writer.GetBaseAddress());
+		//if (res->GetResourceType() == ZResourceType::Room || res->GetResourceType() == ZResourceType::Scene)
+		if (StringHelper::Contains(oName, "_scene") || StringHelper::Contains(oName, "_room"))
+		{
+			//oName = StringHelper::Split(oName, "_")[0];
+			oName = StringHelper::Split(oName, "_")[0] + "_scene";
+			//rName = StringHelper::Split(rName, "_")[0];
+		}
+
+		std::string fName = StringHelper::Sprintf("%s\\%s", oName.c_str(), rName.c_str());
+
+		if (otrArchive->HasFile(fName))
+			otrArchive->RemoveFile(fName);
+
+		//if (!otrArchive->HasFile(fName))
+			otrArchive->AddFile(fName, (uintptr_t)strem->ToVector().data(), writer.GetBaseAddress());
+	}
 }
 
 static void ExporterXMLBegin()
@@ -118,6 +135,7 @@ static void ImportExporters()
 	exporterSet->resSaveFunc = ExporterResourceEnd;
 	exporterSet->exporters[ZResourceType::Texture] = new OTRExporter_Texture();
 	exporterSet->exporters[ZResourceType::Room] = new OTRExporter_Room();
+	exporterSet->exporters[ZResourceType::Scene] = new OTRExporter_Room();
 	exporterSet->exporters[ZResourceType::CollisionHeader] = new OTRExporter_Collision();
 	exporterSet->exporters[ZResourceType::DisplayList] = new OTRExporter_DisplayList();
 

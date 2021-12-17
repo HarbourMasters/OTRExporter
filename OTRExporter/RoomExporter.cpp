@@ -8,7 +8,6 @@
 #include <ZRoom/Commands/SetSkyboxModifier.h>
 #include <ZRoom/Commands/SetSoundSettings.h>
 #include <ZRoom/Commands/SetCameraSettings.h>
-#include <ZRoom/Commands/SetMesh.h>
 #include <ZRoom/Commands/SetRoomBehavior.h>
 #include <ZRoom/Commands/SetCsCamera.h>
 #include <ZRoom/Commands/SetRoomList.h>
@@ -20,18 +19,24 @@
 #include <ZRoom/Commands/SetLightingSettings.h>
 #include <ZRoom/Commands/SetEchoSettings.h>
 #include "CollisionExporter.h"
+#include "OTRResource.h"
 
 void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
 	ZRoom* room = (ZRoom*)res;
 
-	//writer->Write(room->commands.size());
+	writer->Write((uint8_t)Endianess::Little);
+	writer->Write((uint32_t)OtrLib::ResourceType::OTRRoom);
+	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
+	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+
+	writer->Write((uint32_t)room->commands.size());
 
 	for (int i = 0; i < room->commands.size(); i++)
 	{
 		ZRoomCommand* cmd = room->commands[i];
 				
-		writer->Write((uint8_t)cmd->cmdID);
+		writer->Write((uint32_t)cmd->cmdID);
 
 		switch (cmd->cmdID)
 		{
@@ -133,7 +138,7 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 		{
 			SetMesh* cmdMesh = (SetMesh*)cmd;
 			 
-			int baseStreamEnd = writer->GetStream().get()->GetLength();
+			//int baseStreamEnd = writer->GetStream().get()->GetLength();
 
 			writer->Write((uint8_t)cmdMesh->data); // 0x01
 			writer->Write(cmdMesh->meshHeaderType);
@@ -142,13 +147,13 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 			{
 				PolygonType2* poly = (PolygonType2*)cmdMesh->polyType.get();
 
-				//writer->Write(poly->num);
+				writer->Write(poly->num);
 				//writer->Write(poly->start);
 				//writer->Write(poly->end);
 
 				for (int i = 0; i < poly->num; i++)
 				{
-					//WritePolyDList(writer, &poly->polyDLists[i]);
+					WritePolyDList(writer, &poly->polyDLists[i]);
 				}
 			}
 			else if (cmdMesh->meshHeaderType == 1)
@@ -185,8 +190,7 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 		{
 			SetLightingSettings* cmdLight = (SetLightingSettings*)cmd;
 
-			writer->Write((uint8_t)cmdLight->settings.size()); // 0x01
-			writer->Write(cmdLight->segmentOffset); // 0x04
+			writer->Write((uint32_t)cmdLight->settings.size()); // 0x01
 
 			for (const LightingSettings& setting : cmdLight->settings)
 			{
@@ -223,22 +227,27 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 		{
 			SetRoomList* cmdRoom = (SetRoomList*)cmd;
 
-			// TODO: FINISH
-			
-			//writer->Write((uint8_t)cmdRoom->rooms.size()); // 0x01
+			writer->Write((uint32_t)cmdRoom->romfile->numRooms); // 0x01
 
-			//for (RoomEntry entry : cmdRoom->rooms)
-			//{
-			//	writer->Write(entry.virtualAddressStart);
-			//	writer->Write(entry.virtualAddressEnd);
-			//}
+			//for (RoomEntry entry : cmdRoom->romfile->rooms)
+			for (int i = 0;i < cmdRoom->romfile->numRooms; i++)
+			{
+				std::string roomName = StringHelper::Sprintf("%s_room_%i", StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i);
+				writer->Write(roomName);
+
+				//writer->Write(entry.virtualAddressStart);
+				//writer->Write(entry.virtualAddressEnd);
+			}
 		}
 		break;
 		case RoomCommand::SetCollisionHeader:
 		{
 			SetCollisionHeader* cmdCollHeader = (SetCollisionHeader*)cmd;
 
-			OTRExporter_Collision colExp = OTRExporter_Collision();
+			Declaration* colHeaderDecl = room->parent->GetDeclaration(cmdCollHeader->segmentOffset);
+			writer->Write(colHeaderDecl->varName);
+
+			//OTRExporter_Collision colExp = OTRExporter_Collision();
 			//colExp.Save(cmdCollHeader->collisionHeader, outPath, writer);
 		}
 		break;
@@ -252,7 +261,7 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 			//uint32_t oldOffset = writer->GetBaseAddress();
 			//writer->Seek(baseStreamEnd, SeekOffsetType::Start);
 
-			writer->Write(cmdEntrance->entrances.size());
+			writer->Write((uint32_t)cmdEntrance->entrances.size());
 
 			for (EntranceEntry entry : cmdEntrance->entrances)
 			{
@@ -277,7 +286,7 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 
 			uint32_t baseStreamEnd = writer->GetStream().get()->GetLength();
 
-			writer->Write(cmdStartPos->actors.size()); // 0x01
+			writer->Write((uint32_t)cmdStartPos->actors.size()); // 0x01
 			//writer->Write(baseStreamEnd); // 0x04
 
 			//uint32_t oldOffset = writer->GetBaseAddress();
@@ -326,9 +335,29 @@ void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, PolygonDlist* dlist)
 		writer->Write(dlist->unk_06);
 
 		// TODO: DList Stuff
+		if (dlist->opaDList != nullptr)
+			writer->Write(dlist->opaDList->GetName());
+		else
+			writer->Write("");
+
+		if (dlist->xluDList != nullptr)
+			writer->Write(dlist->xluDList->GetName());
+		else
+			writer->Write("");
 		break;
 	default:
 		// TODO: DList Stuff
+
+		if (dlist->opaDList != nullptr)
+			writer->Write(dlist->opaDList->GetName());
+		else
+			writer->Write("");
+		
+		if (dlist->xluDList != nullptr)
+			writer->Write(dlist->xluDList->GetName());
+		else
+			writer->Write("");
+
 		break;
 	}
 }

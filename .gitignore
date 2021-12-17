@@ -339,3 +339,7 @@ ZAPDUtils/ZAPDUtils.a
 build/
 ZAPDUtils/build/
 ZAPD/BuildInfo.h
+assets/
+baserom/
+*.vtx.inc
+*.otr

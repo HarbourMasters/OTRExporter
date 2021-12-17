@@ -8,6 +8,7 @@
 enum class F3DZEXOpcode_OTR
 {
 	G_SETTIMGOTR = 0x20,
+	G_DL_OTR = 0x31,
 };
 
 class OTRExporter_DisplayList : public ZResourceExporter
