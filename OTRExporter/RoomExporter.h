@@ -8,6 +8,6 @@ class PolygonDlist;
 class OTRExporter_Room : public ZResourceExporter
 {
 public:
-	void WritePolyDList(BinaryWriter* writer, PolygonDlist* dlist);
+	void WritePolyDList(BinaryWriter* writer, ZRoom* room, PolygonDlist* dlist);
 	virtual void Save(ZResource* res, fs::path outPath, BinaryWriter* writer) override;
 };

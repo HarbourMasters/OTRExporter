@@ -93,7 +93,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\..\ZAPD\ZAPD;$(ProjectDir)..\..\ZAPD\lib\tinyxml2;$(ProjectDir)..\..\ZAPD\lib\libgfxd;$(ProjectDir)..\..\ZAPD\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\..\ZAPD\ZAPD;$(ProjectDir)..\..\ZAPD\lib\tinyxml2;$(ProjectDir)..\..\ZAPD\lib\libgfxd;$(ProjectDir)..\..\ZAPD\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\..\OtrLib\otrlib;$(LibraryPath)</LibraryPath>
     <TargetName>ExporterExample</TargetName>
   </PropertyGroup>

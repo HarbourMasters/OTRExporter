@@ -153,7 +153,7 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 
 				for (int i = 0; i < poly->num; i++)
 				{
-					WritePolyDList(writer, &poly->polyDLists[i]);
+					WritePolyDList(writer, room, &poly->polyDLists[i]);
 				}
 			}
 			else if (cmdMesh->meshHeaderType == 1)
@@ -232,11 +232,8 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 			//for (RoomEntry entry : cmdRoom->romfile->rooms)
 			for (int i = 0;i < cmdRoom->romfile->numRooms; i++)
 			{
-				std::string roomName = StringHelper::Sprintf("%s_room_%i", StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i);
+				std::string roomName = StringHelper::Sprintf("%s\\%s_room_%i", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i);
 				writer->Write(roomName);
-
-				//writer->Write(entry.virtualAddressStart);
-				//writer->Write(entry.virtualAddressEnd);
 			}
 		}
 		break;
@@ -245,10 +242,8 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 			SetCollisionHeader* cmdCollHeader = (SetCollisionHeader*)cmd;
 
 			Declaration* colHeaderDecl = room->parent->GetDeclaration(cmdCollHeader->segmentOffset);
-			writer->Write(colHeaderDecl->varName);
-
-			//OTRExporter_Collision colExp = OTRExporter_Collision();
-			//colExp.Save(cmdCollHeader->collisionHeader, outPath, writer);
+			std::string path = StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), colHeaderDecl->varName.c_str());
+			writer->Write(path);
 		}
 		break;
 		case RoomCommand::SetEntranceList:
@@ -322,7 +317,7 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 	//File::WriteAllBytes(StringHelper::Sprintf("%s", res->GetName().c_str()), memStream->ToVector());
 }
 
-void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, PolygonDlist* dlist)
+void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, ZRoom* room, PolygonDlist* dlist)
 {
 	writer->Write(dlist->polyType);
 
@@ -336,12 +331,12 @@ void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, PolygonDlist* dlist)
 
 		// TODO: DList Stuff
 		if (dlist->opaDList != nullptr)
-			writer->Write(dlist->opaDList->GetName());
+			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->opaDList->GetName().c_str()));
 		else
 			writer->Write("");
 
 		if (dlist->xluDList != nullptr)
-			writer->Write(dlist->xluDList->GetName());
+			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->xluDList->GetName().c_str()));
 		else
 			writer->Write("");
 		break;
@@ -349,12 +344,12 @@ void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, PolygonDlist* dlist)
 		// TODO: DList Stuff
 
 		if (dlist->opaDList != nullptr)
-			writer->Write(dlist->opaDList->GetName());
+			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->opaDList->GetName().c_str()));
 		else
 			writer->Write("");
 		
 		if (dlist->xluDList != nullptr)
-			writer->Write(dlist->xluDList->GetName());
+			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->xluDList->GetName().c_str()));
 		else
 			writer->Write("");
 
