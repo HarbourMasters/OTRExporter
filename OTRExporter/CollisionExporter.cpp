@@ -26,13 +26,6 @@ void OTRExporter_Collision::Save(ZResource* res, fs::path outPath, BinaryWriter*
 	//writer->Write(col->camDataAddress);
 
 	//writer->Write(col->numWaterBoxes);
-	//writer->Write(col->waterBoxAddress);
-
-	//writer->Write(col->vtxSegmentOffset);
-	//writer->Write(col->polySegmentOffset);
-	//writer->Write(col->polyTypeDefSegmentOffset);
-	//writer->Write(col->camDataSegmentOffset);
-	//writer->Write(col->waterBoxSegmentOffset);
 
 	//uint32_t oldOffset = writer->GetBaseAddress();
 	//writer->Seek(col->vtxSegmentOffset, SeekOffsetType::Start);
@@ -45,8 +38,6 @@ void OTRExporter_Collision::Save(ZResource* res, fs::path outPath, BinaryWriter*
 		writer->Write(col->vertices[i].scalars[1].scalarData.s16);
 		writer->Write(col->vertices[i].scalars[2].scalarData.s16);
 	}
-
-	//writer->Seek(col->polySegmentOffset, SeekOffsetType::Start);
 
 	writer->Write((uint32_t)col->polygons.size());
 
@@ -62,13 +53,11 @@ void OTRExporter_Collision::Save(ZResource* res, fs::path outPath, BinaryWriter*
 		writer->Write(col->polygons[i].d);
 	}
 
-	//writer->Seek(col->polyTypeDefSegmentOffset, SeekOffsetType::Start);
 	writer->Write((uint32_t)col->polygonTypes.size());
 
 	for (uint16_t i = 0; i < col->polygonTypes.size(); i++)
 		writer->Write(col->polygonTypes[i]);
 
-	//writer->Seek(col->camDataSegmentOffset, SeekOffsetType::Start);
 	writer->Write((uint32_t)col->camData->entries.size());
 
 	for (auto entry : col->camData->entries)
@@ -78,5 +67,24 @@ void OTRExporter_Collision::Save(ZResource* res, fs::path outPath, BinaryWriter*
 		writer->Write(entry->cameraPosDataSeg);
 	}
 
-	//writer->Seek(oldOffset, SeekOffsetType::Start);
+	writer->Write((uint32_t)col->camData->cameraPositionData.size());
+
+	for (auto entry : col->camData->cameraPositionData)
+	{
+		writer->Write(entry->x);
+		writer->Write(entry->y);
+		writer->Write(entry->z);
+	}
+
+	writer->Write((uint32_t)col->waterBoxes.size());
+
+	for (auto waterBox : col->waterBoxes)
+	{
+		writer->Write(waterBox.xMin);
+		writer->Write(waterBox.ySurface);
+		writer->Write(waterBox.zMin);
+		writer->Write(waterBox.xLength);
+		writer->Write(waterBox.zLength);
+		writer->Write(waterBox.properties);
+	}
 }
