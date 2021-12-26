@@ -7,6 +7,7 @@ FORMAT := clang-format-11
 ASAN ?= 0
 DEBUG ?= 1
 OPTFLAGS ?= -O0
+LTO ?= 0
 
 CXXFLAGS ?= -Wall -Wextra -std=c++17
 
@@ -18,6 +19,10 @@ ifneq ($(ASAN),0)
 	CXXFLAGS += -fsanitize=address
 endif
 
+ifneq ($(LTO),0)
+	CXXFLAGS += -flto
+endif
+
 SRC_DIRS  := $(shell find -type d -not -path "*build*")
 CXX_FILES := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.cpp))
 H_FILES   := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h))
@@ -25,13 +30,13 @@ H_FILES   := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h))
 O_FILES   := $(CXX_FILES:%.cpp=build/%.o)
 LIB       := ExporterTest.a
 
-INCDIRS := $(addprefix -I, \
+INC_DIRS := $(addprefix -I, \
 	../../ZAPD/ZAPD \
 	../../ZAPD/lib/tinyxml2 \
 	../../ZAPD/lib/libgfxd \
 	../../ZAPD/ZAPDUtils \
 	../../OtrLib/otrlib \
-	../../OtrLib/otrlib/lib/spdlog/include \
+	../../OtrLib/otrlib/Lib/spdlog/include \
 	../../OtrLib/otrlib/Lib/Fast3D/U64 \
 )
 
@@ -49,7 +54,7 @@ format:
 .PHONY: all clean format
 
 build/%.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(OPTFLAGS) $(INCDIRS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(OPTFLAGS) $(INC_DIRS) -c $< -o $@
 
 $(LIB): $(O_FILES)
 	$(AR) rcs $@ $^
