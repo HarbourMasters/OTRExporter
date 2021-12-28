@@ -9,7 +9,13 @@ DEBUG ?= 1
 OPTFLAGS ?= -O0
 LTO ?= 0
 
-CXXFLAGS := -Wall -Wextra -std=c++17
+WARN := -Wall -Wextra -Werror \
+	-Wno-unused-parameter \
+	-Wno-unused-function \
+	-Wno-unused-variable
+
+
+CXXFLAGS := $(WARN) -std=c++17 
 CPPFLAGS := -MMD
 
 ifneq ($(DEBUG),0)

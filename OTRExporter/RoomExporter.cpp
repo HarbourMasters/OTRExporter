@@ -32,7 +32,7 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 
 	writer->Write((uint32_t)room->commands.size());
 
-	for (int i = 0; i < room->commands.size(); i++)
+	for (size_t i = 0; i < room->commands.size(); i++)
 	{
 		ZRoomCommand* cmd = room->commands[i];
 				
@@ -128,7 +128,7 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 			writer->Write((uint8_t)cmdCsCam->cameras.size()); // 0x01
 			writer->Write(cmdCsCam->segmentOffset); // 0x04
 
-			for (int i = 0; i < cmdCsCam->cameras.size(); i++)
+			for (size_t i = 0; i < cmdCsCam->cameras.size(); i++)
 			{
 				// TODO: FINISH THIS...
 			}

@@ -213,7 +213,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 				spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = %08X", GETSEGOFFSET(data)));
 			}
 
-			for (int i = 0; i < dList->otherDLists.size(); i++)
+			for (size_t i = 0; i < dList->otherDLists.size(); i++)
 			{
 				Declaration* dListDecl2 = dList->parent->GetDeclaration(GETSEGOFFSET(dList->otherDLists[i]->GetRawDataIndex()));
 
@@ -458,7 +458,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 				auto lastItem = vertsKeys[0];
 
-				for (int i = 1; i < vertsKeys.size(); i++)
+				for (size_t i = 1; i < vertsKeys.size(); i++)
 				{
 					auto curItem = vertsKeys[i];
 

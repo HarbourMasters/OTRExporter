@@ -7,7 +7,7 @@ void OTRExporter_Texture::Save(ZResource* res, fs::path outPath, BinaryWriter* w
 
 	auto data = tex->parent->GetRawData();
 
-	for (int i = tex->GetRawDataIndex(); i < tex->GetRawDataIndex() + tex->GetRawDataSize(); i++)
+	for (size_t i = tex->GetRawDataIndex(); i < tex->GetRawDataIndex() + tex->GetRawDataSize(); i++)
 		writer->Write(data[i]);
 
 	//otrArchive->AddFile(file->GetName(), (uintptr_t)strem->ToVector().data(), strem->GetLength());
