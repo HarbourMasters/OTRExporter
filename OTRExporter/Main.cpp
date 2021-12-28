@@ -4,6 +4,9 @@
 #include "RoomExporter.h"
 #include "CollisionExporter.h"
 #include "DisplayListExporter.h"
+#include "PlayerAnimationExporter.h"
+#include "OTRSkeletonExporter.h"
+#include "OTRSkeletonLimbExporter.h"
 #include <Globals.h>
 #include <Utils/File.h>
 #include <Utils/Directory.h>
@@ -12,6 +15,7 @@
 
 std::shared_ptr<OtrLib::OTRArchive> otrArchive;
 BinaryWriter* fileWriter;
+std::chrono::steady_clock::time_point fileStart, resStart;
 
 enum class ExporterFileMode
 {
@@ -62,6 +66,8 @@ static void ExporterFileBegin(ZFile* file)
 {
 	printf("ExporterFileBegin() called on ZFile %s.\n", file->GetName().c_str());
 
+	fileStart = std::chrono::steady_clock::now();
+
 	MemoryStream* stream = new MemoryStream();
 	fileWriter = new BinaryWriter(stream);
 }
@@ -69,6 +75,11 @@ static void ExporterFileBegin(ZFile* file)
 static void ExporterFileEnd(ZFile* file)
 {
 	printf("ExporterFileEnd() called on ZFile %s.\n", file->GetName().c_str());
+
+	auto fileEnd = std::chrono::steady_clock::now();
+	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(fileEnd - fileStart).count();
+
+	printf("File Export Ended %s in %lims\n", file->GetName().c_str(), diff);
 
 	//MemoryStream* strem = (MemoryStream*)fileWriter->GetStream().get();
 	//otrArchive->AddFile(file->GetName(), (uintptr_t)strem->ToVector().data(), strem->GetLength());
@@ -79,6 +90,8 @@ static void ExporterFileEnd(ZFile* file)
 static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 {
 	MemoryStream* strem = (MemoryStream*)writer.GetStream().get();
+
+	auto start = std::chrono::steady_clock::now();
 
 	if (res->GetName() != "")
 	{
@@ -95,12 +108,20 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 
 		std::string fName = StringHelper::Sprintf("%s\\%s", oName.c_str(), rName.c_str());
 
+#ifdef _DEBUG
 		if (otrArchive->HasFile(fName))
 			otrArchive->RemoveFile(fName);
+#endif
 
 		//if (!otrArchive->HasFile(fName))
 			otrArchive->AddFile(fName, (uintptr_t)strem->ToVector().data(), writer.GetBaseAddress());
 	}
+
+	auto end = std::chrono::steady_clock::now();
+	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+	//if (diff > 10)
+		printf("Exported Resource End %s in %lims\n", res->GetName().c_str(), diff);
 }
 
 static void ExporterXMLBegin()
@@ -138,6 +159,9 @@ static void ImportExporters()
 	exporterSet->exporters[ZResourceType::Scene] = new OTRExporter_Room();
 	exporterSet->exporters[ZResourceType::CollisionHeader] = new OTRExporter_Collision();
 	exporterSet->exporters[ZResourceType::DisplayList] = new OTRExporter_DisplayList();
+	exporterSet->exporters[ZResourceType::PlayerAnimationData] = new OTRExporter_PlayerAnimationExporter();
+	exporterSet->exporters[ZResourceType::Skeleton] = new OTRExporter_Skeleton();
+	exporterSet->exporters[ZResourceType::Limb] = new OTRExporter_SkeletonLimb();
 
 	Globals::AddExporter("OTR", exporterSet);
 }

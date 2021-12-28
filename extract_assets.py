@@ -16,7 +16,7 @@ def ExtractFile(xmlPath, outputPath, outputSourcePath):
         # Don't extract if another file wasn't extracted properly.
     #    return
 
-    execStr = "..\\OTRExporter\\x64\\Debug\\ZAPD.exe e -eh -i %s -b baserom/ -o %s -osf %s -gsf 1 -rconf ..\\ZAPD\\x64\\Debug\\ZAPDConfigs\\MqDbg\\Config.xml -se OTR" % (xmlPath, outputPath, outputSourcePath)
+    execStr = "..\\OTRExporter\\x64\\Release\\ZAPD.exe e -eh -i %s -b baserom/ -o %s -osf %s -gsf 1 -rconf ..\\ZAPD\\x64\\Debug\\ZAPDConfigs\\MqDbg\\Config.xml -se OTR" % (xmlPath, outputPath, outputSourcePath)
     
     if "overlays" in xmlPath:
         execStr += " --static"

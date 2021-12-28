@@ -17,9 +17,15 @@
 #include <ZRoom/Commands/SetStartPositionList.h>
 #include <ZRoom/Commands/SetSkyboxSettings.h>
 #include <ZRoom/Commands/SetLightingSettings.h>
+#include <ZRoom/Commands/SetLightList.h>
 #include <ZRoom/Commands/SetEchoSettings.h>
+#include <ZRoom/Commands/SetObjectList.h>
+#include <ZRoom/Commands/SetAlternateHeaders.h>
 #include "CollisionExporter.h"
+#include "DisplayListExporter.h"
 #include "OTRResource.h"
+#include <Globals.h>
+#include <ZRoom/Commands/SetExitList.h>
 
 void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
@@ -44,7 +50,7 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 		{
 			SetActorList* cmdSetActorList = (SetActorList*)cmd;
 
-			writer->Write(cmdSetActorList->actors.size());
+			writer->Write((uint32_t)cmdSetActorList->actors.size());
 
 			for (const ActorSpawnEntry& entry : cmdSetActorList->actors)
 			{
@@ -130,16 +136,14 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 
 			for (int i = 0; i < cmdCsCam->cameras.size(); i++)
 			{
-				// TODO: FINISH THIS...
+				// OTRTODO: FINISH THIS...
 			}
 		}
 		break;
 		case RoomCommand::SetMesh:
 		{
 			SetMesh* cmdMesh = (SetMesh*)cmd;
-			 
-			//int baseStreamEnd = writer->GetStream().get()->GetLength();
-
+			
 			writer->Write((uint8_t)cmdMesh->data); // 0x01
 			writer->Write(cmdMesh->meshHeaderType);
 
@@ -148,8 +152,6 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 				PolygonType2* poly = (PolygonType2*)cmdMesh->polyType.get();
 
 				writer->Write(poly->num);
-				//writer->Write(poly->start);
-				//writer->Write(poly->end);
 
 				for (int i = 0; i < poly->num; i++)
 				{
@@ -159,6 +161,8 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 			else if (cmdMesh->meshHeaderType == 1)
 			{
 				PolygonType1* poly = (PolygonType1*)cmdMesh->polyType.get();
+
+				// OTRTODO: FINISH THIS
 
 				//writer->Write(poly->format);
 				//writer->Write(poly->dlist);
@@ -174,8 +178,6 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 					WritePolyDList(writer, &poly->polyDLists[0]);
 				}*/
 			}
-
-			//writer->Seek(oldOffset, SeekOffsetType::Start);
 		}
 		break;
 		case RoomCommand::SetCameraSettings:
@@ -186,6 +188,26 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 			writer->Write(cmdCam->mapHighlight); // 0x04
 		}
 		break;
+		case RoomCommand::SetLightList:
+		{
+			SetLightList* cmdLight = (SetLightList*)cmd;
+
+			writer->Write((uint32_t)cmdLight->lights.size());
+
+			for (int i = 0; i < cmdLight->lights.size(); i++)
+			{
+				writer->Write(cmdLight->lights[i].type);
+				writer->Write(cmdLight->lights[i].x);
+				writer->Write(cmdLight->lights[i].y);
+				writer->Write(cmdLight->lights[i].z);
+				writer->Write(cmdLight->lights[i].r);
+				writer->Write(cmdLight->lights[i].g);
+				writer->Write(cmdLight->lights[i].b);
+				writer->Write(cmdLight->lights[i].drawGlow);
+				writer->Write(cmdLight->lights[i].radius);
+			}
+		}
+			break;
 		case RoomCommand::SetLightingSettings:
 		{
 			SetLightingSettings* cmdLight = (SetLightingSettings*)cmd;
@@ -229,7 +251,6 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 
 			writer->Write((uint32_t)cmdRoom->romfile->numRooms); // 0x01
 
-			//for (RoomEntry entry : cmdRoom->romfile->rooms)
 			for (int i = 0;i < cmdRoom->romfile->numRooms; i++)
 			{
 				std::string roomName = StringHelper::Sprintf("%s\\%s_room_%i", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i);
@@ -250,12 +271,6 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 		{
 			SetEntranceList* cmdEntrance = (SetEntranceList*)cmd;
 
-			//uint32_t baseStreamEnd = writer->GetStream().get()->GetLength();
-			//writer->Write(baseStreamEnd); // 0x04
-
-			//uint32_t oldOffset = writer->GetBaseAddress();
-			//writer->Seek(baseStreamEnd, SeekOffsetType::Start);
-
 			writer->Write((uint32_t)cmdEntrance->entrances.size());
 
 			for (EntranceEntry entry : cmdEntrance->entrances)
@@ -263,8 +278,6 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 				writer->Write((uint8_t)entry.startPositionIndex);
 				writer->Write((uint8_t)entry.roomToLoad);
 			}
-
-			//writer->Seek(oldOffset, SeekOffsetType::Start);
 		}
 		break;
 		case RoomCommand::SetSpecialObjects:
@@ -282,11 +295,7 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 			uint32_t baseStreamEnd = writer->GetStream().get()->GetLength();
 
 			writer->Write((uint32_t)cmdStartPos->actors.size()); // 0x01
-			//writer->Write(baseStreamEnd); // 0x04
-
-			//uint32_t oldOffset = writer->GetBaseAddress();
-			//writer->Seek(baseStreamEnd, SeekOffsetType::Start);
-
+			
 			for (const ActorSpawnEntry& entry : cmdStartPos->actors)
 			{
 				writer->Write(entry.actorNum);
@@ -298,23 +307,52 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 				writer->Write(entry.rotZ);
 				writer->Write(entry.initVar);
 			}
-
-			//writer->Seek(oldOffset, SeekOffsetType::Start);
 		}
 		break;
-		case RoomCommand::EndMarker:
+		case RoomCommand::SetAlternateHeaders:
 		{
+			SetAlternateHeaders* cmdHeaders = (SetAlternateHeaders*)cmd;
+
+			writer->Write((uint32_t)cmdHeaders->headers.size());
+
+			for (int i = 0; i < cmdHeaders->headers.size(); i++)
+			{
+				uint32_t seg = cmdHeaders->headers[i] & 0xFFFFFFFF;
+				std::string headerName = "";
+				bool foundDecl = Globals::Instance->GetSegmentedPtrName(seg, room->parent, "", headerName);
+
+				writer->Write(OTRExporter_DisplayList::GetPathToRes(room, headerName));
+			}
 		}
+			break;
+		case RoomCommand::SetExitList:
+		{
+			SetExitList* cmdExit = (SetExitList*)cmd;
+
+			writer->Write((uint32_t)cmdExit->exits.size());
+
+			for (int i = 0; i < cmdExit->exits.size(); i++)
+				writer->Write(cmdExit->exits[i]);
+		}
+			break;
+		case RoomCommand::EndMarker:
 		break;
+		case RoomCommand::SetObjectList:
+		{
+			SetObjectList* cmdSetObjectList = (SetObjectList*)cmd;
+
+			writer->Write((uint32_t)cmdSetObjectList->objects.size());
+
+			for (int i = 0; i < cmdSetObjectList->objects.size(); i++)
+				writer->Write(cmdSetObjectList->objects[i]);
+		}
+			break;
 		default:
-			printf("UNIMPLEMENTED COMMAND: %i\n", (int)cmd->cmdID);
+			printf("UNIMPLEMENTED COMMAND: 0x%02X\n", (int)cmd->cmdID);
 
 			break;
 		}
 	}
-
-	//writer->Close();
-	//File::WriteAllBytes(StringHelper::Sprintf("%s", res->GetName().c_str()), memStream->ToVector());
 }
 
 void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, ZRoom* room, PolygonDlist* dlist)
@@ -328,31 +366,16 @@ void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, ZRoom* room, Polygon
 		writer->Write(dlist->y);
 		writer->Write(dlist->z);
 		writer->Write(dlist->unk_06);
-
-		// TODO: DList Stuff
-		if (dlist->opaDList != nullptr)
-			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->opaDList->GetName().c_str()));
-		else
-			writer->Write("");
-
-		if (dlist->xluDList != nullptr)
-			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->xluDList->GetName().c_str()));
-		else
-			writer->Write("");
-		break;
 	default:
-		// TODO: DList Stuff
-
 		if (dlist->opaDList != nullptr)
 			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->opaDList->GetName().c_str()));
 		else
 			writer->Write("");
-		
+
 		if (dlist->xluDList != nullptr)
 			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->xluDList->GetName().c_str()));
 		else
 			writer->Write("");
-
 		break;
 	}
 }

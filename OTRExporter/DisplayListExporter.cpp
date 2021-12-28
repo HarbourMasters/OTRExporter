@@ -1,10 +1,12 @@
 #include "DisplayListExporter.h"
 #include "Main.h"
 #include "../ZAPD/ZFile.h"
-#include <Utils/MemoryStream.cpp>
+#include <Utils/MemoryStream.h>
+#include <Utils/BitConverter.h>
 #include "Lib/StrHash64.h"
 #include "spdlog/spdlog.h"
 #include "PR/ultra64/gbi.h"
+#include <Globals.h>
 //#include "gbi.h"
 //#include "Lib/Fast3D/U64/PR/gbi.h"
 
@@ -24,9 +26,25 @@
                    Ab1, Ad1))       \
 }
 
+typedef int32_t Mtx_t[4][4];
+
+typedef union Mtx
+{
+	//_Alignas(8)
+		Mtx_t		m;
+	int32_t		l[16];
+	struct
+	{
+		int16_t		i[16];
+		uint16_t	f[16];
+	};
+} Mtx;
+
 void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
 	ZDisplayList* dList = (ZDisplayList*)res;
+
+	printf("Exporting DList %s\n", dList->GetName().c_str());
 
 	writer->Write((uint8_t)Endianess::Little);
 	writer->Write((uint32_t)OtrLib::ResourceType::OTRDisplayList);
@@ -38,12 +56,14 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 	// DEBUG: Write in a marker
 	Declaration* dbgDecl = dList->parent->GetDeclaration(dList->GetRawDataIndex());
-	std::string dbgName = StringHelper::Sprintf("%s\\%s", (StringHelper::Split(res->parent->GetOutName(), "_")[0] + "_scene").c_str(), dbgDecl->varName.c_str());
+	std::string dbgName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dbgDecl->varName.c_str());
 	uint64_t hash = CRC64(dbgName.c_str());
 	writer->Write((uint32_t)(G_MARKER << 24));
 	writer->Write((uint32_t)0xBEEFBEEF);
 	writer->Write((uint32_t)(hash >> 32));
 	writer->Write((uint32_t)(hash & 0xFFFFFFFF));
+
+	auto dlStart = std::chrono::steady_clock::now();
 
 	for (auto data : dList->instructions)
 	{
@@ -63,6 +83,11 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 		word0 += (opcode << 24);
 
+		if (writer->GetBaseAddress() == 0xC0)
+		{
+			int bp = 0;
+		}
+
 		switch ((int)opF3D)
 		{
 		case G_NOOP:
@@ -81,9 +106,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			break;
 		default:
 		{
-			int bp = 0;
-			//writer->Seek(-1, SeekOffsetType::Current);
-			//writer->Write(data);
+			//word0 = _byteswap_ulong((uint32_t)(data >> 32));
+			//word1 = _byteswap_ulong((uint32_t)(data & 0xFFFFFFFF));
 		}
 		break;
 		case G_GEOMETRYMODE:
@@ -153,18 +177,20 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word1 = value.words.w1;
 		}
 		break;
-		/*case G_MTX:
+		case G_MTX:
 		{
 			uint32_t pp = (data & 0x000000FF00000000) >> 32;
 			uint32_t mm = (data & 0x00000000FFFFFFFF);
 
 			pp ^= 0x01;
 
+			mm += 0xF0000000;
+
 			Gfx value = gsSPMatrix(mm, pp);
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;*/
+			break;
 		case G_LOADBLOCK:
 		{
 			int32_t sss = (data & 0x00FFF00000000000) >> 48;
@@ -190,7 +216,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			break;
 		case G_DL:
 		{
-			// TODO:
 			Declaration* dListDecl = dList->parent->GetDeclaration(GETSEGOFFSET(data));
 			int bp = 0;
 
@@ -199,7 +224,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			
 			if (dListDecl != nullptr)
 			{
-				std::string vName = StringHelper::Sprintf("%s\\%s", (StringHelper::Split(res->parent->GetOutName(), "_")[0] + "_scene").c_str(), dListDecl->varName.c_str());
+				std::string vName = StringHelper::Sprintf("%s\\%s", (GetParentFolderName(res).c_str()), dListDecl->varName.c_str());
 
 				uint64_t hash = CRC64(vName.c_str());
 
@@ -224,10 +249,12 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 					Save(dList->otherDLists[i], outPath, &dlWriter);
 
-					std::string fName = StringHelper::Sprintf("%s\\%s", (StringHelper::Split(res->parent->GetOutName(), "_")[0] + "_scene").c_str(), dListDecl2->varName.c_str());
+					std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
 
+#ifdef _DEBUG
 					if (otrArchive->HasFile(fName))
 						otrArchive->RemoveFile(fName);
+#endif
 
 					otrArchive->AddFile(fName, (uintptr_t)dlStream->ToVector().data(), dlWriter.GetBaseAddress());
 				}
@@ -237,8 +264,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 				}
 			}
-
-			//writer->Write(CRC64(dListDecl->varName.c_str()));
 		}
 		break;
 		case G_TEXTURE:
@@ -280,6 +305,11 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word1 = test.words.w1;
 		}
 			break;
+		/*case G_QUAD:
+		{
+			gsSP1Quadrangle()
+		}
+			break;*/
 		case G_SETPRIMCOLOR:
 		{
 			int32_t mm = (data & 0x0000FF0000000000) >> 40;
@@ -408,7 +438,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 		{
 			uint32_t seg = data & 0xFFFFFFFF;
 			int32_t texAddress = Seg2Filespace(data, dList->parent->baseAddress);
-			Declaration* texDecl = dList->parent->GetDeclaration(texAddress);
+			std::string texName = "";
+			bool foundDecl = Globals::Instance->GetSegmentedPtrName(seg, dList->parent, "", texName);
 
 			int32_t __ = (data & 0x00FF000000000000) >> 48;
 			int32_t www = (data & 0x00000FFF00000000) >> 32;
@@ -424,28 +455,20 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			writer->Write(word0);
 			writer->Write(word1);
 
-			if (texDecl != nullptr)
+			if (foundDecl)
 			{
-				std::string fName = StringHelper::Sprintf("%s\\%s", (StringHelper::Split(res->parent->GetOutName(), "_")[0] + "_scene").c_str(), texDecl->varName.c_str());
+				std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), texName.c_str());
 				uint64_t hash = CRC64(fName.c_str());
 
 				word0 = hash >> 32;
 				word1 = hash & 0xFFFFFFFF;
-
-				//writer->Write(CRC64(texDecl->varName.c_str()));
 			}
 			else
 			{
-				//writer->Write((uint64_t)0);
 				word0 = 0;
 				word1 = 0;
 				spdlog::error("texDecl == nullptr!");
 			}
-
-			//MemoryStream* vtxStream = new MemoryStream();
-			//BinaryWriter* vtxWriter = new BinaryWriter(vtxStream);
-
-			//otrArchive->AddFile(texDecl->varName, (uintptr_t)vtxStream->ToVector().data(), vtxWriter->GetBaseAddress());
 		}
 		break;
 		case G_VTX:
@@ -485,7 +508,11 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 				// Write CRC64 of vtx file name
 				auto segOffset = GETSEGOFFSET(data);
-				Declaration* vtxDecl = dList->parent->GetDeclarationRanged(GETSEGOFFSET(data));
+				uint32_t seg = data & 0xFFFFFFFF;
+				Declaration* vtxDecl = dList->parent->GetDeclarationRanged(segOffset);
+				//std::string vtxName = "";
+				//bool foundDecl = Globals::Instance->GetSegmentedPtrName(seg, dList->parent, "", vtxName);
+
 				int32_t aa = (data & 0x000000FF00000000ULL) >> 32;
 				int32_t nn = (data & 0x000FF00000000000ULL) >> 44;
 
@@ -503,48 +530,55 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 					writer->Write(word0);
 					writer->Write(word1);
 
-					//while (writer->GetBaseAddress() % GFX_SIZE != 0)
-						//writer->Write((uint8_t)0x00);
-
-					//writer->Write(CRC64(vtxDecl->varName.c_str()));
-
-					std::string fName = StringHelper::Sprintf("%s\\%s", (StringHelper::Split(res->parent->GetOutName(), "_")[0] + "_scene").c_str(), vtxDecl->varName.c_str());
-					uint64_t hash = CRC64(fName.c_str());
-
-					word0 = hash >> 32;
-					word1 = hash & 0xFFFFFFFF;
-
-					// Write vertices to file
-					MemoryStream* vtxStream = new MemoryStream();
-					BinaryWriter vtxWriter = BinaryWriter(vtxStream);
-
-					int sz = dList->vertices[GETSEGOFFSET(data)].size();
-
-					if (sz > 0)
+					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->varName);
+					
+					//if (!otrArchive->HasFile(fName))
 					{
-						//for (int i = 0; i < nn; i++)
-						for (int i = 0; i < sz; i++)
+						printf("Exporting VTX Data %s\n", fName.c_str());
+
+						uint64_t hash = CRC64(fName.c_str());
+
+						word0 = hash >> 32;
+						word1 = hash & 0xFFFFFFFF;
+
+						// Write vertices to file
+						MemoryStream* vtxStream = new MemoryStream();
+						BinaryWriter vtxWriter = BinaryWriter(vtxStream);
+
+						int sz = dList->vertices[GETSEGOFFSET(data)].size();
+
+						if (sz > 0)
 						{
-							auto v = dList->vertices[GETSEGOFFSET(data)][i];
+							auto start = std::chrono::steady_clock::now();
 
-							vtxWriter.Write(v.x);
-							vtxWriter.Write(v.y);
-							vtxWriter.Write(v.z);
-							vtxWriter.Write(v.flag);
-							vtxWriter.Write(v.s);
-							vtxWriter.Write(v.t);
-							vtxWriter.Write(v.r);
-							vtxWriter.Write(v.g);
-							vtxWriter.Write(v.b);
-							vtxWriter.Write(v.a);
+							for (int i = 0; i < sz; i++)
+							{
+								auto v = dList->vertices[GETSEGOFFSET(data)][i];
+
+								vtxWriter.Write(v.x);
+								vtxWriter.Write(v.y);
+								vtxWriter.Write(v.z);
+								vtxWriter.Write(v.flag);
+								vtxWriter.Write(v.s);
+								vtxWriter.Write(v.t);
+								vtxWriter.Write(v.r);
+								vtxWriter.Write(v.g);
+								vtxWriter.Write(v.b);
+								vtxWriter.Write(v.a);
+							}
+
+#ifdef _DEBUG
+							if (otrArchive->HasFile(fName))
+								otrArchive->RemoveFile(fName);
+#endif
+
+							otrArchive->AddFile(fName, (uintptr_t)vtxStream->ToVector().data(), vtxWriter.GetBaseAddress());
+
+							auto end = std::chrono::steady_clock::now();
+							auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+							printf("Exported VTX Array %s in %lims\n", fName.c_str(), diff);
 						}
-
-						//std::string fName = StringHelper::Sprintf("%s\\%s", (StringHelper::Split(res->parent->GetOutName(), "_")[0] + "_scene").c_str(), vtxDecl->varName.c_str());
-
-						if (otrArchive->HasFile(fName))
-							otrArchive->RemoveFile(fName);
-						
-						otrArchive->AddFile(fName, (uintptr_t)vtxStream->ToVector().data(), vtxWriter.GetBaseAddress());
 					}
 				}
 				else
@@ -567,9 +601,24 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 	
 		writer->Write(word0);
 		writer->Write(word1);
-		
-		//for (int i = 0; i < GFX_SIZE - 1; i++)
-		//while (writer->GetBaseAddress() % GFX_SIZE != 0)
-			//writer->Write((uint8_t)0x00);
 	}
+
+	auto dlEnd = std::chrono::steady_clock::now();
+	auto dlDiff = std::chrono::duration_cast<std::chrono::milliseconds>(dlEnd - dlStart).count();
+
+	printf("Display List Gen in %lims\n", dlDiff);
+}
+
+std::string OTRExporter_DisplayList::GetPathToRes(ZResource* res, std::string varName)
+{
+	std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), varName.c_str());
+	return fName;
+}
+
+std::string OTRExporter_DisplayList::GetParentFolderName(ZResource* res)
+{
+	if (StringHelper::Contains(res->parent->GetOutName(), "_scene") || StringHelper::Contains(res->parent->GetOutName(), "_room"))
+		return (StringHelper::Split(res->parent->GetOutName(), "_")[0] + "_scene");
+	else
+		return res->parent->GetOutName();
 }

@@ -18,18 +18,6 @@ void OTRExporter_Collision::Save(ZResource* res, fs::path outPath, BinaryWriter*
 	writer->Write(col->absMaxY);
 	writer->Write(col->absMaxZ);
 
-	//writer->Write(col->vtxAddress);
-
-	//writer->Write(col->numPolygons);
-	//writer->Write(col->polyAddress);
-	//writer->Write(col->polyTypeDefAddress);
-	//writer->Write(col->camDataAddress);
-
-	//writer->Write(col->numWaterBoxes);
-
-	//uint32_t oldOffset = writer->GetBaseAddress();
-	//writer->Seek(col->vtxSegmentOffset, SeekOffsetType::Start);
-
 	writer->Write((uint32_t)col->vertices.size());
 	
 	for (uint16_t i = 0; i < col->vertices.size(); i++)
@@ -82,6 +70,7 @@ void OTRExporter_Collision::Save(ZResource* res, fs::path outPath, BinaryWriter*
 	{
 		writer->Write(waterBox.xMin);
 		writer->Write(waterBox.ySurface);
+		writer->Write(waterBox.xMin);
 		writer->Write(waterBox.zMin);
 		writer->Write(waterBox.xLength);
 		writer->Write(waterBox.zLength);
