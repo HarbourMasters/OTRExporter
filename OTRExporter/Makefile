@@ -9,7 +9,8 @@ DEBUG ?= 1
 OPTFLAGS ?= -O0
 LTO ?= 0
 
-CXXFLAGS ?= -Wall -Wextra -std=c++17
+CXXFLAGS := -Wall -Wextra -std=c++17
+CPPFLAGS := -MMD
 
 ifneq ($(DEBUG),0)
 	CXXFLAGS += -g
@@ -28,6 +29,7 @@ CXX_FILES := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.cpp))
 H_FILES   := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h))
 
 O_FILES   := $(CXX_FILES:%.cpp=build/%.o)
+D_FILES   := $(O_FILES:%.o=%.d)
 LIB       := ExporterTest.a
 
 INC_DIRS := $(addprefix -I, \
@@ -54,7 +56,9 @@ format:
 .PHONY: all clean format
 
 build/%.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(OPTFLAGS) $(INC_DIRS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) -c $< -o $@
 
 $(LIB): $(O_FILES)
 	$(AR) rcs $@ $^
+
+-include $(D_FILES)

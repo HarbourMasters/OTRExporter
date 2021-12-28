@@ -3,10 +3,6 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-.vscode/
-*.swp
-*.a
-
 
 # User-specific files
 *.suo
@@ -348,3 +344,5 @@ assets/
 baserom/
 *.vtx.inc
 *.otr
+*.swp
+*.a
