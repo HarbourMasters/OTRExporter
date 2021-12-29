@@ -22,6 +22,9 @@
     <ClInclude Include="CollisionExporter.h" />
     <ClInclude Include="DisplayListExporter.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="OTRSkeletonExporter.h" />
+    <ClInclude Include="OTRSkeletonLimbExporter.h" />
+    <ClInclude Include="PlayerAnimationExporter.h" />
     <ClInclude Include="RoomExporter.h" />
     <ClInclude Include="TextureExporter.h" />
   </ItemGroup>
@@ -29,6 +32,9 @@
     <ClCompile Include="CollisionExporter.cpp" />
     <ClCompile Include="DisplayListExporter.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="OTRSkeletonExporter.cpp" />
+    <ClCompile Include="OTRSkeletonLimbExporter.cpp" />
+    <ClCompile Include="PlayerAnimationExporter.cpp" />
     <ClCompile Include="RoomExporter.cpp" />
     <ClCompile Include="TextureExporter.cpp" />
   </ItemGroup>
@@ -60,7 +66,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -95,10 +101,11 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)..\..\ZAPD\ZAPD;$(ProjectDir)..\..\ZAPD\lib\tinyxml2;$(ProjectDir)..\..\ZAPD\lib\libgfxd;$(ProjectDir)..\..\ZAPD\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\..\OtrLib\otrlib;$(LibraryPath)</LibraryPath>
-    <TargetName>ExporterExample</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\..\ZAPD\ZAPD;$(ProjectDir)..\..\ZAPD\lib\tinyxml2;$(ProjectDir)..\..\ZAPD\lib\libgfxd;$(ProjectDir)..\..\ZAPD\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\..\OtrLib\otrlib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -151,8 +158,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
