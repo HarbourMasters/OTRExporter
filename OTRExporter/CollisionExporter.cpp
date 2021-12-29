@@ -50,9 +50,16 @@ void OTRExporter_Collision::Save(ZResource* res, fs::path outPath, BinaryWriter*
 
 	for (auto entry : col->camData->entries)
 	{
+		auto camPosDecl = col->parent->GetDeclarationRanged(Seg2Filespace(entry->cameraPosDataSeg, col->parent->baseAddress));
+		
+		int idx = 0;
+
+		if (camPosDecl != nullptr)
+			idx = ((entry->cameraPosDataSeg & 0x00FFFFFF) - camPosDecl->address) / 6;
+		
 		writer->Write(entry->cameraSType);
 		writer->Write(entry->numData);
-		writer->Write(entry->cameraPosDataSeg);
+		writer->Write((uint32_t)idx);
 	}
 
 	writer->Write((uint32_t)col->camData->cameraPositionData.size());

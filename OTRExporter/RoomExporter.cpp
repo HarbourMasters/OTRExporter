@@ -335,8 +335,6 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 				writer->Write(cmdExit->exits[i]);
 		}
 			break;
-		case RoomCommand::EndMarker:
-		break;
 		case RoomCommand::SetObjectList:
 		{
 			SetObjectList* cmdSetObjectList = (SetObjectList*)cmd;
@@ -346,6 +344,8 @@ void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 			for (int i = 0; i < cmdSetObjectList->objects.size(); i++)
 				writer->Write(cmdSetObjectList->objects[i]);
 		}
+			break;
+		case RoomCommand::EndMarker:
 			break;
 		default:
 			printf("UNIMPLEMENTED COMMAND: 0x%02X\n", (int)cmd->cmdID);
