@@ -20,5 +20,5 @@ void OTRExporter_PlayerAnimationExporter::Save(ZResource* res, fs::path outPath,
 	auto end = std::chrono::steady_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-	printf("Exported Player Anim %s in %lims\n", anim->GetName().c_str(), diff);
+	printf("Exported Player Anim %s in %llims\n", anim->GetName().c_str(), diff);
 }

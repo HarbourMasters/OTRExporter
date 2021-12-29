@@ -485,7 +485,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 				{
 					auto curItem = vertsKeys[i];
 
-					int32_t sizeDiff = curItem.first - (lastItem.first + (lastItem.second.size() * 16));
+					size_t sizeDiff = curItem.first - (lastItem.first + (lastItem.second.size() * 16));
 
 					// Make sure there isn't an unaccounted inbetween these two
 					if (sizeDiff == 0)
@@ -545,13 +545,13 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 						MemoryStream* vtxStream = new MemoryStream();
 						BinaryWriter vtxWriter = BinaryWriter(vtxStream);
 
-						int sz = dList->vertices[GETSEGOFFSET(data)].size();
+						size_t sz = dList->vertices[GETSEGOFFSET(data)].size();
 
 						if (sz > 0)
 						{
 							auto start = std::chrono::steady_clock::now();
 
-							for (int i = 0; i < sz; i++)
+							for (size_t i = 0; i < sz; i++)
 							{
 								auto v = dList->vertices[GETSEGOFFSET(data)][i];
 
@@ -577,7 +577,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 							auto end = std::chrono::steady_clock::now();
 							auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-							printf("Exported VTX Array %s in %lims\n", fName.c_str(), diff);
+							printf("Exported VTX Array %s in %llims\n", fName.c_str(), diff);
 						}
 					}
 				}
@@ -606,7 +606,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 	auto dlEnd = std::chrono::steady_clock::now();
 	auto dlDiff = std::chrono::duration_cast<std::chrono::milliseconds>(dlEnd - dlStart).count();
 
-	printf("Display List Gen in %lims\n", dlDiff);
+	printf("Display List Gen in %llims\n", dlDiff);
 }
 
 std::string OTRExporter_DisplayList::GetPathToRes(ZResource* res, std::string varName)

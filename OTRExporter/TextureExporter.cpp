@@ -17,7 +17,7 @@ void OTRExporter_Texture::Save(ZResource* res, fs::path outPath, BinaryWriter* w
 	auto end = std::chrono::steady_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-	printf("Exported Texture %s in %lims\n", tex->GetName().c_str(), diff);
+	printf("Exported Texture %s in %llims\n", tex->GetName().c_str(), diff);
 
 	//if (diff > 2)
 		//printf("Export took %lms\n", diff);

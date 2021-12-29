@@ -7,6 +7,7 @@
 #include "PlayerAnimationExporter.h"
 #include "OTRSkeletonExporter.h"
 #include "OTRSkeletonLimbExporter.h"
+#include "OTRMtxExporter.h"
 #include <Globals.h>
 #include <Utils/File.h>
 #include <Utils/Directory.h>
@@ -79,7 +80,7 @@ static void ExporterFileEnd(ZFile* file)
 	auto fileEnd = std::chrono::steady_clock::now();
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(fileEnd - fileStart).count();
 
-	printf("File Export Ended %s in %lims\n", file->GetName().c_str(), diff);
+	printf("File Export Ended %s in %llims\n", file->GetName().c_str(), diff);
 
 	//MemoryStream* strem = (MemoryStream*)fileWriter->GetStream().get();
 	//otrArchive->AddFile(file->GetName(), (uintptr_t)strem->ToVector().data(), strem->GetLength());
@@ -121,7 +122,7 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
 	//if (diff > 10)
-		printf("Exported Resource End %s in %lims\n", res->GetName().c_str(), diff);
+		printf("Exported Resource End %s in %llims\n", res->GetName().c_str(), diff);
 }
 
 static void ExporterXMLBegin()
@@ -162,6 +163,7 @@ static void ImportExporters()
 	exporterSet->exporters[ZResourceType::PlayerAnimationData] = new OTRExporter_PlayerAnimationExporter();
 	exporterSet->exporters[ZResourceType::Skeleton] = new OTRExporter_Skeleton();
 	exporterSet->exporters[ZResourceType::Limb] = new OTRExporter_SkeletonLimb();
+	exporterSet->exporters[ZResourceType::Mtx] = new OTRExporter_Mtx();
 
 	Globals::AddExporter("OTR", exporterSet);
 }
