@@ -101,13 +101,11 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)..\..\ZAPD\ZAPD;$(ProjectDir)..\..\ZAPD\lib\tinyxml2;$(ProjectDir)..\..\ZAPD\lib\libgfxd;$(ProjectDir)..\..\ZAPD\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\..\OtrLib\otrlib;$(LibraryPath)</LibraryPath>
-    <TargetName>ExporterExample</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)..\..\ZAPD\ZAPD;$(ProjectDir)..\..\ZAPD\lib\tinyxml2;$(ProjectDir)..\..\ZAPD\lib\libgfxd;$(ProjectDir)..\..\ZAPD\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\..\OtrLib\otrlib;$(LibraryPath)</LibraryPath>
-    <TargetName>ExporterExample</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
