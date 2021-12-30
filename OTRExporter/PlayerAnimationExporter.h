@@ -8,5 +8,5 @@
 class OTRExporter_PlayerAnimationExporter : public ZResourceExporter
 {
 public:
-	virtual void Save(ZResource* res, fs::path outPath, BinaryWriter* writer) override;
+	virtual void Save(ZResource* res, const fs::path outPath, BinaryWriter* writer) override;
 };

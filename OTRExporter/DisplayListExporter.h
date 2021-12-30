@@ -8,7 +8,7 @@
 class OTRExporter_DisplayList : public ZResourceExporter
 {
 public:
-	virtual void Save(ZResource* res, fs::path outPath, BinaryWriter* writer) override;
+	virtual void Save(ZResource* res, const fs::path outPath, BinaryWriter* writer) override;
 	static std::string GetParentFolderName(ZResource* res);
 	static std::string GetPathToRes(ZResource* res, std::string varName);
 

@@ -83,11 +83,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 		word0 += (opcode << 24);
 
-		if (writer->GetBaseAddress() == 0xC0)
-		{
-			int bp = 0;
-		}
-
 		switch ((int)opF3D)
 		{
 		case G_NOOP:
@@ -216,52 +211,70 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			break;
 		case G_DL:
 		{
-			Declaration* dListDecl = dList->parent->GetDeclaration(GETSEGOFFSET(data));
-			int bp = 0;
-
-			writer->Write(word0);
-			writer->Write(word1);
-			
-			if (dListDecl != nullptr)
+			if (!Globals::Instance->HasSegment(GETSEGNUM(data)))
 			{
-				std::string vName = StringHelper::Sprintf("%s\\%s", (GetParentFolderName(res).c_str()), dListDecl->varName.c_str());
+				int32_t pp = (data & 0x00FF000000000000) >> 56;
 
-				uint64_t hash = CRC64(vName.c_str());
+				Gfx value;
 
-				word0 = hash >> 32;
-				word1 = hash & 0xFFFFFFFF;
+				u32 dListVal = (data & 0x0FFFFFFF) + 0xF0000000;
+
+				if (pp != 0)
+					value = gsSPBranchList(dListVal);
+				else
+					value = gsSPDisplayList(dListVal);
+
+				word0 = value.words.w0;
+				word1 = value.words.w1;
 			}
 			else
 			{
-				word0 = 0;
-				word1 = 0;
-				spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = %08X", GETSEGOFFSET(data)));
-			}
+				Declaration* dListDecl = dList->parent->GetDeclaration(GETSEGOFFSET(data));
+				int bp = 0;
 
-			for (size_t i = 0; i < dList->otherDLists.size(); i++)
-			{
-				Declaration* dListDecl2 = dList->parent->GetDeclaration(GETSEGOFFSET(dList->otherDLists[i]->GetRawDataIndex()));
+				writer->Write(word0);
+				writer->Write(word1);
 
-				if (dListDecl2 != nullptr)
+				if (dListDecl != nullptr)
 				{
-					MemoryStream* dlStream = new MemoryStream();
-					BinaryWriter dlWriter = BinaryWriter(dlStream);
+					std::string vName = StringHelper::Sprintf("%s\\%s", (GetParentFolderName(res).c_str()), dListDecl->varName.c_str());
 
-					Save(dList->otherDLists[i], outPath, &dlWriter);
+					uint64_t hash = CRC64(vName.c_str());
 
-					std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
-
-#ifdef _DEBUG
-					if (otrArchive->HasFile(fName))
-						otrArchive->RemoveFile(fName);
-#endif
-
-					otrArchive->AddFile(fName, (uintptr_t)dlStream->ToVector().data(), dlWriter.GetBaseAddress());
+					word0 = hash >> 32;
+					word1 = hash & 0xFFFFFFFF;
 				}
 				else
 				{
-					spdlog::error(StringHelper::Sprintf("dListDecl2 == nullptr! Addr = %08X", GETSEGOFFSET(data)));
+					word0 = 0;
+					word1 = 0;
+					spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = %08X", GETSEGOFFSET(data)));
+				}
 
+				for (int i = 0; i < dList->otherDLists.size(); i++)
+				{
+					Declaration* dListDecl2 = dList->parent->GetDeclaration(GETSEGOFFSET(dList->otherDLists[i]->GetRawDataIndex()));
+
+					if (dListDecl2 != nullptr)
+					{
+						MemoryStream* dlStream = new MemoryStream();
+						BinaryWriter dlWriter = BinaryWriter(dlStream);
+
+						Save(dList->otherDLists[i], outPath, &dlWriter);
+
+						std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
+
+#ifdef _DEBUG
+						if (otrArchive->HasFile(fName))
+							otrArchive->RemoveFile(fName);
+#endif
+
+						otrArchive->AddFile(fName, (uintptr_t)dlStream->ToVector().data(), dlWriter.GetBaseAddress());
+					}
+					else
+					{
+						spdlog::error(StringHelper::Sprintf("dListDecl2 == nullptr! Addr = %08X", GETSEGOFFSET(data)));
+					}
 				}
 			}
 		}
@@ -438,36 +451,60 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 		{
 			uint32_t seg = data & 0xFFFFFFFF;
 			int32_t texAddress = Seg2Filespace(data, dList->parent->baseAddress);
-			std::string texName = "";
-			bool foundDecl = Globals::Instance->GetSegmentedPtrName(seg, dList->parent, "", texName);
 
-			int32_t __ = (data & 0x00FF000000000000) >> 48;
-			int32_t www = (data & 0x00000FFF00000000) >> 32;
-
-			uint32_t fmt = (__ & 0xE0) >> 5;
-			uint32_t siz = (__ & 0x18) >> 3;
-
-			Gfx value = gsDPSetTextureImage(fmt, siz, www - 1, __);
-			word0 = value.words.w0 & 0x00FFFFFF;
-			word0 += (G_SETTIMG_OTR << 24);
-			word1 = value.words.w1;
-
-			writer->Write(word0);
-			writer->Write(word1);
-
-			if (foundDecl)
+			if (seg == 0x08000000)
 			{
-				std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), texName.c_str());
-				uint64_t hash = CRC64(fName.c_str());
+				int bp = 0;
+			}
 
-				word0 = hash >> 32;
-				word1 = hash & 0xFFFFFFFF;
+			if (!Globals::Instance->HasSegment(GETSEGNUM(seg)))
+			{
+				int32_t __ = (data & 0x00FF000000000000) >> 48;
+				int32_t www = (data & 0x00000FFF00000000) >> 32;
+
+				uint32_t fmt = (__ & 0xE0) >> 5;
+				uint32_t siz = (__ & 0x18) >> 3;
+
+				Gfx value = gsDPSetTextureImage(fmt, siz, www - 1, (seg & 0x0FFFFFFF) + 0xF0000000);
+				word0 = value.words.w0;
+				word1 = value.words.w1;
+
+				writer->Write(word0);
+				writer->Write(word1);
 			}
 			else
 			{
-				word0 = 0;
-				word1 = 0;
-				spdlog::error("texDecl == nullptr!");
+				std::string texName = "";
+				bool foundDecl = Globals::Instance->GetSegmentedPtrName(seg, dList->parent, "", texName);
+
+				int32_t __ = (data & 0x00FF000000000000) >> 48;
+				int32_t www = (data & 0x00000FFF00000000) >> 32;
+
+				uint32_t fmt = (__ & 0xE0) >> 5;
+				uint32_t siz = (__ & 0x18) >> 3;
+
+				Gfx value = gsDPSetTextureImage(fmt, siz, www - 1, __);
+				word0 = value.words.w0 & 0x00FFFFFF;
+				word0 += (G_SETTIMG_OTR << 24);
+				word1 = value.words.w1;
+
+				writer->Write(word0);
+				writer->Write(word1);
+
+				if (foundDecl)
+				{
+					std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), texName.c_str());
+					uint64_t hash = CRC64(fName.c_str());
+
+					word0 = hash >> 32;
+					word1 = hash & 0xFFFFFFFF;
+				}
+				else
+				{
+					word0 = 0;
+					word1 = 0;
+					spdlog::error("texDecl == nullptr! PTR = 0x%08X", texAddress);
+				}
 			}
 		}
 		break;

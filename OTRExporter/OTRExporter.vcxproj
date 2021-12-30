@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BackgroundExporter.h" />
     <ClInclude Include="CollisionExporter.h" />
     <ClInclude Include="DisplayListExporter.h" />
     <ClInclude Include="Main.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="TextureExporter.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BackgroundExporter.cpp" />
     <ClCompile Include="CollisionExporter.cpp" />
     <ClCompile Include="DisplayListExporter.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -99,12 +101,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\..\ZAPD\ZAPD;$(ProjectDir)..\..\ZAPD\lib\tinyxml2;$(ProjectDir)..\..\ZAPD\lib\libgfxd;$(ProjectDir)..\..\ZAPD\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\..\ZAPDTR\ZAPD;$(ProjectDir)..\..\ZAPDTR\lib\tinyxml2;$(ProjectDir)..\..\ZAPDTR\lib\libgfxd;$(ProjectDir)..\..\ZAPDTR\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\..\OtrLib\otrlib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\..\ZAPD\ZAPD;$(ProjectDir)..\..\ZAPD\lib\tinyxml2;$(ProjectDir)..\..\ZAPD\lib\libgfxd;$(ProjectDir)..\..\ZAPD\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\..\ZAPDTR\ZAPD;$(ProjectDir)..\..\ZAPDTR\lib\tinyxml2;$(ProjectDir)..\..\ZAPDTR\lib\libgfxd;$(ProjectDir)..\..\ZAPDTR\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\..\OtrLib\otrlib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -1,5 +1,6 @@
 #include <OTRArchive.h>
 //#include <Factories/OTRArchiveFactory.h>
+#include "BackgroundExporter.h"
 #include "TextureExporter.h"
 #include "RoomExporter.h"
 #include "CollisionExporter.h"
@@ -154,6 +155,7 @@ static void ImportExporters()
 	exporterSet->beginXMLFunc = ExporterXMLBegin;
 	exporterSet->endXMLFunc = ExporterXMLEnd;
 	exporterSet->resSaveFunc = ExporterResourceEnd;
+	exporterSet->exporters[ZResourceType::Background] = new OTRExporter_Background();
 	exporterSet->exporters[ZResourceType::Texture] = new OTRExporter_Texture();
 	exporterSet->exporters[ZResourceType::Room] = new OTRExporter_Room();
 	exporterSet->exporters[ZResourceType::Scene] = new OTRExporter_Room();
