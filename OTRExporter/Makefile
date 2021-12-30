@@ -36,7 +36,7 @@ H_FILES   := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h))
 
 O_FILES   := $(CXX_FILES:%.cpp=build/%.o)
 D_FILES   := $(O_FILES:%.o=%.d)
-LIB       := ExporterTest.a
+LIB       := OTRExporter.a
 
 INC_DIRS := $(addprefix -I, \
 	../../ZAPD/ZAPD \

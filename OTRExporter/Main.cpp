@@ -77,9 +77,9 @@ static void ExporterFileEnd(ZFile* file)
 	printf("ExporterFileEnd() called on ZFile %s.\n", file->GetName().c_str());
 
 	auto fileEnd = std::chrono::steady_clock::now();
-	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(fileEnd - fileStart).count();
+	size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(fileEnd - fileStart).count();
 
-	printf("File Export Ended %s in %lims\n", file->GetName().c_str(), diff);
+	printf("File Export Ended %s in %zums\n", file->GetName().c_str(), diff);
 
 	//MemoryStream* strem = (MemoryStream*)fileWriter->GetStream().get();
 	//otrArchive->AddFile(file->GetName(), (uintptr_t)strem->ToVector().data(), strem->GetLength());
@@ -118,10 +118,10 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 	}
 
 	auto end = std::chrono::steady_clock::now();
-	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
 	//if (diff > 10)
-		printf("Exported Resource End %s in %lims\n", res->GetName().c_str(), diff);
+		printf("Exported Resource End %s in %zums\n", res->GetName().c_str(), diff);
 }
 
 static void ExporterXMLBegin()

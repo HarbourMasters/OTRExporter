@@ -575,9 +575,9 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 							otrArchive->AddFile(fName, (uintptr_t)vtxStream->ToVector().data(), vtxWriter.GetBaseAddress());
 
 							auto end = std::chrono::steady_clock::now();
-							auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+							size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-							printf("Exported VTX Array %s in %lims\n", fName.c_str(), diff);
+							printf("Exported VTX Array %s in %zums\n", fName.c_str(), diff);
 						}
 					}
 				}
@@ -604,9 +604,9 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 	}
 
 	auto dlEnd = std::chrono::steady_clock::now();
-	auto dlDiff = std::chrono::duration_cast<std::chrono::milliseconds>(dlEnd - dlStart).count();
+	size_t dlDiff = std::chrono::duration_cast<std::chrono::milliseconds>(dlEnd - dlStart).count();
 
-	printf("Display List Gen in %lims\n", dlDiff);
+	printf("Display List Gen in %zums\n", dlDiff);
 }
 
 std::string OTRExporter_DisplayList::GetPathToRes(ZResource* res, std::string varName)
