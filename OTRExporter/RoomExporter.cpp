@@ -26,8 +26,10 @@
 #include "OTRResource.h"
 #include <Globals.h>
 #include <ZRoom/Commands/SetExitList.h>
+#include <ZRoom/Commands/SetPathways.h>
+#include "TextureExporter.h"
 
-void OTRExporter_Room::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter* writer)
 {
 	ZRoom* room = (ZRoom*)res;
 
