@@ -7,6 +7,8 @@
 #include "spdlog/spdlog.h"
 #include "PR/ultra64/gbi.h"
 #include <Globals.h>
+#include <iostream>
+#include <string>
 //#include "gbi.h"
 //#include "Lib/Fast3D/U64/PR/gbi.h"
 
@@ -91,14 +93,14 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_ENDDL:
 		{
 			Gfx value = gsSPEndDisplayList();
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		default:
 		{
 			printf("Undefined opcode: %02X\n", opcode);
@@ -115,14 +117,14 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_RDPPIPESYNC:
 		{
 			Gfx value = gsDPPipeSync();
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_RDPLOADSYNC:
 		{
 			Gfx value = gsDPLoadSync();
@@ -186,7 +188,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_LOADBLOCK:
 		{
 			int32_t sss = (data & 0x00FFF00000000000) >> 48;
@@ -199,7 +201,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_CULLDL:
 		{
 			int32_t vvvv = (data & 0xFFFF00000000) >> 32;
@@ -209,13 +211,13 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_DL:
 		{
 			if (!Globals::Instance->HasSegment(GETSEGNUM(data)))
 			{
 				int32_t pp = (data & 0x00FF000000000000) >> 56;
-				
+
 				Gfx value;
 
 				u32 dListVal = (data & 0x0FFFFFFF) + 0xF0000000;
@@ -293,7 +295,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_TRI1:
 		{
 			int32_t aa = ((data & 0x00FF000000000000ULL) >> 48) / 2;
@@ -304,7 +306,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = test.words.w0;
 			word1 = test.words.w1;
 		}
-			break;
+		break;
 		case G_TRI2:
 		{
 			int32_t aa = ((data & 0x00FF000000000000ULL) >> 48) / 2;
@@ -318,7 +320,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = test.words.w0;
 			word1 = test.words.w1;
 		}
-			break;
+		break;
 		/*case G_QUAD:
 		{
 			gsSP1Quadrangle()
@@ -337,7 +339,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_SETOTHERMODE_L:
 		{
 			int32_t ss = (data & 0x0000FF0000000000) >> 40;
@@ -351,7 +353,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_SETOTHERMODE_H:
 		{
 			int32_t ss = (data & 0x0000FF0000000000) >> 40;
@@ -400,7 +402,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_SETCOMBINE:
 		{
 			int32_t a0 = (data & 0b000000011110000000000000000000000000000000000000000000000000000) >> 52;
@@ -424,7 +426,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_SETTILESIZE:
 		{
 			int32_t sss = (data & 0x00FFF00000000000) >> 44;
@@ -437,7 +439,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_LOADTLUT:
 		{
 			int32_t t = (data & 0x0000000007000000) >> 24;
@@ -447,16 +449,11 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word0 = value.words.w0;
 			word1 = value.words.w1;
 		}
-			break;
+		break;
 		case G_SETTIMG:
 		{
 			uint32_t seg = data & 0xFFFFFFFF;
 			int32_t texAddress = Seg2Filespace(data, dList->parent->baseAddress);
-
-			if (seg == 0x08000000)
-			{
-				int bp = 0;
-			}
 
 			if (!Globals::Instance->HasSegment(GETSEGNUM(seg)))
 			{
@@ -496,6 +493,11 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 				{
 					std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), texName.c_str());
 					uint64_t hash = CRC64(fName.c_str());
+
+					if (fName == "object_link_child\\gLinkChildDekuShieldBackTex")
+					{
+						int bp = 0;
+					}
 
 					word0 = hash >> 32;
 					word1 = hash & 0xFFFFFFFF;
@@ -574,29 +576,65 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 					}
 
 					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->varName);
-					
+
+					printf("Exporting VTX Data %s\n", fName.c_str());
+
+					uint64_t hash = CRC64(fName.c_str());
+
+					if (StringHelper::Contains(fName, "object_link_childVtx_01C978"))
+					{
+						int addr = writer->GetBaseAddress();
+						int bp = 0;
+					}
+
+					word0 = hash >> 32;
+					word1 = hash & 0xFFFFFFFF;
+
 					//if (!otrArchive->HasFile(fName))
 					{
-						printf("Exporting VTX Data %s\n", fName.c_str());
-
-						uint64_t hash = CRC64(fName.c_str());
-
-						word0 = hash >> 32;
-						word1 = hash & 0xFFFFFFFF;
-
 						// Write vertices to file
 						MemoryStream* vtxStream = new MemoryStream();
 						BinaryWriter vtxWriter = BinaryWriter(vtxStream);
 
-						size_t sz = dList->vertices[GETSEGOFFSET(data)].size();
+						size_t sz = dList->vertices[vtxDecl->address].size();
 
 						if (sz > 0)
 						{
 							auto start = std::chrono::steady_clock::now();
 
-							for (size_t i = 0; i < sz; i++)
+
+							// God dammit this is so dumb
+							auto split = StringHelper::Split(vtxDecl->text, "\n");
+
+							for (int i = 0; i < split.size(); i++)
 							{
-								auto v = dList->vertices[GETSEGOFFSET(data)][i];
+								std::string line = split[i];
+
+								if (StringHelper::Contains(line, "VTX("))
+								{
+									auto split2 = StringHelper::Split(StringHelper::Split(StringHelper::Split(line, "VTX(")[1], ")")[0], ",");
+
+									vtxWriter.Write((int16_t)std::stoi(split2[0], nullptr, 10)); // v.x
+									vtxWriter.Write((int16_t)std::stoi(split2[1], nullptr, 10)); // v.y
+									vtxWriter.Write((int16_t)std::stoi(split2[2], nullptr, 10)); // v.z
+
+									vtxWriter.Write((int16_t)0);								 // v.flag
+									
+									vtxWriter.Write((int16_t)std::stoi(split2[3], nullptr, 10)); // v.s
+									vtxWriter.Write((int16_t)std::stoi(split2[4], nullptr, 10)); // v.t
+									
+									vtxWriter.Write((uint8_t)std::stoi(split2[5], nullptr, 10)); // v.r
+									vtxWriter.Write((uint8_t)std::stoi(split2[6], nullptr, 10)); // v.g
+									vtxWriter.Write((uint8_t)std::stoi(split2[7], nullptr, 10)); // v.b
+									vtxWriter.Write((uint8_t)std::stoi(split2[8], nullptr, 10)); // v.a
+
+									int bp = 0;
+								}
+							}
+
+							/*for (size_t i = 0; i < sz; i++)
+							{
+								auto v = dList->vertices[vtxDecl->address][i];
 
 								vtxWriter.Write(v.x);
 								vtxWriter.Write(v.y);
@@ -608,12 +646,12 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 								vtxWriter.Write(v.g);
 								vtxWriter.Write(v.b);
 								vtxWriter.Write(v.a);
-							}
+							}*/
 
-#ifdef _DEBUG
-							if (otrArchive->HasFile(fName))
-								otrArchive->RemoveFile(fName);
-#endif
+							//#ifdef _DEBUG
+														//if (otrArchive->HasFile(fName))
+															//otrArchive->RemoveFile(fName);
+							//#endif
 
 							otrArchive->AddFile(fName, (uintptr_t)vtxStream->ToVector().data(), vtxWriter.GetBaseAddress());
 

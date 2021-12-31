@@ -166,8 +166,8 @@ static void ImportExporters()
 	exporterSet->exporters[ZResourceType::PlayerAnimationData] = new OTRExporter_PlayerAnimationExporter();
 	exporterSet->exporters[ZResourceType::Skeleton] = new OTRExporter_Skeleton();
 	exporterSet->exporters[ZResourceType::Limb] = new OTRExporter_SkeletonLimb();
-	exporterSet->exporters[ZResourceType::Vector] = new OTRExporter_Vtx();
-	exporterSet->exporters[ZResourceType::Array] = new OTRExporter_Array();
+	//exporterSet->exporters[ZResourceType::Vertex] = new OTRExporter_Vtx();
+	//exporterSet->exporters[ZResourceType::Array] = new OTRExporter_Array();
 
 	Globals::AddExporter("OTR", exporterSet);
 }

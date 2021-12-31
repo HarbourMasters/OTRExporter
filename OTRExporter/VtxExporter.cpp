@@ -42,7 +42,4 @@ void OTRExporter_Vtx::Save(ZResource* res, fs::path outPath, BinaryWriter* write
 	writer->Write(vtx->g);
 	writer->Write(vtx->b);
 	writer->Write(vtx->a);
-
-
-
 }
