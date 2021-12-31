@@ -8,6 +8,8 @@
 #include "PlayerAnimationExporter.h"
 #include "OTRSkeletonExporter.h"
 #include "OTRSkeletonLimbExporter.h"
+#include "ArrayExporter.h"
+#include "VtxExporter.h"
 #include <Globals.h>
 #include <Utils/File.h>
 #include <Utils/Directory.h>
@@ -164,6 +166,8 @@ static void ImportExporters()
 	exporterSet->exporters[ZResourceType::PlayerAnimationData] = new OTRExporter_PlayerAnimationExporter();
 	exporterSet->exporters[ZResourceType::Skeleton] = new OTRExporter_Skeleton();
 	exporterSet->exporters[ZResourceType::Limb] = new OTRExporter_SkeletonLimb();
+	exporterSet->exporters[ZResourceType::Vector] = new OTRExporter_Vtx();
+	exporterSet->exporters[ZResourceType::Array] = new OTRExporter_Array();
 
 	Globals::AddExporter("OTR", exporterSet);
 }
