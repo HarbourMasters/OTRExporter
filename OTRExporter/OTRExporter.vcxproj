@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArrayExporter.h" />
     <ClInclude Include="BackgroundExporter.h" />
     <ClInclude Include="CollisionExporter.h" />
     <ClInclude Include="DisplayListExporter.h" />
@@ -28,8 +29,10 @@
     <ClInclude Include="PlayerAnimationExporter.h" />
     <ClInclude Include="RoomExporter.h" />
     <ClInclude Include="TextureExporter.h" />
+    <ClInclude Include="VtxExporter.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ArrayExporter.cpp" />
     <ClCompile Include="BackgroundExporter.cpp" />
     <ClCompile Include="CollisionExporter.cpp" />
     <ClCompile Include="DisplayListExporter.cpp" />
@@ -39,6 +42,7 @@
     <ClCompile Include="PlayerAnimationExporter.cpp" />
     <ClCompile Include="RoomExporter.cpp" />
     <ClCompile Include="TextureExporter.cpp" />
+    <ClCompile Include="VtxExporter.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

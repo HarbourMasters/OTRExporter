@@ -582,13 +582,13 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 						MemoryStream* vtxStream = new MemoryStream();
 						BinaryWriter vtxWriter = BinaryWriter(vtxStream);
 
-						int sz = dList->vertices[GETSEGOFFSET(data)].size();
+						size_t sz = dList->vertices[GETSEGOFFSET(data)].size();
 
 						if (sz > 0)
 						{
 							auto start = std::chrono::steady_clock::now();
 
-							for (int i = 0; i < sz; i++)
+							for (size_t i = 0; i < sz; i++)
 							{
 								auto v = dList->vertices[GETSEGOFFSET(data)][i];
 
