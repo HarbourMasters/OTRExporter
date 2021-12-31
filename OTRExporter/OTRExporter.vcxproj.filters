@@ -42,6 +42,12 @@
     <ClInclude Include="BackgroundExporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="VtxExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrayExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionExporter.cpp">
@@ -69,6 +75,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BackgroundExporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VtxExporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ArrayExporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
