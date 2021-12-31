@@ -101,6 +101,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			break;
 		default:
 		{
+			printf("Undefined opcode: %02X\n", opcode);
 			//word0 = _byteswap_ulong((uint32_t)(data >> 32));
 			//word1 = _byteswap_ulong((uint32_t)(data & 0xFFFFFFFF));
 		}
@@ -177,9 +178,9 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			uint32_t pp = (data & 0x000000FF00000000) >> 32;
 			uint32_t mm = (data & 0x00000000FFFFFFFF);
 
-			pp ^= 0x01;
+			pp ^= G_MTX_PUSH;
 
-			mm += 0xF0000000;
+			mm = (mm & 0x0FFFFFFF) + 0xF0000000;
 
 			Gfx value = gsSPMatrix(mm, pp);
 			word0 = value.words.w0;
@@ -566,6 +567,11 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 					writer->Write(word0);
 					writer->Write(word1);
+
+					if (vtxDecl->address == 0x4B18)
+					{
+						int bp = 0;
+					}
 
 					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->varName);
 					
