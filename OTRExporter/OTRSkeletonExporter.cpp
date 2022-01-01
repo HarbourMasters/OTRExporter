@@ -16,7 +16,6 @@ void OTRExporter_Skeleton::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 	writer->Write((uint32_t)skel->limbCount);
 	writer->Write((uint32_t)skel->dListCount);
 
-
 	writer->Write((uint8_t)skel->limbsTable.limbType);
 	writer->Write((uint32_t)skel->limbsTable.count);
 
