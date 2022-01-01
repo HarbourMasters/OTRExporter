@@ -40,7 +40,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 	writer->Write((uint32_t)room->commands.size());
 
-	for (int i = 0; i < room->commands.size(); i++)
+	for (size_t i = 0; i < room->commands.size(); i++)
 	{
 		ZRoomCommand* cmd = room->commands[i];
 				
@@ -136,7 +136,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 			writer->Write((uint8_t)cmdCsCam->cameras.size()); // 0x01
 			writer->Write(cmdCsCam->segmentOffset); // 0x04
 
-			for (int i = 0; i < cmdCsCam->cameras.size(); i++)
+			for (size_t i = 0; i < cmdCsCam->cameras.size(); i++)
 			{
 				// OTRTODO: FINISH THIS...
 			}
@@ -155,7 +155,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 				writer->Write(poly->num);
 
-				for (int i = 0; i < poly->num; i++)
+				for (size_t i = 0; i < poly->num; i++)
 				{
 					WritePolyDList(writer, room, &poly->polyDLists[i]);
 				}
@@ -196,7 +196,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 			writer->Write((uint32_t)cmdLight->lights.size());
 
-			for (int i = 0; i < cmdLight->lights.size(); i++)
+			for (size_t i = 0; i < cmdLight->lights.size(); i++)
 			{
 				writer->Write(cmdLight->lights[i].type);
 				writer->Write(cmdLight->lights[i].x);
@@ -253,7 +253,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 			writer->Write((uint32_t)cmdRoom->romfile->numRooms); // 0x01
 
-			for (int i = 0;i < cmdRoom->romfile->numRooms; i++)
+			for (size_t i = 0;i < cmdRoom->romfile->numRooms; i++)
 			{
 				std::string roomName = StringHelper::Sprintf("%s\\%s_room_%i", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i);
 				writer->Write(roomName);
@@ -317,7 +317,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 			writer->Write((uint32_t)cmdHeaders->headers.size());
 
-			for (int i = 0; i < cmdHeaders->headers.size(); i++)
+			for (size_t i = 0; i < cmdHeaders->headers.size(); i++)
 			{
 				uint32_t seg = cmdHeaders->headers[i] & 0xFFFFFFFF;
 				std::string headerName = "";
@@ -333,7 +333,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 			writer->Write((uint32_t)cmdExit->exits.size());
 
-			for (int i = 0; i < cmdExit->exits.size(); i++)
+			for (size_t i = 0; i < cmdExit->exits.size(); i++)
 				writer->Write(cmdExit->exits[i]);
 		}
 			break;
@@ -343,7 +343,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 			writer->Write((uint32_t)cmdSetObjectList->objects.size());
 
-			for (int i = 0; i < cmdSetObjectList->objects.size(); i++)
+			for (size_t i = 0; i < cmdSetObjectList->objects.size(); i++)
 				writer->Write(cmdSetObjectList->objects[i]);
 		}
 			break;
@@ -368,6 +368,7 @@ void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, ZRoom* room, Polygon
 		writer->Write(dlist->y);
 		writer->Write(dlist->z);
 		writer->Write(dlist->unk_06);
+		[[fallthrough]];
 	default:
 		if (dlist->opaDList != nullptr)
 			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->opaDList->GetName().c_str()));

@@ -19,7 +19,7 @@ void OTRExporter_Skeleton::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 	writer->Write((uint8_t)skel->limbsTable.limbType);
 	writer->Write((uint32_t)skel->limbsTable.count);
 
-	for (int i = 0; i < skel->limbsTable.count; i++)
+	for (size_t i = 0; i < skel->limbsTable.count; i++)
 	{
 		Declaration* skelDecl = skel->parent->GetDeclarationRanged(GETSEGOFFSET(skel->limbsTable.limbsAddresses[i]));
 

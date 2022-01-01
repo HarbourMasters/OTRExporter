@@ -254,7 +254,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 					spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = %08X", GETSEGOFFSET(data)));
 				}
 
-				for (int i = 0; i < dList->otherDLists.size(); i++)
+				for (size_t i = 0; i < dList->otherDLists.size(); i++)
 				{
 					Declaration* dListDecl2 = dList->parent->GetDeclaration(GETSEGOFFSET(dList->otherDLists[i]->GetRawDataIndex()));
 
@@ -521,7 +521,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 				auto lastItem = vertsKeys[0];
 
-				for (int i = 1; i < vertsKeys.size(); i++)
+				for (size_t i = 1; i < vertsKeys.size(); i++)
 				{
 					auto curItem = vertsKeys[i];
 
@@ -656,9 +656,9 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 							otrArchive->AddFile(fName, (uintptr_t)vtxStream->ToVector().data(), vtxWriter.GetBaseAddress());
 
 							auto end = std::chrono::steady_clock::now();
-							auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+							size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-							printf("Exported VTX Array %s in %lims\n", fName.c_str(), diff);
+							printf("Exported VTX Array %s in %zums\n", fName.c_str(), diff);
 						}
 					}
 				}
@@ -685,9 +685,9 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 	}
 
 	auto dlEnd = std::chrono::steady_clock::now();
-	auto dlDiff = std::chrono::duration_cast<std::chrono::milliseconds>(dlEnd - dlStart).count();
+	size_t dlDiff = std::chrono::duration_cast<std::chrono::milliseconds>(dlEnd - dlStart).count();
 
-	printf("Display List Gen in %lims\n", dlDiff);
+	printf("Display List Gen in %zums\n", dlDiff);
 }
 
 std::string OTRExporter_DisplayList::GetPathToRes(ZResource* res, std::string varName)
