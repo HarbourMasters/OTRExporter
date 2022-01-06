@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse, json, os, signal, time
+import argparse, json, os, signal, time, sys
 from multiprocessing import Pool, cpu_count, Event, Manager, ProcessError
 
 EXTRACTED_ASSETS_NAMEFILE = ".extracted-assets.json"
@@ -16,11 +16,13 @@ def ExtractFile(xmlPath, outputPath, outputSourcePath):
         # Don't extract if another file wasn't extracted properly.
     #    return
 
-    execStr = "x64\\Release\\ZAPD.exe e -eh -i %s -b baserom/ -o %s -osf %s -gsf 1 -rconf CFG\\Config.xml -se OTR" % (xmlPath, outputPath, outputSourcePath)
-    
+    execStr = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPD/ZAPD.out"
+
+    execStr += " e -eh -i %s -b baserom/ -o %s -osf %s -gsf 1 -rconf CFG/Config.xml -se OTR" % (xmlPath, outputPath, outputSourcePath)
+
     if "overlays" in xmlPath:
         execStr += " --static"
-    
+
     #if globalUnaccounted:
     #    execStr += " -wu"
 

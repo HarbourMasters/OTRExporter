@@ -11,11 +11,11 @@ void OTRExporter_PlayerAnimationExporter::Save(ZResource* res, fs::path outPath,
 	
 	writer->Write((uint32_t)anim->limbRotData.size());
 
-	for (int i = 0; i < anim->limbRotData.size(); i++)
+	for (size_t i = 0; i < anim->limbRotData.size(); i++)
 		writer->Write(anim->limbRotData[i]);
 
 	auto end = std::chrono::steady_clock::now();
-	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-	printf("Exported Player Anim %s in %lims\n", anim->GetName().c_str(), diff);
+	printf("Exported Player Anim %s in %zums\n", anim->GetName().c_str(), diff);
 }

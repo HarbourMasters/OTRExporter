@@ -19,7 +19,7 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWrit
 	writer->Write(limb->rotZ);
 
 	// OTRTODO:
-	if (limb->childPtr != NULL)
+	if (limb->childPtr != 0)
 	{
 		auto childDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->childPtr));
 		
@@ -33,7 +33,7 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWrit
 		writer->Write("");
 	}
 
-	if (limb->siblingPtr != NULL)
+	if (limb->siblingPtr != 0)
 	{
 		auto siblingDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->siblingPtr));
 
@@ -47,7 +47,7 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWrit
 		writer->Write("");
 	}
 
-	if (limb->dListPtr != NULL)
+	if (limb->dListPtr != 0)
 	{
 		auto dlDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->dListPtr));
 
@@ -61,7 +61,7 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWrit
 		writer->Write("");
 	}
 
-	if (limb->dList2Ptr != NULL)
+	if (limb->dList2Ptr != 0)
 	{
 		auto dlDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->dList2Ptr));
 
