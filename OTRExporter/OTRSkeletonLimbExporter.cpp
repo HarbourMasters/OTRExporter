@@ -6,10 +6,7 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWrit
 {
 	ZLimb* limb = (ZLimb*)res;
 
-	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)OtrLib::ResourceType::OTRSkeletonLimb);
-	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
-	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRSkeletonLimb);
 
 	writer->Write((uint8_t)limb->type);
 	writer->Write((uint8_t)limb->skinSegmentType);

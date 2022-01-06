@@ -22,21 +22,30 @@
     <ClInclude Include="ArrayExporter.h" />
     <ClInclude Include="BackgroundExporter.h" />
     <ClInclude Include="CollisionExporter.h" />
+    <ClInclude Include="command_macros_base.h" />
+    <ClInclude Include="CutsceneExporter.h" />
     <ClInclude Include="DisplayListExporter.h" />
+    <ClInclude Include="AnimationExporter.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="OTRExporter.h" />
     <ClInclude Include="OTRSkeletonExporter.h" />
     <ClInclude Include="OTRSkeletonLimbExporter.h" />
     <ClInclude Include="PlayerAnimationExporter.h" />
     <ClInclude Include="RoomExporter.h" />
     <ClInclude Include="TextureExporter.h" />
     <ClInclude Include="VtxExporter.h" />
+    <ClInclude Include="z64cutscene.h" />
+    <ClInclude Include="z64cutscene_commands.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArrayExporter.cpp" />
     <ClCompile Include="BackgroundExporter.cpp" />
     <ClCompile Include="CollisionExporter.cpp" />
+    <ClCompile Include="CutsceneExporter.cpp" />
     <ClCompile Include="DisplayListExporter.cpp" />
+    <ClCompile Include="AnimationExporter.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="OTRExporter.cpp" />
     <ClCompile Include="OTRSkeletonExporter.cpp" />
     <ClCompile Include="OTRSkeletonLimbExporter.cpp" />
     <ClCompile Include="PlayerAnimationExporter.cpp" />

@@ -5,9 +5,10 @@
 #include "ZDisplayList.h"
 #include "ZSkeleton.h"
 #include "ZLimb.h"
+#include "OTRExporter.h"
 #include <Utils/BinaryWriter.h>
 
-class OTRExporter_SkeletonLimb : public ZResourceExporter
+class OTRExporter_SkeletonLimb : public OTRExporter
 {
 public:
 	virtual void Save(ZResource* res, const fs::path outPath, BinaryWriter* writer) override;

@@ -2,9 +2,10 @@
 
 #include "ZResource.h"
 #include "ZVtx.h"
+#include "OTRExporter.h"
 #include <Utils/BinaryWriter.h>
 
-class OTRExporter_Vtx : public ZResourceExporter
+class OTRExporter_Vtx : public OTRExporter
 {
 public:
 	void SaveArr(const std::vector<ZResource*>&, BinaryWriter* writer);

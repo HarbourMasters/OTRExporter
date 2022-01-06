@@ -28,15 +28,15 @@
 #include <ZRoom/Commands/SetExitList.h>
 #include <ZRoom/Commands/SetPathways.h>
 #include "TextureExporter.h"
+#include "Main.h"
+#include <ZRoom/Commands/SetCutscenes.h>
+#undef FindResource
 
 void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter* writer)
 {
 	ZRoom* room = (ZRoom*)res;
 
-	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)OtrLib::ResourceType::OTRRoom);
-	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
-	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRRoom);
 
 	writer->Write((uint32_t)room->commands.size());
 
@@ -133,12 +133,25 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 		{
 			SetCsCamera* cmdCsCam = (SetCsCamera*)cmd;
 
-			writer->Write((uint8_t)cmdCsCam->cameras.size()); // 0x01
-			writer->Write(cmdCsCam->segmentOffset); // 0x04
+			writer->Write((uint32_t)cmdCsCam->cameras.size());
 
 			for (int i = 0; i < cmdCsCam->cameras.size(); i++)
 			{
 				// OTRTODO: FINISH THIS...
+				writer->Write(cmdCsCam->cameras[i].baseOffset);
+				writer->Write(cmdCsCam->cameras[i].type);
+				writer->Write(cmdCsCam->cameras[i].numPoints);
+				//writer->Write(cmdCsCam->cameras[i].camAddress);
+				//writer->Write(cmdCsCam->cameras[i].segmentOffset);
+			}
+
+			writer->Write((uint32_t)cmdCsCam->points.size());
+
+			for (int i = 0; i < cmdCsCam->points.size(); i++)
+			{
+				writer->Write(cmdCsCam->points[i].scalars[0].scalarData.s16);
+				writer->Write(cmdCsCam->points[i].scalars[1].scalarData.s16);
+				writer->Write(cmdCsCam->points[i].scalars[2].scalarData.s16);
 			}
 		}
 		break;
@@ -156,29 +169,74 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 				writer->Write(poly->num);
 
 				for (int i = 0; i < poly->num; i++)
-				{
 					WritePolyDList(writer, room, &poly->polyDLists[i]);
-				}
 			}
 			else if (cmdMesh->meshHeaderType == 1)
 			{
 				PolygonType1* poly = (PolygonType1*)cmdMesh->polyType.get();
 
-				// OTRTODO: FINISH THIS
+				writer->Write(poly->format);
 
-				//writer->Write(poly->format);
-				//writer->Write(poly->dlist);
+				auto test = (PolygonDlist*)&poly->polyDLists[0];
+				Declaration* dListDeclOpa = poly->parent->GetDeclaration(GETSEGOFFSET(test->opa));
+				Declaration* dListDeclXlu = poly->parent->GetDeclaration(GETSEGOFFSET(test->xlu));
 
-				/*if (poly->format == 2)
+				if (test->opa != 0)
+					writer->Write(StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(res).c_str(), dListDeclOpa->varName.c_str()));
+				else
+					writer->Write("");
+				
+				if (test->xlu != 0)
+					writer->Write(StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(res).c_str(), dListDeclXlu->varName.c_str()));
+				else
+					writer->Write("");
+
+				if (poly->format == 2)
 				{
-					writer->Write(poly->count);
-					writer->Write(poly->list);
+					writer->Write((uint32_t)poly->count);
+
+					for (int i = 0; i < poly->count; i++)
+					{
+						writer->Write(poly->multiList[i].unk_00);
+						writer->Write(poly->multiList[i].id);
+
+						Declaration* bgDecl = poly->parent->GetDeclarationRanged(GETSEGOFFSET(poly->multiList[i].source));
+
+						writer->Write(OTRExporter_DisplayList::GetPathToRes(poly->multiList[i].sourceBackground, bgDecl->varName));
+						
+						writer->Write(poly->multiList[i].unk_0C);
+						writer->Write(poly->multiList[i].tlut);
+						writer->Write(poly->multiList[i].width);
+						writer->Write(poly->multiList[i].height);
+						writer->Write(poly->multiList[i].fmt);
+						writer->Write(poly->multiList[i].siz);
+						writer->Write(poly->multiList[i].mode0);
+						writer->Write(poly->multiList[i].tlutCount);
+					}
+				}
+				else
+				{
+					writer->Write((uint32_t)1);
+
+					writer->Write(poly->single.unk_00);
+					writer->Write(poly->single.id);
+
+					Declaration* bgDecl = poly->parent->GetDeclarationRanged(GETSEGOFFSET(poly->single.source));
+
+					writer->Write(OTRExporter_DisplayList::GetPathToRes(poly->single.sourceBackground, bgDecl->varName));
+
+					writer->Write(poly->single.unk_0C);
+					writer->Write(poly->single.tlut);
+					writer->Write(poly->single.width);
+					writer->Write(poly->single.height);
+					writer->Write(poly->single.fmt);
+					writer->Write(poly->single.siz);
+					writer->Write(poly->single.mode0);
+					writer->Write(poly->single.tlutCount);
 				}
 
 				if (poly->dlist != 0)
-				{
-					WritePolyDList(writer, &poly->polyDLists[0]);
-				}*/
+					WritePolyDList(writer, room, &poly->polyDLists[0]);
 			}
 		}
 		break;
@@ -255,7 +313,8 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 			for (int i = 0;i < cmdRoom->romfile->numRooms; i++)
 			{
-				std::string roomName = StringHelper::Sprintf("%s\\%s_room_%i", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i);
+				//std::string roomName = StringHelper::Sprintf("%s\\%s_room_%i", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i);
+				std::string roomName = OTRExporter_DisplayList::GetPathToRes(room, StringHelper::Sprintf("%s_room_%i", StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i));
 				writer->Write(roomName);
 			}
 		}
@@ -265,7 +324,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 			SetCollisionHeader* cmdCollHeader = (SetCollisionHeader*)cmd;
 
 			Declaration* colHeaderDecl = room->parent->GetDeclaration(cmdCollHeader->segmentOffset);
-			std::string path = StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), colHeaderDecl->varName.c_str());
+			std::string path = OTRExporter_DisplayList::GetPathToRes(room, colHeaderDecl->varName);
 			writer->Write(path);
 		}
 		break;
@@ -322,8 +381,20 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 				uint32_t seg = cmdHeaders->headers[i] & 0xFFFFFFFF;
 				std::string headerName = "";
 				bool foundDecl = Globals::Instance->GetSegmentedPtrName(seg, room->parent, "", headerName);
+				std::string name = OTRExporter_DisplayList::GetPathToRes(room, headerName);
 
-				writer->Write(OTRExporter_DisplayList::GetPathToRes(room, headerName));
+				writer->Write(name);
+
+				// TEST
+				/*auto testRes = room->parent->FindResource(GETSEGOFFSET(seg));
+
+				std::shared_ptr<MemoryStream> headerStream = std::shared_ptr<MemoryStream>(new MemoryStream());
+				std::shared_ptr<BinaryWriter> headerWriter = std::shared_ptr<BinaryWriter>(new BinaryWriter(headerStream));
+				Save(testRes, outPath, headerWriter.get());
+
+				otrArchive->AddFile(name, (uintptr_t)headerStream->ToVector().data(), headerWriter->GetBaseAddress());
+
+				int bp = 0;*/
 			}
 		}
 			break;
@@ -345,6 +416,15 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 			for (int i = 0; i < cmdSetObjectList->objects.size(); i++)
 				writer->Write(cmdSetObjectList->objects[i]);
+		}
+			break;
+		case RoomCommand::SetCutscenes:
+		{
+			SetCutscenes* cmdSetCutscenes = (SetCutscenes*)cmd;
+			
+			std::string listName;
+			Globals::Instance->GetSegmentedPtrName(cmdSetCutscenes->cmdArg2, room->parent, "CutsceneData", listName);
+			writer->Write(listName);
 		}
 			break;
 		case RoomCommand::EndMarker:
@@ -369,13 +449,15 @@ void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, ZRoom* room, Polygon
 		writer->Write(dlist->z);
 		writer->Write(dlist->unk_06);
 	default:
+		//writer->Write(StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(res).c_str(), dListDeclOpa->varName.c_str()));
+
 		if (dlist->opaDList != nullptr)
-			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->opaDList->GetName().c_str()));
+			writer->Write(StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), dlist->opaDList->GetName().c_str()));
 		else
 			writer->Write("");
 
 		if (dlist->xluDList != nullptr)
-			writer->Write(StringHelper::Sprintf("%s\\%s", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), dlist->xluDList->GetName().c_str()));
+			writer->Write(StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), dlist->xluDList->GetName().c_str()));
 		else
 			writer->Write("");
 		break;

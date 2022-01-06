@@ -5,10 +5,7 @@ void OTRExporter_Skeleton::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 {
 	ZSkeleton* skel = (ZSkeleton*)res;
 
-	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)OtrLib::ResourceType::OTRSkeleton);
-	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
-	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRSkeleton);
 
 	writer->Write((uint8_t)skel->type);
 	writer->Write((uint8_t)skel->limbType);

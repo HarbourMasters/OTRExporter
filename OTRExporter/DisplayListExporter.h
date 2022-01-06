@@ -3,9 +3,10 @@
 #include "ZResource.h"
 #include "ZTexture.h"
 #include "ZDisplayList.h"
+#include "OTRExporter.h"
 #include <Utils/BinaryWriter.h>
 
-class OTRExporter_DisplayList : public ZResourceExporter
+class OTRExporter_DisplayList : public OTRExporter
 {
 public:
 	virtual void Save(ZResource* res, const fs::path outPath, BinaryWriter* writer) override;

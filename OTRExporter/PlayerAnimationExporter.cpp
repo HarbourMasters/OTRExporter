@@ -5,10 +5,7 @@ void OTRExporter_PlayerAnimationExporter::Save(ZResource* res, fs::path outPath,
 {
 	ZPlayerAnimationData* anim = (ZPlayerAnimationData*)res;
 
-	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)OtrLib::ResourceType::OTRPlayerAnimation);
-	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
-	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRPlayerAnimation);
 
 	auto start = std::chrono::steady_clock::now();
 	

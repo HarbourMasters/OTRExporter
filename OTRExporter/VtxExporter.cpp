@@ -8,6 +8,7 @@ void OTRExporter_Vtx::SaveArr(const std::vector<ZResource*>& vec, BinaryWriter* 
 	writer->Write((uint32_t)OtrLib::ResourceType::OTRVtx);
 	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
 	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+
 	for (auto& res: vec) {
 		ZVtx* vtx = (ZVtx*)res;
 		writer->Write(vtx->x);
@@ -27,10 +28,8 @@ void OTRExporter_Vtx::SaveArr(const std::vector<ZResource*>& vec, BinaryWriter* 
 void OTRExporter_Vtx::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
 	ZVtx* vtx = (ZVtx*)res;
-	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)OtrLib::ResourceType::OTRVtx);
-	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
-	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+
+	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRVtx);
 
 	writer->Write(vtx->x);
 	writer->Write(vtx->y);

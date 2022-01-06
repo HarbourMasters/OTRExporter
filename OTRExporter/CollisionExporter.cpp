@@ -5,11 +5,8 @@ void OTRExporter_Collision::Save(ZResource* res, fs::path outPath, BinaryWriter*
 {
 	ZCollisionHeader* col = (ZCollisionHeader*)res;
 
-	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)OtrLib::ResourceType::OTRCollisionHeader);
-	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
-	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
-
+	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRCollisionHeader);
+	
 	writer->Write(col->absMinX);
 	writer->Write(col->absMinY);
 	writer->Write(col->absMinZ);
@@ -77,7 +74,6 @@ void OTRExporter_Collision::Save(ZResource* res, fs::path outPath, BinaryWriter*
 	{
 		writer->Write(waterBox.xMin);
 		writer->Write(waterBox.ySurface);
-		writer->Write(waterBox.xMin);
 		writer->Write(waterBox.zMin);
 		writer->Write(waterBox.xLength);
 		writer->Write(waterBox.zLength);

@@ -48,10 +48,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 	printf("Exporting DList %s\n", dList->GetName().c_str());
 
-	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)OtrLib::ResourceType::OTRDisplayList);
-	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
-	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRDisplayList);
 
 	while (writer->GetBaseAddress() % 8 != 0)
 		writer->Write((uint8_t)0xFF);
@@ -455,6 +452,11 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			uint32_t seg = data & 0xFFFFFFFF;
 			int32_t texAddress = Seg2Filespace(data, dList->parent->baseAddress);
 
+			if (StringHelper::Contains(res->GetName(), "gLinkChildHatNearDL"))
+			{
+				int bp = 0;
+			}
+
 			if (!Globals::Instance->HasSegment(GETSEGNUM(seg)))
 			{
 				int32_t __ = (data & 0x00FF000000000000) >> 48;
@@ -491,13 +493,16 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 				if (foundDecl)
 				{
-					std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), texName.c_str());
+					ZFile* assocFile = Globals::Instance->GetSegment(GETSEGNUM(seg));
+					std::string assocFileName = assocFile->GetName();
+					std::string fName = "";
+					
+					if (GETSEGNUM(seg) == SEGMENT_SCENE || GETSEGNUM(seg) == SEGMENT_ROOM)
+						fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), texName.c_str());
+					else
+						fName = StringHelper::Sprintf("%s\\%s", assocFileName.c_str(), texName.c_str());
+					
 					uint64_t hash = CRC64(fName.c_str());
-
-					if (fName == "object_link_child\\gLinkChildDekuShieldBackTex")
-					{
-						int bp = 0;
-					}
 
 					word0 = hash >> 32;
 					word1 = hash & 0xFFFFFFFF;
@@ -560,7 +565,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 				{
 					uint32_t diff = segOffset - vtxDecl->address;
 
-					Gfx value = gsSPVertex(diff, nn, 0);
+					Gfx value = gsSPVertex(diff, nn, ((aa >> 1) - nn));
 
 					word0 = value.words.w0;
 					word0 &= 0x00FFFFFF;
@@ -570,22 +575,11 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 					writer->Write(word0);
 					writer->Write(word1);
 
-					if (vtxDecl->address == 0x4B18)
-					{
-						int bp = 0;
-					}
-
 					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->varName);
 
 					printf("Exporting VTX Data %s\n", fName.c_str());
 
 					uint64_t hash = CRC64(fName.c_str());
-
-					if (StringHelper::Contains(fName, "object_link_childVtx_01C978"))
-					{
-						int addr = writer->GetBaseAddress();
-						int bp = 0;
-					}
 
 					word0 = hash >> 32;
 					word1 = hash & 0xFFFFFFFF;
@@ -698,8 +692,28 @@ std::string OTRExporter_DisplayList::GetPathToRes(ZResource* res, std::string va
 
 std::string OTRExporter_DisplayList::GetParentFolderName(ZResource* res)
 {
-	if (StringHelper::Contains(res->parent->GetOutName(), "_scene") || StringHelper::Contains(res->parent->GetOutName(), "_room"))
-		return (StringHelper::Split(res->parent->GetOutName(), "_")[0] + "_scene");
-	else
-		return res->parent->GetOutName();
+	//if (StringHelper::Contains(res->parent->GetOutName(), "_scene") || StringHelper::Contains(res->parent->GetOutName(), "_room"))
+		//return (StringHelper::Split(res->parent->GetOutName(), "_")[0] + "_scene");
+	//else
+		//return res->parent->GetOutName();
+
+	std::string oName = res->parent->GetOutName();
+
+	if (StringHelper::Contains(oName, "_scene"))
+	{
+		auto split = StringHelper::Split(oName, "_");
+		oName = "";
+		for (int i = 0; i < split.size() - 1; i++)
+			oName += split[i] + "_";
+
+		oName += "scene";
+
+		//oName = StringHelper::Split(oName, "_")[0] + "_scene";
+	}
+	else if (StringHelper::Contains(oName, "_room"))
+	{
+		oName = StringHelper::Split(oName, "_room")[0] + "_scene";
+	}
+
+	return oName;
 }

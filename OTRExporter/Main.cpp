@@ -10,6 +10,8 @@
 #include "OTRSkeletonLimbExporter.h"
 #include "ArrayExporter.h"
 #include "VtxExporter.h"
+#include "AnimationExporter.h"
+#include "CutsceneExporter.h"
 #include <Globals.h>
 #include <Utils/File.h>
 #include <Utils/Directory.h>
@@ -102,11 +104,20 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 		std::string rName = res->GetName();
 
 		//if (res->GetResourceType() == ZResourceType::Room || res->GetResourceType() == ZResourceType::Scene)
-		if (StringHelper::Contains(oName, "_scene") || StringHelper::Contains(oName, "_room"))
+		if (StringHelper::Contains(oName, "_scene"))
 		{
-			//oName = StringHelper::Split(oName, "_")[0];
-			oName = StringHelper::Split(oName, "_")[0] + "_scene";
-			//rName = StringHelper::Split(rName, "_")[0];
+			auto split = StringHelper::Split(oName, "_");
+			oName = "";
+			for (int i = 0; i < split.size() - 1; i++)
+				oName += split[i] + "_";
+
+			oName += "scene";
+
+			//oName = StringHelper::Split(oName, "_")[0] + "_scene";
+		}
+		else if (StringHelper::Contains(oName, "_room"))
+		{
+			oName = StringHelper::Split(oName, "_room")[0] + "_scene";
 		}
 
 		std::string fName = StringHelper::Sprintf("%s\\%s", oName.c_str(), rName.c_str());
@@ -160,12 +171,15 @@ static void ImportExporters()
 	exporterSet->exporters[ZResourceType::Background] = new OTRExporter_Background();
 	exporterSet->exporters[ZResourceType::Texture] = new OTRExporter_Texture();
 	exporterSet->exporters[ZResourceType::Room] = new OTRExporter_Room();
+	exporterSet->exporters[ZResourceType::AltHeader] = new OTRExporter_Room();
 	exporterSet->exporters[ZResourceType::Scene] = new OTRExporter_Room();
 	exporterSet->exporters[ZResourceType::CollisionHeader] = new OTRExporter_Collision();
 	exporterSet->exporters[ZResourceType::DisplayList] = new OTRExporter_DisplayList();
 	exporterSet->exporters[ZResourceType::PlayerAnimationData] = new OTRExporter_PlayerAnimationExporter();
 	exporterSet->exporters[ZResourceType::Skeleton] = new OTRExporter_Skeleton();
 	exporterSet->exporters[ZResourceType::Limb] = new OTRExporter_SkeletonLimb();
+	exporterSet->exporters[ZResourceType::Animation] = new OTRExporter_Animation();
+	exporterSet->exporters[ZResourceType::Cutscene] = new OTRExporter_Cutscene();
 	//exporterSet->exporters[ZResourceType::Vertex] = new OTRExporter_Vtx();
 	//exporterSet->exporters[ZResourceType::Array] = new OTRExporter_Array();
 
