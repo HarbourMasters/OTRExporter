@@ -30,6 +30,8 @@
 #include "TextureExporter.h"
 #include "Main.h"
 #include <ZRoom/Commands/SetCutscenes.h>
+#include "CutsceneExporter.h"
+#include <ZRoom/Commands/SetTransitionActorList.h>
 #undef FindResource
 
 void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter* writer)
@@ -48,6 +50,27 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 		switch (cmd->cmdID)
 		{
+		case RoomCommand::SetTransitionActorList:
+		{
+			SetTransitionActorList* cmdTrans = (SetTransitionActorList*)cmd;
+
+			writer->Write((uint32_t)cmdTrans->transitionActors.size());
+
+			for (const TransitionActorEntry& entry : cmdTrans->transitionActors)
+			{
+				writer->Write(entry.frontObjectRoom);
+				writer->Write(entry.frontTransitionReaction);
+				writer->Write(entry.backObjectRoom);
+				writer->Write(entry.backTransitionReaction);
+				writer->Write(entry.actorNum);
+				writer->Write(entry.posX);
+				writer->Write(entry.posY);
+				writer->Write(entry.posZ);
+				writer->Write(entry.rotY);
+				writer->Write(entry.initVar);
+			}
+		}
+			break;
 		case RoomCommand::SetActorList:
 		{
 			SetActorList* cmdSetActorList = (SetActorList*)cmd;
@@ -424,7 +447,16 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 			
 			std::string listName;
 			Globals::Instance->GetSegmentedPtrName(cmdSetCutscenes->cmdArg2, room->parent, "CutsceneData", listName);
-			writer->Write(listName);
+			std::string fName = StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), listName.c_str());
+			writer->Write(fName);
+
+			MemoryStream* csStream = new MemoryStream();
+			BinaryWriter csWriter = BinaryWriter(csStream);
+			OTRExporter_Cutscene cs;
+			cs.Save(cmdSetCutscenes->cutscenes[0], "", &csWriter);
+
+			//std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->varName);
+			otrArchive->AddFile(fName, (uintptr_t)csStream->ToVector().data(), csWriter.GetBaseAddress());
 		}
 			break;
 		case RoomCommand::EndMarker:

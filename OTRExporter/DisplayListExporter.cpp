@@ -98,6 +98,17 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word1 = value.words.w1;
 		}
 		break;
+		case G_MODIFYVTX:
+		{
+			int32_t ww = (data & 0x00FF000000000000ULL) >> 48;
+			int32_t nnnn = (data & 0x0000FFFF00000000ULL) >> 32;
+			int32_t vvvvvvvv = (data & 0x00000000FFFFFFFFULL);
+
+			Gfx value = gsSPModifyVertex(nnnn / 2, ww, vvvvvvvv);
+			word0 = value.words.w0;
+			word1 = value.words.w1;
+		}
+			break;
 		default:
 		{
 			printf("Undefined opcode: %02X\n", opcode);
@@ -318,11 +329,18 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word1 = test.words.w1;
 		}
 		break;
-		/*case G_QUAD:
+		case G_QUAD:
 		{
-			gsSP1Quadrangle()
+			int32_t aa = ((data & 0x00FF000000000000ULL) >> 48) / 2;
+			int32_t bb = ((data & 0x0000FF0000000000ULL) >> 40) / 2;
+			int32_t cc = ((data & 0x000000FF00000000ULL) >> 32) / 2;
+			int32_t dd = ((data & 0x000000000000FFULL)) / 2;
+			
+			Gfx test = gsSP1Quadrangle(aa, bb, cc, dd, 0);
+			word0 = test.words.w0;
+			word1 = test.words.w1;
 		}
-			break;*/
+			break;
 		case G_SETPRIMCOLOR:
 		{
 			int32_t mm = (data & 0x0000FF0000000000) >> 40;

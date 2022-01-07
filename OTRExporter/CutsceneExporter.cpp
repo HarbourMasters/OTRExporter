@@ -10,11 +10,17 @@ void OTRExporter_Cutscene::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
 	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
 
+	//writer->Write((uint32_t)cs->commands.size() + 2 + 2);
+	writer->Write((uint32_t)0);
+
+	int currentStream = writer->GetBaseAddress();
+
 	writer->Write(CS_BEGIN_CUTSCENE(cs->numCommands, cs->endFrame));
 
-	for (size_t i = 0; i < cs->commands.size(); i++) 
+	for (size_t i = 0; i < cs->commands.size(); i++)
 	{
-		switch ((CutsceneCommands)cs->commands[i]->commandID) {
+		switch ((CutsceneCommands)cs->commands[i]->commandID)
+		{
 		case CutsceneCommands::SetCameraPos:
 		{
 			writer->Write(CS_CMD_CAM_EYE);
@@ -176,6 +182,8 @@ void OTRExporter_Cutscene::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 		}
 		case CutsceneCommands::SetSceneTransFX:
 		{
+			CutsceneCommandSceneTransFX* cmdTFX = (CutsceneCommandSceneTransFX*)cs->commands[i];
+
 			writer->Write(CS_CMD_SCENE_TRANS_FX);
 			writer->Write((uint32_t)1);
 			writer->Write(CMD_HH((((CutsceneCommandSceneTransFX*)cs->commands[i])->base), ((CutsceneCommandSceneTransFX*)cs->commands[i])->startFrame));
@@ -268,11 +276,15 @@ void OTRExporter_Cutscene::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 			writer->Write(CMD_HH(((CutsceneCommandTerminator*)cs->commands[i])->endFrame, ((CutsceneCommandTerminator*)cs->commands[i])->endFrame));
 			break;
 		}
-
-		//CS_END
-		writer->Write(0xFFFFFFFF);
-		writer->Write((uint32_t)0);
 		}
-
 	}
+
+	//CS_END
+	writer->Write(0xFFFFFFFF);
+	writer->Write((uint32_t)0);
+
+	int endStream = writer->GetBaseAddress();
+	writer->Seek(currentStream - 4, SeekOffsetType::Start);
+	writer->Write((uint32_t)((endStream - currentStream) / 4));
+	writer->Seek(endStream, SeekOffsetType::Start);
 }
