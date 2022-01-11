@@ -48,7 +48,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 	printf("Exporting DList %s\n", dList->GetName().c_str());
 
-	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRDisplayList);
+	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRDisplayList);
 
 	while (writer->GetBaseAddress() % 8 != 0)
 		writer->Write((uint8_t)0xFF);

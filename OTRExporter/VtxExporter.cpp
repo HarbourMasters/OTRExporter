@@ -1,12 +1,12 @@
 #include "VtxExporter.h"
-#include "OTRResource.h"
+#include "Resource.h"
 
 
 void OTRExporter_Vtx::SaveArr(const std::vector<ZResource*>& vec, BinaryWriter* writer)
 {
 	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)OtrLib::ResourceType::OTRVtx);
-	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
+	writer->Write((uint32_t)Ship::ResourceType::OTRVtx);
+	writer->Write((uint32_t)Ship::Version::Deckard);
 	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
 	writer->Write((uint32_t)vec.size());
 
@@ -30,7 +30,7 @@ void OTRExporter_Vtx::Save(ZResource* res, fs::path outPath, BinaryWriter* write
 {
 	ZVtx* vtx = (ZVtx*)res;
 
-	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRVtx);
+	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRVtx);
 
 	writer->Write((uint32_t)1); //Yes I'm hard coding it to one, it *should* be fine.
 

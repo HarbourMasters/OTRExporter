@@ -1,13 +1,13 @@
 #include "CutsceneExporter.h"
-#include <OTRResource.h>
+#include <Resource.h>
 
 void OTRExporter_Cutscene::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
 	ZCutscene* cs = (ZCutscene*)res;
 
 	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)OtrLib::ResourceType::OTRCutscene);
-	writer->Write((uint32_t)OtrLib::OTRVersion::Deckard);
+	writer->Write((uint32_t)Ship::ResourceType::OTRCutscene);
+	writer->Write((uint32_t)Ship::Version::Deckard);
 	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
 
 	//writer->Write((uint32_t)cs->commands.size() + 2 + 2);

@@ -3,10 +3,10 @@
 #include "ZArray.h"
 #include "OTRExporter.h"
 #include <Utils/BinaryWriter.h>
-#include <OTRResource.h>
+#include <Resource.h>
 
 class OTRExporter : public ZResourceExporter
 {
 protected:
-	void WriteHeader(ZResource* res, fs::path outPath, BinaryWriter* writer, OtrLib::ResourceType resType);
+	void WriteHeader(ZResource* res, fs::path outPath, BinaryWriter* writer, Ship::ResourceType resType);
 };

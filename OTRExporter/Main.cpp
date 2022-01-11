@@ -1,4 +1,4 @@
-#include <OTRArchive.h>
+#include <Archive.h>
 //#include <Factories/OTRArchiveFactory.h>
 #include "BackgroundExporter.h"
 #include "TextureExporter.h"
@@ -19,7 +19,7 @@
 #include <Utils/MemoryStream.h>
 #include <Utils/BinaryWriter.h>
 
-std::shared_ptr<OtrLib::OTRArchive> otrArchive;
+std::shared_ptr<Ship::Archive> otrArchive;
 BinaryWriter* fileWriter;
 std::chrono::steady_clock::time_point fileStart, resStart;
 
@@ -144,9 +144,9 @@ static void ExporterXMLBegin()
 	printf("ExporterXMLBegin() called.\n");
 
 	if (File::Exists("oot.otr"))
-		otrArchive = std::shared_ptr<OtrLib::OTRArchive>(new OtrLib::OTRArchive("oot.otr"));
+		otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive("oot.otr"));
 	else
-		otrArchive = OtrLib::OTRArchive::CreateArchive("oot.otr");
+		otrArchive = Ship::Archive::CreateArchive("oot.otr");
 }
 
 static void ExporterXMLEnd()

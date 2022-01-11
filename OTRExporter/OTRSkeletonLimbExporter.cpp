@@ -1,12 +1,12 @@
 #include "OTRSkeletonLimbExporter.h"
 #include "DisplayListExporter.h"
-#include <OTRResource.h>
+#include <Resource.h>
 
 void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
 	ZLimb* limb = (ZLimb*)res;
 
-	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRSkeletonLimb);
+	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRSkeletonLimb);
 
 	writer->Write((uint8_t)limb->type);
 	writer->Write((uint8_t)limb->skinSegmentType);
