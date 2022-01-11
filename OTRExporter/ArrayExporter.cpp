@@ -57,6 +57,6 @@ void OTRExporter_Array::Save(ZResource* res, fs::path outPath, BinaryWriter* wri
 	//}
 	//else if (arr->resList[0]->GetResourceType() == ZResourceType::Vector)
 	//{
-	//	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRVtx);
+	//	WriteHeader(res, outPath, writer, Ship::ResourceType::Vtx);
 	//}
 }
