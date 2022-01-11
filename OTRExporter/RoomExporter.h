@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ZResource.h"
-#include "OTRExporter.h"
+#include "Exporter.h"
 #include "ZRoom/ZRoom.h"
 
 class PolygonDlist;

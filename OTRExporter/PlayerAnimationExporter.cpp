@@ -1,11 +1,11 @@
 #include "PlayerAnimationExporter.h"
-#include <OTRResource.h>
+#include <Resource.h>
 
 void OTRExporter_PlayerAnimationExporter::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
 	ZPlayerAnimationData* anim = (ZPlayerAnimationData*)res;
 
-	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRPlayerAnimation);
+	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRPlayerAnimation);
 
 	auto start = std::chrono::steady_clock::now();
 	
@@ -17,5 +17,5 @@ void OTRExporter_PlayerAnimationExporter::Save(ZResource* res, fs::path outPath,
 	auto end = std::chrono::steady_clock::now();
 	size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-	printf("Exported Player Anim %s in %zums\n", anim->GetName().c_str(), diff);
+	//printf("Exported Player Anim %s in %zums\n", anim->GetName().c_str(), diff);
 }

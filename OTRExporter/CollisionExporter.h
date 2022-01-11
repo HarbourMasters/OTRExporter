@@ -2,7 +2,7 @@
 
 #include "ZResource.h"
 #include "ZCollision.h"
-#include "OTRExporter.h"
+#include "Exporter.h"
 
 class OTRExporter_Collision : public OTRExporter
 {

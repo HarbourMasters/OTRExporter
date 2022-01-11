@@ -2,7 +2,7 @@
 
 #include "ZResource.h"
 #include "ZBackground.h"
-#include "OTRExporter.h"
+#include "Exporter.h"
 #include <Utils/BinaryWriter.h>
 
 class OTRExporter_Background : public OTRExporter

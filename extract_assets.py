@@ -3,7 +3,7 @@
 import argparse, json, os, signal, time, sys
 from multiprocessing import Pool, cpu_count, Event, Manager, ProcessError
 
-EXTRACTED_ASSETS_NAMEFILE = ".extracted-assets.json"
+#EXTRACTED_ASSETS_NAMEFILE = ".extracted-assets.json"
 
 
 def SignalHandler(sig, frame):
@@ -18,6 +18,7 @@ def ExtractFile(xmlPath, outputPath, outputSourcePath):
 
     execStr = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPD/ZAPD.out"
 
+    #execStr += " e -eh -i %s -b baserom/ -o %s -osf %s -gsf 1 -rconf CFG/Config.xml -se OTR" % (xmlPath, outputPath, outputSourcePath)
     execStr += " e -eh -i %s -b baserom/ -o %s -osf %s -gsf 1 -rconf CFG/Config.xml -se OTR" % (xmlPath, outputPath, outputSourcePath)
 
     if "overlays" in xmlPath:
@@ -28,6 +29,7 @@ def ExtractFile(xmlPath, outputPath, outputSourcePath):
 
     print(execStr)
     exitValue = os.system(execStr)
+    #exitValue = 0
     if exitValue != 0:
     #    globalAbort.set()
         print("\n")
@@ -39,7 +41,7 @@ def ExtractFunc(fullPath):
     *pathList, xmlName = fullPath.split(os.sep)
     objectName = os.path.splitext(xmlName)[0]
 
-    outPath = os.path.join("assets", *pathList[2:], objectName)
+    outPath = os.path.join("..\\otr\\assets\\", *pathList[4:], objectName)
     outSourcePath = outPath
 
     #if fullPath in globalExtractedAssetsTracker:
@@ -80,7 +82,7 @@ def main():
 
     asset_path = args.single
     if asset_path is not None:
-        fullPath = os.path.join("assets", "xml", asset_path + ".xml")
+        fullPath = os.path.join("..\\otr\\assets", "xml", asset_path + ".xml")
         if not os.path.exists(fullPath):
             print(f"Error. File {fullPath} doesn't exists.", file=os.sys.stderr)
             exit(1)
@@ -98,7 +100,7 @@ def main():
             extract_staff_text_path = None
 
         xmlFiles = []
-        for currentPath, _, files in os.walk(os.path.join("assets", "xml")):
+        for currentPath, _, files in os.walk(os.path.join("..\\otr\\assets", "xml")):
             for file in files:
                 fullPath = os.path.join(currentPath, file)
                 if file.endswith(".xml"):

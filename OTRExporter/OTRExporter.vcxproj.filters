@@ -33,12 +33,6 @@
     <ClInclude Include="PlayerAnimationExporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OTRSkeletonExporter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OTRSkeletonLimbExporter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BackgroundExporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,7 +42,7 @@
     <ClInclude Include="ArrayExporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OTRExporter.h">
+    <ClInclude Include="Exporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AnimationExporter.h">
@@ -67,6 +61,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PathExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonLimbExporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -89,10 +89,10 @@
     <ClCompile Include="PlayerAnimationExporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OTRSkeletonExporter.cpp">
+    <ClCompile Include="SkeletonExporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OTRSkeletonLimbExporter.cpp">
+    <ClCompile Include="SkeletonLimbExporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BackgroundExporter.cpp">
@@ -104,7 +104,7 @@
     <ClCompile Include="ArrayExporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OTRExporter.cpp">
+    <ClCompile Include="Exporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AnimationExporter.cpp">

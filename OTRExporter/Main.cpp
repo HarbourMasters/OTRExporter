@@ -1,13 +1,13 @@
-#include <OTRArchive.h>
-//#include <Factories/OTRArchiveFactory.h>
+#include <Archive.h>
+//#include <Factories/ARCHIVEFactory.h>
 #include "BackgroundExporter.h"
 #include "TextureExporter.h"
 #include "RoomExporter.h"
 #include "CollisionExporter.h"
 #include "DisplayListExporter.h"
 #include "PlayerAnimationExporter.h"
-#include "OTRSkeletonExporter.h"
-#include "OTRSkeletonLimbExporter.h"
+#include "SkeletonExporter.h"
+#include "SkeletonLimbExporter.h"
 #include "ArrayExporter.h"
 #include "VtxExporter.h"
 #include "AnimationExporter.h"
@@ -19,7 +19,7 @@
 #include <Utils/MemoryStream.h>
 #include <Utils/BinaryWriter.h>
 
-std::shared_ptr<OtrLib::OTRArchive> otrArchive;
+std::shared_ptr<Ship::Archive> otrArchive;
 BinaryWriter* fileWriter;
 std::chrono::steady_clock::time_point fileStart, resStart;
 
@@ -70,7 +70,7 @@ static bool ExporterProcessFileMode(ZFileMode fileMode)
 
 static void ExporterFileBegin(ZFile* file)
 {
-	printf("ExporterFileBegin() called on ZFile %s.\n", file->GetName().c_str());
+	//printf("ExporterFileBegin() called on ZFile %s.\n", file->GetName().c_str());
 
 	fileStart = std::chrono::steady_clock::now();
 
@@ -80,12 +80,12 @@ static void ExporterFileBegin(ZFile* file)
 
 static void ExporterFileEnd(ZFile* file)
 {
-	printf("ExporterFileEnd() called on ZFile %s.\n", file->GetName().c_str());
+	//printf("ExporterFileEnd() called on ZFile %s.\n", file->GetName().c_str());
 
 	auto fileEnd = std::chrono::steady_clock::now();
 	size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(fileEnd - fileStart).count();
 
-	printf("File Export Ended %s in %zums\n", file->GetName().c_str(), diff);
+	//printf("File Export Ended %s in %zums\n", file->GetName().c_str(), diff);
 
 	//MemoryStream* strem = (MemoryStream*)fileWriter->GetStream().get();
 	//otrArchive->AddFile(file->GetName(), (uintptr_t)strem->ToVector().data(), strem->GetLength());
@@ -136,24 +136,24 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 	size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
 	//if (diff > 10)
-		printf("Exported Resource End %s in %zums\n", res->GetName().c_str(), diff);
+		//printf("Exported Resource End %s in %zums\n", res->GetName().c_str(), diff);
 }
 
 static void ExporterXMLBegin()
 {
-	printf("ExporterXMLBegin() called.\n");
+	//printf("ExporterXMLBegin() called.\n");
 
 	if (File::Exists("oot.otr"))
-		otrArchive = std::shared_ptr<OtrLib::OTRArchive>(new OtrLib::OTRArchive("oot.otr"));
+		otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive("oot.otr"));
 	else
-		otrArchive = OtrLib::OTRArchive::CreateArchive("oot.otr");
+		otrArchive = Ship::Archive::CreateArchive("oot.otr");
 }
 
 static void ExporterXMLEnd()
 {
-	printf("ExporterXMLEnd() called.\n");
+	//printf("ExporterXMLEnd() called.\n");
 
-	//otrArchive;
+	//ARCHIVE;
 }
 
 static void ImportExporters()

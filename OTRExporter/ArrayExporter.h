@@ -1,7 +1,7 @@
 #pragma once
 #include "ZResource.h"
 #include "ZArray.h"
-#include "OTRExporter.h"
+#include "Exporter.h"
 #include <Utils/BinaryWriter.h>
 
 class OTRExporter_Array : public OTRExporter

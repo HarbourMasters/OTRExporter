@@ -4,7 +4,7 @@ void OTRExporter_Array::Save(ZResource* res, fs::path outPath, BinaryWriter* wri
 {
 	ZArray* arr = (ZArray*)res;
 
-	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRArray);
+	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRArray);
 
 	writer->Write((uint32_t)arr->resList[0]->GetResourceType());
 	writer->Write((uint32_t)arr->arrayCnt);
@@ -57,6 +57,6 @@ void OTRExporter_Array::Save(ZResource* res, fs::path outPath, BinaryWriter* wri
 	//}
 	//else if (arr->resList[0]->GetResourceType() == ZResourceType::Vector)
 	//{
-	//	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRVtx);
+	//	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRVtx);
 	//}
 }

@@ -1,5 +1,5 @@
 #pragma once
 
-#include <OTRArchive.h>
+#include <Archive.h>
 
-extern std::shared_ptr<OtrLib::OTRArchive> otrArchive;
+extern std::shared_ptr<Ship::Archive> otrArchive;

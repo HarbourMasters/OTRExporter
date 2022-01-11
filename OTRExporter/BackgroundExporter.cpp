@@ -17,5 +17,5 @@ void OTRExporter_Background::Save(ZResource* res, fs::path outPath, BinaryWriter
 	auto end = std::chrono::steady_clock::now();
 	size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-	printf("Exported BG %s in %zums\n", bg->GetName().c_str(), diff);
+	//printf("Exported BG %s in %zums\n", bg->GetName().c_str(), diff);
 }

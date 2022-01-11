@@ -3,7 +3,7 @@
 #include "ZResource.h"
 #include "ZTexture.h"
 #include "ZDisplayList.h"
-#include "OTRExporter.h"
+#include "Exporter.h"
 #include <Utils/BinaryWriter.h>
 
 class OTRExporter_DisplayList : public OTRExporter

@@ -1,11 +1,11 @@
-#include "OTRSkeletonExporter.h"
-#include <OTRResource.h>
+#include "SkeletonExporter.h"
+#include <Resource.h>
 
 void OTRExporter_Skeleton::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
 	ZSkeleton* skel = (ZSkeleton*)res;
 
-	WriteHeader(res, outPath, writer, OtrLib::ResourceType::OTRSkeleton);
+	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRSkeleton);
 
 	writer->Write((uint8_t)skel->type);
 	writer->Write((uint8_t)skel->limbType);
