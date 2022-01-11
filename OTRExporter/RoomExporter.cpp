@@ -404,20 +404,13 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 				uint32_t seg = cmdHeaders->headers[i] & 0xFFFFFFFF;
 				std::string headerName = "";
 				bool foundDecl = Globals::Instance->GetSegmentedPtrName(seg, room->parent, "", headerName);
-				std::string name = OTRExporter_DisplayList::GetPathToRes(room, headerName);
-
-				writer->Write(name);
-
-				// TEST
-				/*auto testRes = room->parent->FindResource(GETSEGOFFSET(seg));
-
-				std::shared_ptr<MemoryStream> headerStream = std::shared_ptr<MemoryStream>(new MemoryStream());
-				std::shared_ptr<BinaryWriter> headerWriter = std::shared_ptr<BinaryWriter>(new BinaryWriter(headerStream));
-				Save(testRes, outPath, headerWriter.get());
-
-				otrArchive->AddFile(name, (uintptr_t)headerStream->ToVector().data(), headerWriter->GetBaseAddress());
-
-				int bp = 0;*/
+				if (headerName == "NULL")
+					writer->Write("");
+				else
+				{
+					std::string name = OTRExporter_DisplayList::GetPathToRes(room, headerName);
+					writer->Write(name);
+				}
 			}
 		}
 			break;

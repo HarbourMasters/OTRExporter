@@ -11,6 +11,38 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWrit
 	writer->Write((uint8_t)limb->type);
 	writer->Write((uint8_t)limb->skinSegmentType);
 
+	writer->Write(limb->segmentStruct.unk_0);
+	writer->Write((uint32_t)limb->segmentStruct.unk_4_arr.size());
+	
+	for (auto item : limb->segmentStruct.unk_4_arr)
+	{
+		writer->Write(item.unk_4);
+
+		writer->Write((uint32_t)item.unk_8_arr.size());
+
+		for (auto item2 : item.unk_8_arr)
+		{
+			writer->Write(item2.unk_0);
+			writer->Write(item2.unk_2);
+			writer->Write(item2.unk_4);
+			writer->Write(item2.unk_6);
+			writer->Write(item2.unk_7);
+			writer->Write(item2.unk_8);
+			writer->Write(item2.unk_9);
+		}
+
+		writer->Write((uint32_t)item.unk_C_arr.size());
+
+		for (auto item2 : item.unk_C_arr)
+		{
+			writer->Write(item2.unk_0);
+			writer->Write(item2.x);
+			writer->Write(item2.y);
+			writer->Write(item2.z);
+			writer->Write(item2.unk_8);
+		}
+	}
+
 	writer->Write(limb->legTransX);
 	writer->Write(limb->legTransY);
 	writer->Write(limb->legTransZ);
