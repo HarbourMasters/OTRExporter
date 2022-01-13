@@ -32,6 +32,7 @@
 #include <ZRoom/Commands/SetCutscenes.h>
 #include "CutsceneExporter.h"
 #include <ZRoom/Commands/SetTransitionActorList.h>
+#include "PathExporter.h"
 #undef FindResource
 
 void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter* writer)
@@ -450,6 +451,29 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter
 
 			//std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->varName);
 			otrArchive->AddFile(fName, (uintptr_t)csStream->ToVector().data(), csWriter.GetBaseAddress());
+		}
+			break;
+		case RoomCommand::SetPathways:
+		{
+			SetPathways* cmdSetPathways = (SetPathways*)cmd;
+
+			writer->Write((uint32_t)cmdSetPathways->pathwayList.pathways.size());
+
+			for (int i = 0; i < cmdSetPathways->pathwayList.pathways.size(); i++)
+			{
+				Declaration* decl = room->parent->GetDeclaration(GETSEGOFFSET(cmdSetPathways->pathwayList.pathways[i].listSegmentAddress));
+				std::string path = StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(res).c_str(), decl->varName.c_str());
+				writer->Write(path);
+
+				MemoryStream* pathStream = new MemoryStream();
+				BinaryWriter pathWriter = BinaryWriter(pathStream);
+				OTRExporter_Path pathExp;
+				pathExp.Save(&cmdSetPathways->pathwayList, outPath, &pathWriter);
+
+				otrArchive->AddFile(path, (uintptr_t)pathStream->ToVector().data(), pathWriter.GetBaseAddress());
+
+				int bp = 0;
+			}
 		}
 			break;
 		case RoomCommand::EndMarker:
