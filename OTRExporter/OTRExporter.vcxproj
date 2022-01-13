@@ -116,13 +116,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\..\ZAPDTR\ZAPD;$(ProjectDir)..\..\ZAPDTR\lib\tinyxml2;$(ProjectDir)..\..\ZAPDTR\lib\libgfxd;$(ProjectDir)..\..\ZAPDTR\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\..\OtrLib\otrlib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)..\..\ZAPDTR\ZAPD;$(ProjectDir)..\..\ZAPDTR\lib\tinyxml2;$(ProjectDir)..\..\ZAPDTR\lib\libgfxd;$(ProjectDir)..\..\ZAPDTR\ZAPDUtils;$(ProjectDir)..\..\libultraship\libultraship;$(ProjectDir)..\..\libultraship\libultraship\lib\spdlog\include;$(ProjectDir)..\..\libultraship\libultraship\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\..\libultraship\libultraship;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\..\ZAPDTR\ZAPD;$(ProjectDir)..\..\ZAPDTR\lib\tinyxml2;$(ProjectDir)..\..\ZAPDTR\lib\libgfxd;$(ProjectDir)..\..\ZAPDTR\ZAPDUtils;$(ProjectDir)..\..\OtrLib\otrlib;$(ProjectDir)..\..\OtrLib\otrlib\lib\spdlog\include;$(ProjectDir)..\..\OtrLib\otrlib\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\..\OtrLib\otrlib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)..\..\ZAPDTR\ZAPD;$(ProjectDir)..\..\ZAPDTR\lib\tinyxml2;$(ProjectDir)..\..\ZAPDTR\lib\libgfxd;$(ProjectDir)..\..\ZAPDTR\ZAPDUtils;$(ProjectDir)..\..\libultraship\libultraship;$(ProjectDir)..\..\libultraship\libultraship\lib\spdlog\include;$(ProjectDir)..\..\libultraship\libultraship\Lib\Fast3D\U64;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\..\libultraship\libultraship;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

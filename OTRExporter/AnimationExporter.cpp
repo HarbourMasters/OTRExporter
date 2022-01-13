@@ -5,7 +5,7 @@ void OTRExporter_Animation::Save(ZResource* res, const fs::path outPath, BinaryW
 {
 	ZAnimation* anim = (ZAnimation*)res;
 
-	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRAnimation);
+	WriteHeader(res, outPath, writer, Ship::ResourceType::Animation);
 
 	ZNormalAnimation* normalAnim = dynamic_cast<ZNormalAnimation*>(anim);
 	ZCurveAnimation* curveAnim = dynamic_cast<ZCurveAnimation*>(anim);

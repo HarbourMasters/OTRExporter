@@ -41,7 +41,7 @@ def ExtractFunc(fullPath):
     *pathList, xmlName = fullPath.split(os.sep)
     objectName = os.path.splitext(xmlName)[0]
 
-    outPath = os.path.join("..\\otr\\assets\\", *pathList[4:], objectName)
+    outPath = os.path.join("..\\soh\\assets\\", *pathList[4:], objectName)
     outSourcePath = outPath
 
     #if fullPath in globalExtractedAssetsTracker:
@@ -82,7 +82,7 @@ def main():
 
     asset_path = args.single
     if asset_path is not None:
-        fullPath = os.path.join("..\\otr\\assets", "xml", asset_path + ".xml")
+        fullPath = os.path.join("..\\soh\\assets", "xml", asset_path + ".xml")
         if not os.path.exists(fullPath):
             print(f"Error. File {fullPath} doesn't exists.", file=os.sys.stderr)
             exit(1)
@@ -100,7 +100,7 @@ def main():
             extract_staff_text_path = None
 
         xmlFiles = []
-        for currentPath, _, files in os.walk(os.path.join("..\\otr\\assets", "xml")):
+        for currentPath, _, files in os.walk(os.path.join("..\\soh\\assets", "xml")):
             for file in files:
                 fullPath = os.path.join(currentPath, file)
                 if file.endswith(".xml"):

@@ -5,7 +5,7 @@ void OTRExporter_Path::Save(ZResource* res, fs::path outPath, BinaryWriter* writ
 {
 	ZPath* path = (ZPath*)res;
 
-	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRPath);
+	WriteHeader(res, outPath, writer, Ship::ResourceType::Path);
 	
 	writer->Write((uint32_t)path->pathways[0].points.size());
 

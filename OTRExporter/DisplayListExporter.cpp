@@ -48,7 +48,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 	printf("Exporting DList %s\n", dList->GetName().c_str());
 
-	WriteHeader(res, outPath, writer, Ship::ResourceType::OTRDisplayList);
+	WriteHeader(res, outPath, writer, Ship::ResourceType::DisplayList);
 
 	while (writer->GetBaseAddress() % 8 != 0)
 		writer->Write((uint8_t)0xFF);
@@ -72,13 +72,13 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 		F3DZEXOpcode opF3D = (F3DZEXOpcode)opcode;
 
 		if ((int)opF3D == G_DL)
-			opcode = (uint8_t)G_DL_OTR;
+			opcode = (uint8_t)G_DL_LUS;
 
 		if ((int)opF3D == G_VTX)
-			opcode = (uint8_t)G_VTX_OTR;
+			opcode = (uint8_t)G_VTX_LUS;
 
 		if ((int)opF3D == G_SETTIMG)
-			opcode = (uint8_t)G_SETTIMG_OTR;
+			opcode = (uint8_t)G_SETTIMG_LUS;
 
 		word0 += (opcode << 24);
 
@@ -503,7 +503,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 				Gfx value = gsDPSetTextureImage(fmt, siz, www - 1, __);
 				word0 = value.words.w0 & 0x00FFFFFF;
-				word0 += (G_SETTIMG_OTR << 24);
+				word0 += (G_SETTIMG_LUS << 24);
 				word1 = value.words.w1;
 
 				writer->Write(word0);
@@ -587,7 +587,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 					word0 = value.words.w0;
 					word0 &= 0x00FFFFFF;
-					word0 += (G_VTX_OTR << 24);
+					word0 += (G_VTX_LUS << 24);
 					word1 = value.words.w1;
 
 					writer->Write(word0);
