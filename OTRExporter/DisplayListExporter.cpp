@@ -42,6 +42,21 @@ typedef union Mtx
 	};
 } Mtx;
 
+#define gsSPBranchLessZraw2(dl, vtx, zval)               \
+{   _SHIFTL(G_BRANCH_Z,24,8)|_SHIFTL((vtx)*5,12,12)|_SHIFTL((vtx)*2,0,12),\
+    (unsigned int)(zval),                       }
+
+#define gsSPBranchLessZraw3(dl)               \
+{   _SHIFTL(G_RDPHALF_1,24,8),                        \
+    (unsigned int)(dl),                     }
+
+#define gsDPWordLo(wordlo)            \
+    gsImmp1(G_RDPHALF_2, (unsigned int)(wordlo))
+
+#define gsSPTextureRectangle2(xl, yl, xh, yh, tile)    \
+{    (_SHIFTL(G_TEXRECT, 24, 8) | _SHIFTL(xh, 12, 12) | _SHIFTL(yh, 0, 12)),\
+    (_SHIFTL(tile, 24, 3) | _SHIFTL(xl, 12, 12) | _SHIFTL(yl, 0, 12)) }
+
 void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
 {
 	ZDisplayList* dList = (ZDisplayList*)res;
@@ -72,13 +87,13 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 		F3DZEXOpcode opF3D = (F3DZEXOpcode)opcode;
 
 		if ((int)opF3D == G_DL)
-			opcode = (uint8_t)G_DL_LUS;
+			opcode = (uint8_t)G_DL_OTR;
 
 		if ((int)opF3D == G_VTX)
-			opcode = (uint8_t)G_VTX_LUS;
+			opcode = (uint8_t)G_VTX_OTR;
 
 		if ((int)opF3D == G_SETTIMG)
-			opcode = (uint8_t)G_SETTIMG_LUS;
+			opcode = (uint8_t)G_SETTIMG_OTR;
 
 		word0 += (opcode << 24);
 
@@ -220,6 +235,52 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word1 = value.words.w1;
 		}
 		break;
+		case G_RDPHALF_1:
+		{
+			uint32_t a = (data & 0x00FFF00000000000) >> 44;
+			uint32_t b = (data & 0x00000FFF00000000) >> 32;
+			uint32_t z = (data & 0x00000000FFFFFFFF) >> 0;
+			uint32_t h = (data & 0xFFFFFFFF);
+
+			Gfx value = gsSPBranchLessZraw3(h & 0x00FFFFFF);
+			word0 = value.words.w0;
+			word1 = value.words.w1;
+		}
+			break;
+		case G_RDPHALF_2:
+		{
+			Gfx value = gsDPWordLo(data & 0xFFFFFFFF);
+			word0 = value.words.w0;
+			word1 = value.words.w1;
+		}
+		break;
+		// OTRTODO: FINISH IMPLEMENTATION
+		case G_TEXRECT:
+		{
+			int32_t xxx = (data & 0x00FFF00000000000) >> 48;
+			int32_t yyy = (data & 0x00000FFF00000000) >> 36;
+			int32_t i = (data & 0x000000000F000000) >> 24;
+			int32_t XXX = (data & 0x0000000000FFF000) >> 12;
+			int32_t YYY = (data & 0x0000000000000FFF);
+
+			Gfx value = gsSPTextureRectangle2(XXX, YYY, xxx, yyy, i);
+			word0 = value.words.w0;
+			word1 = value.words.w1;
+		}
+			break;
+		case G_BRANCH_Z:
+		{
+			uint32_t a = (data & 0x00FFF00000000000) >> 44;
+			uint32_t b = (data & 0x00000FFF00000000) >> 32;
+			uint32_t z = (data & 0x00000000FFFFFFFF) >> 0;
+			uint32_t h = (data & 0xFFFFFFFF);
+
+			// sprintf(line, "gsDPWord(%i, 0),", h);
+			Gfx value = gsSPBranchLessZraw2(h & 0x00FFFFFF, (a / 5) | (b / 2), z);
+			word0 = value.words.w0;
+			word1 = value.words.w1;
+		}
+			break;
 		case G_DL:
 		{
 			if (!Globals::Instance->HasSegment(GETSEGNUM(data)))
@@ -465,6 +526,19 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			word1 = value.words.w1;
 		}
 		break;
+		case G_LOADTILE:
+		{
+			int sss =	(data & 0x00FFF00000000000) >> 44;
+			int ttt =	(data & 0x00000FFF00000000) >> 32;
+			int i =		(data & 0x000000000F000000) >> 16;
+			int uuu =	(data & 0x0000000000FFF000) >> 12;
+			int vvv=	(data & 0x0000000000000FFF);
+
+			Gfx value = gsDPLoadTile(i, sss, ttt, uuu, vvv);
+			word0 = value.words.w0;
+			word1 = value.words.w1;
+		}
+			break;
 		case G_SETTIMG:
 		{
 			uint32_t seg = data & 0xFFFFFFFF;
@@ -503,7 +577,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 				Gfx value = gsDPSetTextureImage(fmt, siz, www - 1, __);
 				word0 = value.words.w0 & 0x00FFFFFF;
-				word0 += (G_SETTIMG_LUS << 24);
+				word0 += (G_SETTIMG_OTR << 24);
 				word1 = value.words.w1;
 
 				writer->Write(word0);
@@ -587,7 +661,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 					word0 = value.words.w0;
 					word0 &= 0x00FFFFFF;
-					word0 += (G_VTX_LUS << 24);
+					word0 += (G_VTX_OTR << 24);
 					word1 = value.words.w1;
 
 					writer->Write(word0);

@@ -502,12 +502,18 @@ void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, ZRoom* room, Polygon
 		//writer->Write(StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(res).c_str(), dListDeclOpa->varName.c_str()));
 
 		if (dlist->opaDList != nullptr)
-			writer->Write(StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), dlist->opaDList->GetName().c_str()));
+		{
+			auto opaDecl = room->parent->GetDeclaration(GETSEGOFFSET(dlist->opaDList->GetRawDataIndex()));
+			writer->Write(StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), opaDecl->varName.c_str()));
+		}
 		else
 			writer->Write("");
 
 		if (dlist->xluDList != nullptr)
-			writer->Write(StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), dlist->xluDList->GetName().c_str()));
+		{
+			auto xluDecl = room->parent->GetDeclaration(GETSEGOFFSET(dlist->xluDList->GetRawDataIndex()));
+			writer->Write(StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), xluDecl->varName.c_str()));
+		}
 		else
 			writer->Write("");
 		break;
