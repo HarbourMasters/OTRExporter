@@ -5,9 +5,17 @@ void OTRExporter_Texture::Save(ZResource* res, fs::path outPath, BinaryWriter* w
 {
 	ZTexture* tex = (ZTexture*)res;
 	
+	WriteHeader(tex, outPath, writer, Ship::ResourceType::Texture);
+
 	auto start = std::chrono::steady_clock::now();
 
 	//printf("Exporting Texture %s\n", tex->GetName().c_str());
+	
+	writer->Write((uint32_t)tex->GetTextureType());
+	writer->Write((uint32_t)tex->GetWidth());
+	writer->Write((uint32_t)tex->GetHeight());
+
+	writer->Write((uint32_t)tex->GetRawDataSize());
 
 	auto data = tex->parent->GetRawData();
 
