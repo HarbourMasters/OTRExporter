@@ -13,6 +13,7 @@
 #include "AnimationExporter.h"
 #include "CutsceneExporter.h"
 #include "PathExporter.h"
+#include "TextExporter.h"
 #include <Globals.h>
 #include <Utils/File.h>
 #include <Utils/Directory.h>
@@ -184,6 +185,7 @@ static void ImportExporters()
 	exporterSet->exporters[ZResourceType::Vertex] = new OTRExporter_Vtx();
 	exporterSet->exporters[ZResourceType::Array] = new OTRExporter_Array();
 	exporterSet->exporters[ZResourceType::Path] = new OTRExporter_Path();
+	exporterSet->exporters[ZResourceType::Text] = new OTRExporter_Text();
 
 	Globals::AddExporter("OTR", exporterSet);
 }

@@ -33,6 +33,7 @@
     <ClInclude Include="PathExporter.h" />
     <ClInclude Include="PlayerAnimationExporter.h" />
     <ClInclude Include="RoomExporter.h" />
+    <ClInclude Include="TextExporter.h" />
     <ClInclude Include="TextureExporter.h" />
     <ClInclude Include="VtxExporter.h" />
     <ClInclude Include="z64cutscene.h" />
@@ -52,6 +53,7 @@
     <ClCompile Include="PathExporter.cpp" />
     <ClCompile Include="PlayerAnimationExporter.cpp" />
     <ClCompile Include="RoomExporter.cpp" />
+    <ClCompile Include="TextExporter.cpp" />
     <ClCompile Include="TextureExporter.cpp" />
     <ClCompile Include="VtxExporter.cpp" />
   </ItemGroup>
