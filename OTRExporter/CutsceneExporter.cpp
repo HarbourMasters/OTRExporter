@@ -315,6 +315,7 @@ void OTRExporter_Cutscene::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 			{
 				writer->Write(CMD_HH(e->sequence, e->startFrame));
 				writer->Write(CMD_HH(e->endFrame, e->unknown0));
+				writer->Write(CMD_W(e->unknown1));
 				writer->Write(CMD_W(e->unknown2));
 				writer->Write(CMD_W(e->unknown3));
 				writer->Write(CMD_W(e->unknown4));
@@ -336,6 +337,7 @@ void OTRExporter_Cutscene::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 			{
 				writer->Write(CMD_HH(e->sequence, e->startFrame));
 				writer->Write(CMD_HH(e->endFrame, e->unknown0));
+				writer->Write(CMD_W(e->unknown1));
 				writer->Write(CMD_W(e->unknown2));
 				writer->Write(CMD_W(e->unknown3));
 				writer->Write(CMD_W(e->unknown4));
@@ -357,6 +359,7 @@ void OTRExporter_Cutscene::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 			{
 				writer->Write(CMD_HH(e->base, e->startFrame));
 				writer->Write(CMD_HH(e->endFrame, e->unknown0));
+				writer->Write(CMD_W(e->unknown1));
 				writer->Write(CMD_W(e->unknown2));
 				writer->Write(CMD_W(e->unknown3));
 				writer->Write(CMD_W(e->unknown4));

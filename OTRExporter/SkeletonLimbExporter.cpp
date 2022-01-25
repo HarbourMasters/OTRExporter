@@ -11,7 +11,21 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWrit
 	writer->Write((uint8_t)limb->type);
 	writer->Write((uint8_t)limb->skinSegmentType);
 
-	writer->Write(limb->segmentStruct.unk_0);
+	if (limb->skinSegmentType == ZLimbSkinType::SkinType_DList && limb->type == ZLimbType::Skin)
+	{
+		auto childDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->skinSegment));
+
+		if (childDecl != nullptr)
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, childDecl->varName));
+		else
+			writer->Write("");
+	}
+	else
+	{
+		writer->Write("");
+	}
+
+	writer->Write((uint16_t)limb->segmentStruct.unk_0);
 	writer->Write((uint32_t)limb->segmentStruct.unk_4_arr.size());
 	
 	for (auto item : limb->segmentStruct.unk_4_arr)
@@ -43,6 +57,24 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWrit
 		}
 	}
 
+	if (limb->segmentStruct.unk_8 != 0)
+	{
+		auto skinGfxDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->segmentStruct.unk_8));
+
+		if (skinGfxDecl != nullptr)
+		{
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, skinGfxDecl->varName));
+		}
+		else
+		{
+			writer->Write("");
+		}
+	}
+	else
+	{
+		writer->Write("");
+	}
+
 	writer->Write(limb->legTransX);
 	writer->Write(limb->legTransY);
 	writer->Write(limb->legTransZ);
@@ -50,7 +82,6 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWrit
 	writer->Write(limb->rotY);
 	writer->Write(limb->rotZ);
 
-	// OTRTODO:
 	if (limb->childPtr != 0)
 	{
 		auto childDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->childPtr));
