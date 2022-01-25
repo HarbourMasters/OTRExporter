@@ -150,7 +150,30 @@ void OTRExporter_Cutscene::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 			}
 			break;
 		}
+		case 0x15:
+		case (uint32_t)CutsceneCommands::Unknown:
+		{
+			CutsceneCommandUnknown* cmdUnk = (CutsceneCommandUnknown*)cs->commands[i];
+			writer->Write((uint32_t)cs->commands[i]->commandID);
+			writer->Write((uint32_t)cmdUnk->entries.size());
 
+			for (auto e : cmdUnk->entries)
+			{
+				writer->Write(CMD_W(e->unused0));
+				writer->Write(CMD_W(e->unused1));
+				writer->Write(CMD_W(e->unused2));
+				writer->Write(CMD_W(e->unused3));
+				writer->Write(CMD_W(e->unused4));
+				writer->Write(CMD_W(e->unused5));
+				writer->Write(CMD_W(e->unused6));
+				writer->Write(CMD_W(e->unused7));
+				writer->Write(CMD_W(e->unused8));
+				writer->Write(CMD_W(e->unused9));
+				writer->Write(CMD_W(e->unused10));
+				writer->Write(CMD_W(e->unused11));
+			}
+		}
+			break;
 		case (uint32_t)CutsceneCommands::Textbox:
 		{
 			writer->Write(CS_CMD_TEXTBOX);
@@ -271,8 +294,6 @@ void OTRExporter_Cutscene::Save(ZResource* res, fs::path outPath, BinaryWriter* 
 		case (uint32_t)CutsceneCommands::SetActorAction9:
 		case (uint32_t)CutsceneCommands::SetActorAction10:
 		{
-			// OTRTODO this one is weird
-			// Why is this one weird Louist? - Matt Damon
 			writer->Write((uint32_t)(CutsceneCommands)cs->commands[i]->commandID);
 			writer->Write((uint32_t)CMD_W(((CutsceneCommandActorAction*)cs->commands[i])->entries.size()));
 

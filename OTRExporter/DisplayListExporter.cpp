@@ -644,8 +644,16 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 				}
 
 				// Write CRC64 of vtx file name
-				auto segOffset = GETSEGOFFSET(data);
-				uint32_t seg = data & 0xFFFFFFFF;
+				uint32_t addr = data & 0xFFFFFFFF;
+
+				if (GETSEGNUM(data) == 0x80)
+				{
+					// OTRTODO: Add base addresses for other roms...
+					addr -= 0x8001CE60;
+				}
+
+				auto segOffset = GETSEGOFFSET(addr);
+				//uint32_t seg = data & 0xFFFFFFFF;
 				Declaration* vtxDecl = dList->parent->GetDeclarationRanged(segOffset);
 				//std::string vtxName = "";
 				//bool foundDecl = Globals::Instance->GetSegmentedPtrName(seg, dList->parent, "", vtxName);
@@ -687,7 +695,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 						if (sz > 0)
 						{
 							auto start = std::chrono::steady_clock::now();
-
 
 							// God dammit this is so dumb
 							auto split = StringHelper::Split(vtxDecl->text, "\n");
