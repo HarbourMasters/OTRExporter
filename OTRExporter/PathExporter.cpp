@@ -1,7 +1,7 @@
 #include "PathExporter.h"
 #include "../ZAPD/ZFile.h"
 
-void OTRExporter_Path::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Path::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZPath* path = (ZPath*)res;
 

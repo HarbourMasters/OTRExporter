@@ -1,7 +1,7 @@
 #include "TextExporter.h"
 #include "../ZAPD/ZFile.h"
 
-void OTRExporter_Text::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Text::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZText* txt = (ZText*)res;
 

@@ -57,7 +57,7 @@ typedef union Mtx
 {    (_SHIFTL(G_TEXRECT, 24, 8) | _SHIFTL(xh, 12, 12) | _SHIFTL(yh, 0, 12)),\
     (_SHIFTL(tile, 24, 3) | _SHIFTL(xl, 12, 12) | _SHIFTL(yl, 0, 12)) }
 
-void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZDisplayList* dList = (ZDisplayList*)res;
 

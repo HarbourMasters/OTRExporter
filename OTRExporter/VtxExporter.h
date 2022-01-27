@@ -9,5 +9,5 @@ class OTRExporter_Vtx : public OTRExporter
 {
 public:
 	void SaveArr(const std::vector<ZResource*>&, BinaryWriter* writer);
-	virtual void Save(ZResource* res, fs::path outPath, BinaryWriter* writer) override;
+	virtual void Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer) override;
 };

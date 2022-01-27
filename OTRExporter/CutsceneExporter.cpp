@@ -1,7 +1,7 @@
 #include "CutsceneExporter.h"
 #include <Resource.h>
 
-void OTRExporter_Cutscene::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Cutscene::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZCutscene* cs = (ZCutscene*)res;
 

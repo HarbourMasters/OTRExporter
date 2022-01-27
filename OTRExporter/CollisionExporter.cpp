@@ -1,7 +1,7 @@
 #include "CollisionExporter.h"
 #include <Resource.h>
 
-void OTRExporter_Collision::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Collision::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZCollisionHeader* col = (ZCollisionHeader*)res;
 
