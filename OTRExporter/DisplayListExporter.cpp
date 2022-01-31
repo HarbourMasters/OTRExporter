@@ -57,7 +57,7 @@ typedef union Mtx
 {    (_SHIFTL(G_TEXRECT, 24, 8) | _SHIFTL(xh, 12, 12) | _SHIFTL(yh, 0, 12)),\
     (_SHIFTL(tile, 24, 3) | _SHIFTL(xl, 12, 12) | _SHIFTL(yl, 0, 12)) }
 
-void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZDisplayList* dList = (ZDisplayList*)res;
 
@@ -677,29 +677,36 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 
 					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->varName);
 
-					printf("Exporting VTX Data %s\n", fName.c_str());
+					
 
 					uint64_t hash = CRC64(fName.c_str());
 
 					word0 = hash >> 32;
 					word1 = hash & 0xFFFFFFFF;
 
-					//if (!otrArchive->HasFile(fName))
+					if (!otrArchive->HasFile(fName))
 					{
+						printf("Exporting VTX Data %s\n", fName.c_str());
 						// Write vertices to file
 						MemoryStream* vtxStream = new MemoryStream();
 						BinaryWriter vtxWriter = BinaryWriter(vtxStream);
 
 						size_t sz = dList->vertices[vtxDecl->address].size();
-
+						
 						if (sz > 0)
 						{
 							auto start = std::chrono::steady_clock::now();
 
 							// God dammit this is so dumb
 							auto split = StringHelper::Split(vtxDecl->text, "\n");
+							size_t size = split.size();
+							vtxWriter.Write((uint8_t)Endianess::Little);
+							vtxWriter.Write((uint32_t)Ship::ResourceType::Vertex);
+							vtxWriter.Write((uint32_t)Ship::Version::Deckard);
+							vtxWriter.Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+							vtxWriter.Write((uint32_t)vtxDecl->arrayItemCnt);
 
-							for (int i = 0; i < split.size(); i++)
+							for (size_t i = 0; i < size; i++)
 							{
 								std::string line = split[i];
 
@@ -724,28 +731,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 									int bp = 0;
 								}
 							}
-
-							/*for (size_t i = 0; i < sz; i++)
-							{
-								auto v = dList->vertices[vtxDecl->address][i];
-
-								vtxWriter.Write(v.x);
-								vtxWriter.Write(v.y);
-								vtxWriter.Write(v.z);
-								vtxWriter.Write(v.flag);
-								vtxWriter.Write(v.s);
-								vtxWriter.Write(v.t);
-								vtxWriter.Write(v.r);
-								vtxWriter.Write(v.g);
-								vtxWriter.Write(v.b);
-								vtxWriter.Write(v.a);
-							}*/
-
-							//#ifdef _DEBUG
-														//if (otrotrArchive->HasFile(fName))
-															//otrotrArchive->RemoveFile(fName);
-							//#endif
-
 							otrArchive->AddFile(fName, (uintptr_t)vtxStream->ToVector().data(), vtxWriter.GetBaseAddress());
 
 							auto end = std::chrono::steady_clock::now();

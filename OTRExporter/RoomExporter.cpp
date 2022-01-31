@@ -35,7 +35,7 @@
 #include "PathExporter.h"
 #undef FindResource
 
-void OTRExporter_Room::Save(ZResource* res, const fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZRoom* room = (ZRoom*)res;
 

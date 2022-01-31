@@ -7,6 +7,6 @@
 class OTRExporter_Array : public OTRExporter
 {
 public:
-	virtual void Save(ZResource* res, fs::path outPath, BinaryWriter* writer) override;
+	virtual void Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer) override;
 
 };
