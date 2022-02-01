@@ -716,7 +716,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 							// God dammit this is so dumb
 							//auto split = StringHelper::Split(vtxDecl->text, "\n");
 
-							for (size_t i = 0; i < size; i++)
+							for (size_t i = 0; i < split.size(); i++)
 							{
 								std::string line = split[i];
 

@@ -1,7 +1,7 @@
 #include "BlobExporter.h"
 #include "../ZAPD/ZFile.h"
 
-void OTRExporter_Blob::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Blob::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZBlob* blob = (ZBlob*)res;
 	
