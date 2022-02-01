@@ -42,6 +42,7 @@ def ExtractFunc(fullPath):
     objectName = os.path.splitext(xmlName)[0]
 
     outPath = os.path.join("..\\soh\\assets\\", *pathList[4:], objectName)
+    os.makedirs(outPath, exist_ok=True)
     outSourcePath = outPath
 
     #if fullPath in globalExtractedAssetsTracker:
