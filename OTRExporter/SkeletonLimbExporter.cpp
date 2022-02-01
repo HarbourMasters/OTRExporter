@@ -2,7 +2,7 @@
 #include "DisplayListExporter.h"
 #include <Resource.h>
 
-void OTRExporter_SkeletonLimb::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_SkeletonLimb::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZLimb* limb = (ZLimb*)res;
 

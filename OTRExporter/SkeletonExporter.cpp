@@ -1,7 +1,7 @@
 #include "SkeletonExporter.h"
 #include <Resource.h>
 
-void OTRExporter_Skeleton::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Skeleton::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZSkeleton* skel = (ZSkeleton*)res;
 

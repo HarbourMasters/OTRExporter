@@ -1,6 +1,6 @@
 #include "ArrayExporter.h"
 #include "VtxExporter.h"
-void OTRExporter_Array::Save(ZResource* res, fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Array::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZArray* arr = (ZArray*)res;
 

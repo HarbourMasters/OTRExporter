@@ -1,7 +1,7 @@
 #include "AnimationExporter.h"
 #include <Animation.h>
 
-void OTRExporter_Animation::Save(ZResource* res, const fs::path outPath, BinaryWriter* writer)
+void OTRExporter_Animation::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZAnimation* anim = (ZAnimation*)res;
 
