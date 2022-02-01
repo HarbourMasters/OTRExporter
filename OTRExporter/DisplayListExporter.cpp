@@ -544,11 +544,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 			uint32_t seg = data & 0xFFFFFFFF;
 			int32_t texAddress = Seg2Filespace(data, dList->parent->baseAddress);
 
-			if (StringHelper::Contains(res->GetName(), "gLinkChildHatNearDL"))
-			{
-				int bp = 0;
-			}
-
 			if (!Globals::Instance->HasSegment(GETSEGNUM(seg)))
 			{
 				int32_t __ = (data & 0x00FF000000000000) >> 48;
@@ -610,47 +605,47 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 		break;
 		case G_VTX:
 		{
-			if (dList->vertices.size() > 0)
+			//if (dList->vertices.size() > 0)
 			{
 				// Connect neighboring vertex arrays
 				std::vector<std::pair<uint32_t, std::vector<ZVtx>>> vertsKeys(dList->vertices.begin(),
 					dList->vertices.end());
 
-				auto lastItem = vertsKeys[0];
-
-				for (size_t i = 1; i < vertsKeys.size(); i++)
+				if (vertsKeys.size() > 0)
 				{
-					auto curItem = vertsKeys[i];
+					auto lastItem = vertsKeys[0];
 
-					int32_t sizeDiff = curItem.first - (lastItem.first + (lastItem.second.size() * 16));
-
-					// Make sure there isn't an unaccounted inbetween these two
-					if (sizeDiff == 0)
+					for (size_t i = 1; i < vertsKeys.size(); i++)
 					{
-						for (auto v : curItem.second)
+						auto curItem = vertsKeys[i];
+
+						int32_t sizeDiff = curItem.first - (lastItem.first + (lastItem.second.size() * 16));
+
+						// Make sure there isn't an unaccounted inbetween these two
+						if (sizeDiff == 0)
 						{
-							dList->vertices[lastItem.first].push_back(v);
-							lastItem.second.push_back(v);
+							for (auto v : curItem.second)
+							{
+								dList->vertices[lastItem.first].push_back(v);
+								lastItem.second.push_back(v);
+							}
+
+							dList->vertices.erase(curItem.first);
+							vertsKeys.erase(vertsKeys.begin() + i);
+
+							i--;
+							continue;
 						}
 
-						dList->vertices.erase(curItem.first);
-						vertsKeys.erase(vertsKeys.begin() + i);
-
-						i--;
-						continue;
+						lastItem = curItem;
 					}
-
-					lastItem = curItem;
 				}
 
 				// Write CRC64 of vtx file name
 				uint32_t addr = data & 0xFFFFFFFF;
 
 				if (GETSEGNUM(data) == 0x80)
-				{
-					// OTRTODO: Add base addresses for other roms...
-					addr -= 0x8001CE60;
-				}
+					addr -= dList->parent->baseAddress;
 
 				auto segOffset = GETSEGOFFSET(addr);
 				//uint32_t seg = data & 0xFFFFFFFF;
@@ -661,7 +656,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 				int32_t aa = (data & 0x000000FF00000000ULL) >> 32;
 				int32_t nn = (data & 0x000FF00000000000ULL) >> 44;
 
-				if (vtxDecl != nullptr)
+				if (vtxDecl != nullptr && vtxDecl->varType != "Gfx")
 				{
 					uint32_t diff = segOffset - vtxDecl->address;
 
@@ -684,20 +679,41 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 					word0 = hash >> 32;
 					word1 = hash & 0xFFFFFFFF;
 
-					//if (!otrArchive->HasFile(fName))
+					if (!otrArchive->HasFile(fName))
 					{
 						// Write vertices to file
 						MemoryStream* vtxStream = new MemoryStream();
 						BinaryWriter vtxWriter = BinaryWriter(vtxStream);
 
+						int arrCnt = 0;
+
+						auto split = StringHelper::Split(vtxDecl->text, "\n");
+
+						for (int i = 0; i < split.size(); i++)
+						{
+							std::string line = split[i];
+
+							if (StringHelper::Contains(line, "VTX("))
+								arrCnt++;
+						}
+
+						// OTRTODO: Stupid stupid hack we need to just call arrayexporter...
+						vtxWriter.Write((uint8_t)Endianess::Little);
+						vtxWriter.Write((uint32_t)Ship::ResourceType::Array);
+						vtxWriter.Write((uint32_t)Ship::Version::Deckard);
+						vtxWriter.Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+
+						vtxWriter.Write((uint32_t)ZResourceType::Vertex);
+						vtxWriter.Write((uint32_t)arrCnt);
+
 						size_t sz = dList->vertices[vtxDecl->address].size();
 
-						if (sz > 0)
+						//if (sz > 0)
 						{
 							auto start = std::chrono::steady_clock::now();
 
 							// God dammit this is so dumb
-							auto split = StringHelper::Split(vtxDecl->text, "\n");
+							//auto split = StringHelper::Split(vtxDecl->text, "\n");
 
 							for (int i = 0; i < split.size(); i++)
 							{
@@ -760,7 +776,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 					spdlog::error("vtxDecl == nullptr!");
 				}
 			}
-			else
+			/*else
 			{
 				writer->Write(word0);
 				writer->Write(word1);
@@ -768,7 +784,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, fs::path outPath, BinaryWrite
 				word1 = 0;
 
 				spdlog::error("dList->vertices.size() <= 0!");
-			}
+			}*/
 		}
 		break;
 		}

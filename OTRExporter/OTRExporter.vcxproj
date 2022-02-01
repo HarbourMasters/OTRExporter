@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="ArrayExporter.h" />
     <ClInclude Include="BackgroundExporter.h" />
+    <ClInclude Include="BlobExporter.h" />
     <ClInclude Include="CollisionExporter.h" />
     <ClInclude Include="command_macros_base.h" />
     <ClInclude Include="CutsceneExporter.h" />
@@ -42,6 +43,7 @@
   <ItemGroup>
     <ClCompile Include="ArrayExporter.cpp" />
     <ClCompile Include="BackgroundExporter.cpp" />
+    <ClCompile Include="BlobExporter.cpp" />
     <ClCompile Include="CollisionExporter.cpp" />
     <ClCompile Include="CutsceneExporter.cpp" />
     <ClCompile Include="DisplayListExporter.cpp" />
