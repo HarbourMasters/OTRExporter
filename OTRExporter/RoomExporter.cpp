@@ -76,10 +76,14 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 		{
 			SetActorList* cmdSetActorList = (SetActorList*)cmd;
 
-			writer->Write((uint32_t)cmdSetActorList->actors.size());
+			// There are instance of the amount of actors in the file differing from the size listed in the command.
+			// This can cause issues if we export actors with garbage data, so let's trust the command size
+			writer->Write((uint32_t)cmdSetActorList->numActors);
 
-			for (const ActorSpawnEntry& entry : cmdSetActorList->actors)
+			for (int i = 0; i < cmdSetActorList->numActors; i++)
 			{
+				const ActorSpawnEntry& entry = cmdSetActorList->actors[i];
+
 				writer->Write(entry.actorNum);
 				writer->Write(entry.posX);
 				writer->Write(entry.posY);
