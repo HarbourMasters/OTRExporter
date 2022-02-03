@@ -317,7 +317,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 			{
 				word0 = 0;
 				word1 = 0;
-				spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = %08X", GETSEGOFFSET(data)));
+				spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = {:08X}", GETSEGOFFSET(data)));
 			}
 
 			for (size_t i = 0; i < dList->otherDLists.size(); i++)
@@ -342,7 +342,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 				}
 				else
 				{
-					spdlog::error(StringHelper::Sprintf("dListDecl2 == nullptr! Addr = %08X", GETSEGOFFSET(data)));
+					spdlog::error(StringHelper::Sprintf("dListDecl2 == nullptr! Addr = {:08X}", GETSEGOFFSET(data)));
 				}
 			}
 
@@ -404,7 +404,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 				{
 					word0 = 0;
 					word1 = 0;
-					spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = %08X", GETSEGOFFSET(data)));
+					spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = {:08X}", GETSEGOFFSET(data)));
 				}
 
 				for (size_t i = 0; i < dList->otherDLists.size(); i++)
@@ -429,7 +429,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 					}
 					else
 					{
-						spdlog::error(StringHelper::Sprintf("dListDecl2 == nullptr! Addr = %08X", GETSEGOFFSET(data)));
+						spdlog::error(StringHelper::Sprintf("dListDecl2 == nullptr! Addr = {:08X}", GETSEGOFFSET(data)));
 					}
 				}
 			}
@@ -689,7 +689,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 				{
 					word0 = 0;
 					word1 = 0;
-					spdlog::error("texDecl == nullptr! PTR = 0x%08X", texAddress);
+					spdlog::error("texDecl == nullptr! PTR = 0x{:08X}", texAddress);
 				}
 			}
 		}
