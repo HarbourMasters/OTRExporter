@@ -146,7 +146,7 @@ static void ExporterXMLBegin()
 	//printf("ExporterXMLBegin() called.\n");
 
 	if (File::Exists("oot.otr"))
-		otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive("oot.otr"));
+		otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive("oot.otr", true));
 	else
 		otrArchive = Ship::Archive::CreateArchive("oot.otr");
 }

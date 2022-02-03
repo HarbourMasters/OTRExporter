@@ -61,7 +61,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 {
 	ZDisplayList* dList = (ZDisplayList*)res;
 
-	printf("Exporting DList %s\n", dList->GetName().c_str());
+	//printf("Exporting DList %s\n", dList->GetName().c_str());
 
 	WriteHeader(res, outPath, writer, Ship::ResourceType::DisplayList);
 
@@ -79,15 +79,20 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 	auto dlStart = std::chrono::steady_clock::now();
 
-	for (auto data : dList->instructions)
+	//for (auto data : dList->instructions)
+	for (int dataIdx = 0; dataIdx < dList->instructions.size(); dataIdx++)
 	{
+		auto data = dList->instructions[dataIdx];
 		uint32_t word0 = 0;
 		uint32_t word1 = 0;
 		uint8_t opcode = (uint8_t)(data >> 56);
 		F3DZEXOpcode opF3D = (F3DZEXOpcode)opcode;
 
-		if ((int)opF3D == G_DL)
+		if ((int)opF3D == G_DL)// || (int)opF3D == G_BRANCH_Z)
 			opcode = (uint8_t)G_DL_OTR;
+
+		if ((int)opF3D == G_BRANCH_Z)
+			opcode = (uint8_t)G_BRANCH_Z_OTR;
 
 		if ((int)opF3D == G_VTX)
 			opcode = (uint8_t)G_VTX_OTR;
@@ -237,14 +242,24 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 		break;
 		case G_RDPHALF_1:
 		{
-			uint32_t a = (data & 0x00FFF00000000000) >> 44;
-			uint32_t b = (data & 0x00000FFF00000000) >> 32;
-			uint32_t z = (data & 0x00000000FFFFFFFF) >> 0;
-			uint32_t h = (data & 0xFFFFFFFF);
+			auto data2 = dList->instructions[dataIdx + 1];
 
-			Gfx value = gsSPBranchLessZraw3(h & 0x00FFFFFF);
-			word0 = value.words.w0;
-			word1 = value.words.w1;
+			if ((data2 >> 56) != G_BRANCH_Z)
+			{
+				uint32_t a = (data & 0x00FFF00000000000) >> 44;
+				uint32_t b = (data & 0x00000FFF00000000) >> 32;
+				uint32_t z = (data & 0x00000000FFFFFFFF) >> 0;
+				uint32_t h = (data & 0xFFFFFFFF);
+
+				Gfx value = gsSPBranchLessZraw3(h & 0x00FFFFFF);
+				word0 = value.words.w0;
+				word1 = value.words.w1;
+			}
+			else
+			{
+				word0 = (G_NOOP << 24);
+				word1 = 0;
+			}
 		}
 			break;
 		case G_RDPHALF_2:
@@ -275,15 +290,71 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 			uint32_t z = (data & 0x00000000FFFFFFFF) >> 0;
 			uint32_t h = (data & 0xFFFFFFFF);
 
-			// sprintf(line, "gsDPWord(%i, 0),", h);
-			Gfx value = gsSPBranchLessZraw2(h & 0x00FFFFFF, (a / 5) | (b / 2), z);
-			word0 = value.words.w0;
+			auto data2 = dList->instructions[dataIdx - 1];
+			uint32_t dListPtr = GETSEGOFFSET(data2);
+
+			Declaration* dListDecl = dList->parent->GetDeclaration(dListPtr);
+
+			int bp = 0;
+
+			Gfx value = gsSPBranchLessZraw2(0xDEADABCD, (a / 5) | (b / 2), z);
+			word0 = (value.words.w0 & 0x00FFFFFF) + (G_BRANCH_Z_OTR << 24);
 			word1 = value.words.w1;
+
+			writer->Write(word0);
+			writer->Write(word1);
+
+			if (dListDecl != nullptr)
+			{
+				std::string vName = StringHelper::Sprintf("%s\\%s", (GetParentFolderName(res).c_str()), dListDecl->varName.c_str());
+
+				uint64_t hash = CRC64(vName.c_str());
+
+				word0 = hash >> 32;
+				word1 = hash & 0xFFFFFFFF;
+			}
+			else
+			{
+				word0 = 0;
+				word1 = 0;
+				spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = %08X", GETSEGOFFSET(data)));
+			}
+
+			for (size_t i = 0; i < dList->otherDLists.size(); i++)
+			{
+				Declaration* dListDecl2 = dList->parent->GetDeclaration(GETSEGOFFSET(dList->otherDLists[i]->GetRawDataIndex()));
+
+				if (dListDecl2 != nullptr)
+				{
+					MemoryStream* dlStream = new MemoryStream();
+					BinaryWriter dlWriter = BinaryWriter(dlStream);
+
+					Save(dList->otherDLists[i], outPath, &dlWriter);
+
+					std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
+
+#ifdef _DEBUG
+					if (otrArchive->HasFile(fName))
+						otrArchive->RemoveFile(fName);
+#endif
+
+					otrArchive->AddFile(fName, (uintptr_t)dlStream->ToVector().data(), dlWriter.GetBaseAddress());
+				}
+				else
+				{
+					spdlog::error(StringHelper::Sprintf("dListDecl2 == nullptr! Addr = %08X", GETSEGOFFSET(data)));
+				}
+			}
+
+			//Gfx value = gsSPBranchLessZraw2(h & 0x00FFFFFF, (a / 5) | (b / 2), z);
+			//word0 = value.words.w0;
+			//word1 = value.words.w1;
 		}
 			break;
+		//case G_BRANCH_Z:
 		case G_DL:
 		{
-			if (!Globals::Instance->HasSegment(GETSEGNUM(data)))
+			if (!Globals::Instance->HasSegment(GETSEGNUM(data)) && (int)opF3D != G_BRANCH_Z)
 			{
 				int32_t pp = (data & 0x00FF000000000000) >> 56;
 
@@ -301,7 +372,20 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 			}
 			else
 			{
-				Declaration* dListDecl = dList->parent->GetDeclaration(GETSEGOFFSET(data));
+				uint32_t dListPtr = GETSEGOFFSET(data);
+
+				if ((int)opF3D == G_BRANCH_Z)
+				{
+					auto data2 = dList->instructions[dataIdx - 1];
+					dListPtr = GETSEGOFFSET(data2);
+				}
+				else
+				{
+					int bp = 0;
+				}
+
+				Declaration* dListDecl = dList->parent->GetDeclaration(dListPtr);
+
 				int bp = 0;
 
 				writer->Write(word0);
@@ -570,6 +654,13 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 				uint32_t fmt = (__ & 0xE0) >> 5;
 				uint32_t siz = (__ & 0x18) >> 3;
 
+				// Hack here because the original devs apparantely used the wrong size here...?
+				if (texName == "gSun1Tex" || texName == "gSun2Tex" || texName == "gSun3Tex")
+				{
+					texName = "gSun1Tex";
+					siz = G_IM_SIZ_4b;
+				}
+
 				Gfx value = gsDPSetTextureImage(fmt, siz, www - 1, __);
 				word0 = value.words.w0 & 0x00FFFFFF;
 				word0 += (G_SETTIMG_OTR << 24);
@@ -672,8 +763,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->varName);
 
-					
-
 					uint64_t hash = CRC64(fName.c_str());
 
 					word0 = hash >> 32;
@@ -681,7 +770,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 					if (!otrArchive->HasFile(fName))
 					{
-						printf("Exporting VTX Data %s\n", fName.c_str());
+						//printf("Exporting VTX Data %s\n", fName.c_str());
 						// Write vertices to file
 						MemoryStream* vtxStream = new MemoryStream();
 						BinaryWriter vtxWriter = BinaryWriter(vtxStream);
