@@ -354,7 +354,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 		//case G_BRANCH_Z:
 		case G_DL:
 		{
-			if (!Globals::Instance->HasSegment(GETSEGNUM(data)) && (int)opF3D != G_BRANCH_Z)
+			if ((!Globals::Instance->HasSegment(GETSEGNUM(data)) && (int)opF3D != G_BRANCH_Z)
+				|| ((data & 0xFFFFFFFF) == 0x07000000)) // En_Zf and En_Ny place a DL in segment 7
 			{
 				int32_t pp = (data & 0x00FF000000000000) >> 56;
 
