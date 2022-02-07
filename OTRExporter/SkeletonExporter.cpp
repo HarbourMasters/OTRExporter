@@ -1,5 +1,6 @@
 #include "SkeletonExporter.h"
 #include <Resource.h>
+#include <Globals.h>
 
 void OTRExporter_Skeleton::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
@@ -20,9 +21,14 @@ void OTRExporter_Skeleton::Save(ZResource* res, const fs::path& outPath, BinaryW
 	{
 		Declaration* skelDecl = skel->parent->GetDeclarationRanged(GETSEGOFFSET(skel->limbsTable.limbsAddresses[i]));
 
-		if (skelDecl != nullptr)
+		std::string name;
+		bool foundDecl = Globals::Instance->GetSegmentedPtrName(skel->limbsTable.limbsAddresses[i], skel->parent, "", name);
+		if (foundDecl)
 		{
-			std::string fName = StringHelper::Sprintf("%s\\%s", skel->parent->GetOutName().c_str(), skelDecl->varName.c_str());
+			if (name.at(0) == '&')
+				name.erase(0, 1);
+
+			std::string fName = StringHelper::Sprintf("%s\\%s", skel->parent->GetOutName().c_str(), name.c_str());
 			writer->Write(fName);
 		}
 		else

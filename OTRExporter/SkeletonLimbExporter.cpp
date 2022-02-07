@@ -1,6 +1,7 @@
 #include "SkeletonLimbExporter.h"
 #include "DisplayListExporter.h"
 #include <Resource.h>
+#include <Globals.h>
 
 void OTRExporter_SkeletonLimb::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
@@ -84,12 +85,19 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, const fs::path& outPath, Bin
 
 	if (limb->childPtr != 0)
 	{
-		auto childDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->childPtr));
-		
-		if (childDecl != nullptr)
-			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, childDecl->varName));
+		std::string name;
+		bool foundDecl = Globals::Instance->GetSegmentedPtrName(limb->childPtr, limb->parent, "", name);
+		if (foundDecl)
+		{
+			if (name.at(0) == '&')
+				name.erase(0, 1);
+
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, name));
+		}
 		else
+		{
 			writer->Write("");
+		}
 	}
 	else
 	{
@@ -98,12 +106,19 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, const fs::path& outPath, Bin
 
 	if (limb->siblingPtr != 0)
 	{
-		auto siblingDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->siblingPtr));
+		std::string name;
+		bool foundDecl = Globals::Instance->GetSegmentedPtrName(limb->siblingPtr, limb->parent, "", name);
+		if (foundDecl)
+		{
+			if (name.at(0) == '&')
+				name.erase(0, 1);
 
-		if (siblingDecl != nullptr)
-			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, siblingDecl->varName));
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, name));
+		}
 		else
+		{
 			writer->Write("");
+		}
 	}
 	else
 	{
@@ -112,12 +127,19 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, const fs::path& outPath, Bin
 
 	if (limb->dListPtr != 0)
 	{
-		auto dlDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->dListPtr));
+		std::string name;
+		bool foundDecl = Globals::Instance->GetSegmentedPtrName(limb->dListPtr, limb->parent, "", name);
+		if (foundDecl)
+		{
+			if (name.at(0) == '&')
+				name.erase(0, 1);
 
-		if (dlDecl != nullptr)
-			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, dlDecl->varName));
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, name));
+		}
 		else
+		{
 			writer->Write("");
+		}
 	}
 	else
 	{
@@ -126,12 +148,19 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, const fs::path& outPath, Bin
 
 	if (limb->dList2Ptr != 0)
 	{
-		auto dlDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->dList2Ptr));
+		std::string name;
+		bool foundDecl = Globals::Instance->GetSegmentedPtrName(limb->dList2Ptr, limb->parent, "", name);
+		if (foundDecl)
+		{
+			if (name.at(0) == '&')
+				name.erase(0, 1);
 
-		if (dlDecl != nullptr)
-			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, dlDecl->varName));
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, name));
+		}
 		else
+		{
 			writer->Write("");
+		}
 	}
 	else
 	{
