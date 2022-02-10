@@ -453,8 +453,10 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 			OTRExporter_Cutscene cs;
 			cs.Save(cmdSetCutscenes->cutscenes[0], "", &csWriter);
 
+			File::WriteAllBytes("Extract\\" + fName, csStream->ToVector());
+
 			//std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->varName);
-			otrArchive->AddFile(fName, (uintptr_t)csStream->ToVector().data(), csWriter.GetBaseAddress());
+			//otrArchive->AddFile(fName, (uintptr_t)csStream->ToVector().data(), csWriter.GetBaseAddress());
 		}
 			break;
 		case RoomCommand::SetPathways:
@@ -474,7 +476,9 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 				OTRExporter_Path pathExp;
 				pathExp.Save(&cmdSetPathways->pathwayList, outPath, &pathWriter);
 
-				otrArchive->AddFile(path, (uintptr_t)pathStream->ToVector().data(), pathWriter.GetBaseAddress());
+				File::WriteAllBytes("Extract\\" + path, pathStream->ToVector());
+
+				//otrArchive->AddFile(path, (uintptr_t)pathStream->ToVector().data(), pathWriter.GetBaseAddress());
 
 				int bp = 0;
 			}

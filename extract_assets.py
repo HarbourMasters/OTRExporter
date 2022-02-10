@@ -11,6 +11,24 @@ def SignalHandler(sig, frame):
     mainAbort.set()
     # Don't exit immediately to update the extracted assets file.
 
+def BuildOTR():
+    #if globalAbort.is_set():
+        # Don't extract if another file wasn't extracted properly.
+    #    return
+
+    execStr = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPD/ZAPD.out"
+
+    execStr += " botr -se OTR"
+
+    print(execStr)
+    exitValue = os.system(execStr)
+    if exitValue != 0:
+    #    globalAbort.set()
+        print("\n")
+        print("Error when building the OTR file...", file=os.sys.stderr)
+        print("Aborting...", file=os.sys.stderr)
+        print("\n")
+
 def ExtractFile(xmlPath, outputPath, outputSourcePath):
     #if globalAbort.is_set():
         # Don't extract if another file wasn't extracted properly.
@@ -23,9 +41,6 @@ def ExtractFile(xmlPath, outputPath, outputSourcePath):
 
     if "overlays" in xmlPath:
         execStr += " --static"
-
-    #if globalUnaccounted:
-    #    execStr += " -wu"
 
     print(execStr)
     exitValue = os.system(execStr)
@@ -62,6 +77,16 @@ def ExtractFunc(fullPath):
     #        globalExtractedAssetsTracker[fullPath] = globalManager.dict()
     #    globalExtractedAssetsTracker[fullPath]["timestamp"] = currentTimeStamp
 
+#def initializeWorker(abort, unaccounted: bool, extractedAssetsTracker: dict, manager):
+def initializeWorker(abort, test):
+    global globalAbort
+    #global globalUnaccounted
+    #global globalExtractedAssetsTracker
+    #global globalManager
+    globalAbort = abort
+    #globalUnaccounted = unaccounted
+    #globalExtractedAssetsTracker = extractedAssetsTracker
+    #globalManager = manager
 
 
 def main():
@@ -76,7 +101,7 @@ def main():
     manager = Manager()
     signal.signal(signal.SIGINT, SignalHandler)
 
-    #extractedAssetsTracker = manager.dict()
+    extractedAssetsTracker = manager.dict()
     #if os.path.exists(EXTRACTED_ASSETS_NAMEFILE) and not args.force:
     #    with open(EXTRACTED_ASSETS_NAMEFILE, encoding='utf-8') as f:
     #        extractedAssetsTracker.update(json.load(f, object_hook=manager.dict))
@@ -107,9 +132,23 @@ def main():
                 if file.endswith(".xml"):
                     xmlFiles.append(fullPath)
         
-        for singlePath in xmlFiles:
-            ExtractFunc(singlePath)
-            #return
+        try:
+            numCores = cpu_count()
+            print("Extracting assets with " + str(numCores) + " CPU cores.")
+            #with Pool(numCores,  initializer=initializeWorker, initargs=(mainAbort, args.unaccounted, extractedAssetsTracker, manager)) as p:
+            with Pool(numCores, initializer=initializeWorker, initargs=(mainAbort, 0)) as p:
+                p.map(ExtractFunc, xmlFiles)
+        except Exception as e:
+            print("Warning: Multiprocessing exception ocurred.", file=os.sys.stderr)
+            print("Disabling mutliprocessing.", file=os.sys.stderr)
+
+            initializeWorker(mainAbort, 0)
+            for singlePath in xmlFiles:
+                ExtractFunc(singlePath)
+        
+        
+        BuildOTR()
+        os.rmdir("Extract") # OTRTODO: This line does not work...
 
     #with open(EXTRACTED_ASSETS_NAMEFILE, 'w', encoding='utf-8') as f:
     #    serializableDict = dict()

@@ -22,6 +22,8 @@ void OTRExporter_Texture::Save(ZResource* res, const fs::path& outPath, BinaryWr
 	for (size_t i = tex->GetRawDataIndex(); i < tex->GetRawDataIndex() + tex->GetRawDataSize(); i++)
 		writer->Write(data[i]);
 
+	writer->Write((char*)data.data() + tex->GetRawDataIndex(), tex->GetRawDataSize());
+
 	auto end = std::chrono::steady_clock::now();
 	size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
@@ -29,6 +31,4 @@ void OTRExporter_Texture::Save(ZResource* res, const fs::path& outPath, BinaryWr
 
 	//if (diff > 2)
 		//printf("Export took %lms\n", diff);
-
-	//otrArchive->AddFile(file->GetName(), (uintptr_t)strem->ToVector().data(), strem->GetLength());
 }

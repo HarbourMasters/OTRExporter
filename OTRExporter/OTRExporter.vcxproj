@@ -29,6 +29,7 @@
     <ClInclude Include="AnimationExporter.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Exporter.h" />
+    <ClInclude Include="MtxExporter.h" />
     <ClInclude Include="SkeletonExporter.h" />
     <ClInclude Include="SkeletonLimbExporter.h" />
     <ClInclude Include="PathExporter.h" />
@@ -50,6 +51,7 @@
     <ClCompile Include="AnimationExporter.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Exporter.cpp" />
+    <ClCompile Include="MtxExporter.cpp" />
     <ClCompile Include="SkeletonExporter.cpp" />
     <ClCompile Include="SkeletonLimbExporter.cpp" />
     <ClCompile Include="PathExporter.cpp" />

@@ -346,5 +346,6 @@ baserom/
 *.otr
 *.swp
 *.a
+Extract/
 
 tmp.txt

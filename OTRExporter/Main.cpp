@@ -15,6 +15,7 @@
 #include "PathExporter.h"
 #include "TextExporter.h"
 #include "BlobExporter.h"
+#include "MtxExporter.h"
 #include <Globals.h>
 #include <Utils/File.h>
 #include <Utils/Directory.h>
@@ -27,19 +28,29 @@ std::chrono::steady_clock::time_point fileStart, resStart;
 
 enum class ExporterFileMode
 {
-	ModeExample1 = (int)ZFileMode::Custom + 1,
-	ModeExample2 = (int)ZFileMode::Custom + 2,
-	ModeExample3 = (int)ZFileMode::Custom + 3,
+	BuildOTR = (int)ZFileMode::Custom + 1,
 };
 
-static void ExporterParseFileMode(std::string buildMode, ZFileMode& fileMode)
+static void ExporterParseFileMode(const std::string& buildMode, ZFileMode& fileMode)
 {
-	if (buildMode == "me1")
-		fileMode = (ZFileMode)ExporterFileMode::ModeExample1;
-	else if (buildMode == "me2")
-		fileMode = (ZFileMode)ExporterFileMode::ModeExample2;
-	else if (buildMode == "me3")
-		fileMode = (ZFileMode)ExporterFileMode::ModeExample3;
+	if (buildMode == "botr")
+	{
+		fileMode = (ZFileMode)ExporterFileMode::BuildOTR;
+
+		// Do the magic...
+		if (File::Exists("oot.otr"))
+			otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive("oot.otr", true));
+		else
+			otrArchive = Ship::Archive::CreateArchive("oot.otr");
+
+		auto lst = Directory::ListFiles("Extract");
+
+		for (auto item : lst)
+		{
+			auto fileData = File::ReadAllBytes(item);
+			otrArchive->AddFile(StringHelper::Split(item, "Extract\\")[1], (uintptr_t)fileData.data(), fileData.size());
+		}
+	}
 }
 
 static void ExporterParseArgs(int argc, char* argv[], int& i)
@@ -60,11 +71,7 @@ static bool ExporterProcessFileMode(ZFileMode fileMode)
 {
 	// Do whatever work is associated with these custom file modes...
 	// Return true to indicate one of our own file modes is being processed
-	if (fileMode == (ZFileMode)ExporterFileMode::ModeExample1)
-		return true;
-	else if (fileMode == (ZFileMode)ExporterFileMode::ModeExample2)
-		return true;
-	else if (fileMode == (ZFileMode)ExporterFileMode::ModeExample3)
+	if (fileMode == (ZFileMode)ExporterFileMode::BuildOTR)
 		return true;
 
 	return false;
@@ -126,12 +133,14 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 		std::string fName = StringHelper::Sprintf("%s\\%s", oName.c_str(), rName.c_str());
 
 #ifdef _DEBUG
-		if (otrArchive->HasFile(fName))
-			otrArchive->RemoveFile(fName);
+		//if (otrArchive->HasFile(fName))
+			//otrArchive->RemoveFile(fName);
 #endif
 
+		File::WriteAllBytes("Extract\\" + fName, strem->ToVector());
+
 		//if (!otrArchive->HasFile(fName))
-			otrArchive->AddFile(fName, (uintptr_t)strem->ToVector().data(), writer.GetBaseAddress());
+			//otrArchive->AddFile(fName, (uintptr_t)strem->ToVector().data(), writer.GetBaseAddress());
 	}
 
 	auto end = std::chrono::steady_clock::now();
@@ -145,10 +154,10 @@ static void ExporterXMLBegin()
 {
 	//printf("ExporterXMLBegin() called.\n");
 
-	if (File::Exists("oot.otr"))
-		otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive("oot.otr", true));
-	else
-		otrArchive = Ship::Archive::CreateArchive("oot.otr");
+	//if (File::Exists("oot.otr"))
+		//otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive("oot.otr", true));
+	//else
+		//otrArchive = Ship::Archive::CreateArchive("oot.otr");
 }
 
 static void ExporterXMLEnd()
@@ -164,7 +173,7 @@ static void ImportExporters()
 	// By running ZAPD with the argument -se EXAMPLE, we tell it that we want to use this exporter for our resources.
 	ExporterSet* exporterSet = new ExporterSet();
 	exporterSet->processFileModeFunc = ExporterProcessFileMode;
-	//exporterSet->parseFileModeFunc = ExporterParseFileMode;
+	exporterSet->parseFileModeFunc = ExporterParseFileMode;
 	exporterSet->parseArgsFunc = ExporterParseArgs;
 	exporterSet->beginFileFunc = ExporterFileBegin;
 	exporterSet->endFileFunc = ExporterFileEnd;
@@ -188,6 +197,7 @@ static void ImportExporters()
 	exporterSet->exporters[ZResourceType::Path] = new OTRExporter_Path();
 	exporterSet->exporters[ZResourceType::Text] = new OTRExporter_Text();
 	exporterSet->exporters[ZResourceType::Blob] = new OTRExporter_Blob();
+	exporterSet->exporters[ZResourceType::Mtx] = new OTRExporter_MtxExporter();
 
 	Globals::AddExporter("OTR", exporterSet);
 }

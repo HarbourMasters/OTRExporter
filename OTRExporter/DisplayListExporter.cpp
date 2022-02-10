@@ -9,6 +9,8 @@
 #include <Globals.h>
 #include <iostream>
 #include <string>
+#include "MtxExporter.h"
+#include <Utils/File.h>
 //#include "gbi.h"
 //#include "Lib/Fast3D/U64/PR/gbi.h"
 
@@ -90,6 +92,9 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 		if ((int)opF3D == G_DL)// || (int)opF3D == G_BRANCH_Z)
 			opcode = (uint8_t)G_DL_OTR;
+
+		if ((int)opF3D == G_MTX)
+			opcode = (uint8_t)G_MTX_OTR;
 
 		if ((int)opF3D == G_BRANCH_Z)
 			opcode = (uint8_t)G_BRANCH_Z_OTR;
@@ -205,16 +210,72 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 		break;
 		case G_MTX:
 		{
-			uint32_t pp = (data & 0x000000FF00000000) >> 32;
-			uint32_t mm = (data & 0x00000000FFFFFFFF);
+			if ((!Globals::Instance->HasSegment(GETSEGNUM(data))) || ((data & 0xFFFFFFFF) == 0x07000000)) // En_Zf and En_Ny place a DL in segment 7
+			{
+				uint32_t pp = (data & 0x000000FF00000000) >> 32;
+				uint32_t mm = (data & 0x00000000FFFFFFFF);
 
-			pp ^= G_MTX_PUSH;
+				pp ^= G_MTX_PUSH;
 
-			mm = (mm & 0x0FFFFFFF) + 0xF0000000;
+				mm = (mm & 0x0FFFFFFF) + 0xF0000000;
 
-			Gfx value = gsSPMatrix(mm, pp);
-			word0 = value.words.w0;
-			word1 = value.words.w1;
+				Gfx value = gsSPMatrix(mm, pp);
+				word0 = value.words.w0;
+				word1 = value.words.w1;
+			}
+			else
+			{
+				uint32_t pp = (data & 0x000000FF00000000) >> 32;
+				uint32_t mm = (data & 0x00000000FFFFFFFF);
+				pp ^= G_MTX_PUSH;
+
+				Gfx value = gsSPMatrix(mm, pp);
+				word0 = value.words.w0;
+				word1 = value.words.w1;
+
+				word0 = (word0 & 0x00FFFFFF) + (G_MTX_OTR << 24);
+
+				Declaration* mtxDecl = dList->parent->GetDeclaration(GETSEGOFFSET(mm));
+
+				int bp = 0;
+
+				writer->Write(word0);
+				writer->Write(word1);
+
+				if (mtxDecl != nullptr)
+				{
+					std::string vName = StringHelper::Sprintf("%s\\%s", (GetParentFolderName(res).c_str()), mtxDecl->varName.c_str());
+
+
+
+
+
+					/*std::string vName = "";
+
+					if (GETSEGNUM(mm) == SEGMENT_SCENE || GETSEGNUM(mm) == SEGMENT_ROOM)
+						vName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), texName.c_str());
+					else
+						vName = StringHelper::Sprintf("%s\\%s", assocFileName.c_str(), texName.c_str());*/
+
+					//std::string vName = StringHelper::Sprintf("%s\\%s", (GetParentFolderName(res).c_str()), mtxDecl->varName.c_str());
+
+					uint64_t hash = CRC64(vName.c_str());
+
+					word0 = hash >> 32;
+					word1 = hash & 0xFFFFFFFF;
+
+
+
+					//OTRExporter_MtxExporter mtxExporter;
+					//mtxExporter.Save(outPath, vName, writer);
+				}
+				else
+				{
+					word0 = 0;
+					word1 = 0;
+					spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = {:08X}", GETSEGOFFSET(data)));
+				}
+			}
 		}
 		break;
 		case G_LOADBLOCK:
@@ -326,19 +387,24 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 				if (dListDecl2 != nullptr)
 				{
-					MemoryStream* dlStream = new MemoryStream();
-					BinaryWriter dlWriter = BinaryWriter(dlStream);
-
-					Save(dList->otherDLists[i], outPath, &dlWriter);
-
 					std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
 
+					if (!File::Exists("Extract\\" + fName))
+					{
+						MemoryStream* dlStream = new MemoryStream();
+						BinaryWriter dlWriter = BinaryWriter(dlStream);
+
+						Save(dList->otherDLists[i], outPath, &dlWriter);
+
 #ifdef _DEBUG
-					if (otrArchive->HasFile(fName))
-						otrArchive->RemoveFile(fName);
+						//if (otrArchive->HasFile(fName))
+							//otrArchive->RemoveFile(fName);
 #endif
 
-					otrArchive->AddFile(fName, (uintptr_t)dlStream->ToVector().data(), dlWriter.GetBaseAddress());
+						File::WriteAllBytes("Extract\\" + fName, dlStream->ToVector());
+
+						//otrArchive->AddFile(fName, (uintptr_t)dlStream->ToVector().data(), dlWriter.GetBaseAddress());
+					}
 				}
 				else
 				{
@@ -414,19 +480,24 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 					if (dListDecl2 != nullptr)
 					{
-						MemoryStream* dlStream = new MemoryStream();
-						BinaryWriter dlWriter = BinaryWriter(dlStream);
-
-						Save(dList->otherDLists[i], outPath, &dlWriter);
-
 						std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
 
+						if (!File::Exists("Extract\\" + fName))
+						{
+							MemoryStream* dlStream = new MemoryStream();
+							BinaryWriter dlWriter = BinaryWriter(dlStream);
+
+							Save(dList->otherDLists[i], outPath, &dlWriter);
+
 #ifdef _DEBUG
-						if (otrArchive->HasFile(fName))
-							otrArchive->RemoveFile(fName);
+							//if (otrArchive->HasFile(fName))
+								//otrArchive->RemoveFile(fName);
 #endif
 
-						otrArchive->AddFile(fName, (uintptr_t)dlStream->ToVector().data(), dlWriter.GetBaseAddress());
+							File::WriteAllBytes("Extract\\" + fName, dlStream->ToVector());
+
+							//otrArchive->AddFile(fName, (uintptr_t)dlStream->ToVector().data(), dlWriter.GetBaseAddress());
+						}
 					}
 					else
 					{
@@ -769,7 +840,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 					word0 = hash >> 32;
 					word1 = hash & 0xFFFFFFFF;
 
-					if (!otrArchive->HasFile(fName))
+					//if (!otrArchive->HasFile(fName))
+					if (!File::Exists("Extract\\" + fName))
 					{
 						//printf("Exporting VTX Data %s\n", fName.c_str());
 						// Write vertices to file
@@ -827,11 +899,12 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 									vtxWriter.Write((uint8_t)std::stoi(split2[6], nullptr, 10)); // v.g
 									vtxWriter.Write((uint8_t)std::stoi(split2[7], nullptr, 10)); // v.b
 									vtxWriter.Write((uint8_t)std::stoi(split2[8], nullptr, 10)); // v.a
-
-									int bp = 0;
 								}
 							}
-							otrArchive->AddFile(fName, (uintptr_t)vtxStream->ToVector().data(), vtxWriter.GetBaseAddress());
+
+							File::WriteAllBytes("Extract\\" + fName, vtxStream->ToVector());
+
+							//otrArchive->AddFile(fName, (uintptr_t)vtxStream->ToVector().data(), vtxWriter.GetBaseAddress());
 
 							auto end = std::chrono::steady_clock::now();
 							size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
