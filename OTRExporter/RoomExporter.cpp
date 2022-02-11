@@ -344,6 +344,8 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 				//std::string roomName = StringHelper::Sprintf("%s\\%s_room_%i", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i);
 				std::string roomName = OTRExporter_DisplayList::GetPathToRes(room, StringHelper::Sprintf("%s_room_%i", StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i));
 				writer->Write(roomName);
+				writer->Write(cmdRoom->romfile->rooms[i].virtualAddressStart);
+				writer->Write(cmdRoom->romfile->rooms[i].virtualAddressEnd);
 			}
 		}
 		break;

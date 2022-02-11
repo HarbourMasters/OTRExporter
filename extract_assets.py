@@ -131,7 +131,7 @@ def main():
                 fullPath = os.path.join(currentPath, file)
                 if file.endswith(".xml"):
                     xmlFiles.append(fullPath)
-        
+
         try:
             numCores = cpu_count()
             print("Extracting assets with " + str(numCores) + " CPU cores.")
@@ -145,8 +145,8 @@ def main():
             initializeWorker(mainAbort, 0)
             for singlePath in xmlFiles:
                 ExtractFunc(singlePath)
-        
-        
+
+
         BuildOTR()
         os.rmdir("Extract") # OTRTODO: This line does not work...
 
