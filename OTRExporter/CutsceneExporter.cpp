@@ -402,7 +402,7 @@ void OTRExporter_Cutscene::Save(ZResource* res, const fs::path& outPath, BinaryW
 			{
 				writer->Write(CMD_HH(e->base, e->startFrame));
 				writer->Write(CMD_HBB(e->endFrame, e->hour, e->minute));
-				writer->Write(CMD_W(e->unused));
+				writer->Write((uint32_t)CMD_W(e->unused));
 			}
 			break;
 		}

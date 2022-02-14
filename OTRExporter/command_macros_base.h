@@ -18,7 +18,7 @@
 #define CMD_BBH(a, b, c) (_SHIFTL(a, 0, 8) | _SHIFTL(b, 8, 8) | _SHIFTL(c, 16, 16))
 
 //#define CMD_HBB(a, b, c) (_SHIFTL(a, 16, 16) | _SHIFTL(b, 8, 8) | _SHIFTL(c, 0, 8))
-#define CMD_HBB(a, b, c) (_SHIFTL(c, 24, 8) | _SHIFTL(b, 16, 8) | _SHIFTL(c, 0, 16))
+#define CMD_HBB(a, b, c) (_SHIFTL(c, 24, 8) | _SHIFTL(b, 16, 8) | _SHIFTL(a, 0, 16))
 
 //#define CMD_HH(a, b) (_SHIFTL(a, 16, 16) | _SHIFTL(b, 0, 16))
 #define CMD_HH(a, b) (_SHIFTL(b, 16, 16) | _SHIFTL(a, 0, 16))
