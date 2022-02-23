@@ -768,7 +768,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 		break;
 		case G_VTX:
 		{
-			if (GETSEGNUM(data) == 0xC)
+			if (GETSEGNUM(data) == 0xC || GETSEGNUM(data) == 0x8)
 			{
 				// hack for dynamic verticies used in en_ganon_mant and en_jsjutan
 				// TODO is there a better way?

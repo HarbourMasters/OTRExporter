@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse, json, os, signal, time, sys
+import argparse, json, os, signal, time, sys, shutil
 from multiprocessing import Pool, cpu_count, Event, Manager, ProcessError
 
 #EXTRACTED_ASSETS_NAMEFILE = ".extracted-assets.json"
@@ -15,6 +15,10 @@ def BuildOTR():
     #if globalAbort.is_set():
         # Don't extract if another file wasn't extracted properly.
     #    return
+    
+    shutil.copyfile("baserom/Audiobank", "Extract/Audiobank")
+    shutil.copyfile("baserom/Audioseq", "Extract/Audioseq")
+    shutil.copyfile("baserom/Audiotable", "Extract/Audiotable")
 
     execStr = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPD/ZAPD.out"
 
@@ -133,7 +137,7 @@ def main():
                     xmlFiles.append(fullPath)
 
         try:
-            numCores = cpu_count()
+            numCores = 2
             print("Extracting assets with " + str(numCores) + " CPU cores.")
             #with Pool(numCores,  initializer=initializeWorker, initargs=(mainAbort, args.unaccounted, extractedAssetsTracker, manager)) as p:
             with Pool(numCores, initializer=initializeWorker, initargs=(mainAbort, 0)) as p:
