@@ -19,9 +19,6 @@ void OTRExporter_Texture::Save(ZResource* res, const fs::path& outPath, BinaryWr
 
 	auto data = tex->parent->GetRawData();
 
-	for (size_t i = tex->GetRawDataIndex(); i < tex->GetRawDataIndex() + tex->GetRawDataSize(); i++)
-		writer->Write(data[i]);
-
 	writer->Write((char*)data.data() + tex->GetRawDataIndex(), tex->GetRawDataSize());
 
 	auto end = std::chrono::steady_clock::now();
