@@ -173,7 +173,7 @@ void OTRExporter_Cutscene::Save(ZResource* res, const fs::path& outPath, BinaryW
 				writer->Write(CMD_W(e->unused11));
 			}
 		}
-			break;
+		break;
 		case (uint32_t)CutsceneCommands::Textbox:
 		{
 			writer->Write(CS_CMD_TEXTBOX);
@@ -414,36 +414,12 @@ void OTRExporter_Cutscene::Save(ZResource* res, const fs::path& outPath, BinaryW
 			writer->Write(CMD_HH(((CutsceneCommandTerminator*)cs->commands[i])->endFrame, ((CutsceneCommandTerminator*)cs->commands[i])->endFrame));
 			break;
 		}
-		//case 0x0D:
-		//case 0x6D:
-		//case 0x47:
-		//case 0x16:
-		//case 0x70:
-		//case 0x71:
-		//case 0x1C:
-		//case 0x21:
-		//case 0x3D:
-		//case 0x20:
-		//case 0x3B:
-		//case 0x1B:
-		//{
-		//	writer->Write((uint32_t)(CutsceneCommands)cs->commands[i]->commandID);
-		//	writer->Write((uint32_t)1);
-		//	
-		//	for (int i = 0; i < 12; i++)
-		//		writer->Write((uint32_t)0);
-
-		//	//writer->Write((uint32_t)0);
-		//	//writer->Write(CMD_HH(((CutsceneCommandTerminator*)cs->commands[i])->base, ((CutsceneCommandTerminator*)cs->commands[i])->startFrame));
-		//	//writer->Write(CMD_HH(((CutsceneCommandTerminator*)cs->commands[i])->endFrame, ((CutsceneCommandTerminator*)cs->commands[i])->endFrame));
-		//	break;
-		//}
 		default:
 		{
 			//writer->Write((uint32_t)cs->commands[i]->commandID);
 			printf("Undefined CS Opcode: %04X\n", cs->commands[i]->commandID);
 		}
-			break;
+		break;
 		}
 	}
 
