@@ -2,6 +2,7 @@
 
 import argparse, json, os, signal, time, sys, shutil
 from multiprocessing import Pool, cpu_count, Event, Manager, ProcessError
+import shutil
 
 #EXTRACTED_ASSETS_NAMEFILE = ".extracted-assets.json"
 
@@ -152,7 +153,7 @@ def main():
 
 
         BuildOTR()
-        os.rmdir("Extract") # OTRTODO: This line does not work...
+        shutil.rmtree("Extract")
 
     #with open(EXTRACTED_ASSETS_NAMEFILE, 'w', encoding='utf-8') as f:
     #    serializableDict = dict()

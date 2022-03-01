@@ -5,10 +5,7 @@ void OTRExporter_Cutscene::Save(ZResource* res, const fs::path& outPath, BinaryW
 {
 	ZCutscene* cs = (ZCutscene*)res;
 
-	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)Ship::ResourceType::Cutscene);
-	writer->Write((uint32_t)Ship::Version::Deckard);
-	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+	WriteHeader(cs, outPath, writer, Ship::ResourceType::Cutscene);
 
 	//writer->Write((uint32_t)cs->commands.size() + 2 + 2);
 	writer->Write((uint32_t)0);
