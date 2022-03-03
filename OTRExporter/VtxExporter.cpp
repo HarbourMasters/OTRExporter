@@ -1,15 +1,12 @@
 #include "VtxExporter.h"
 #include "Resource.h"
+#include "VersionInfo.h"
 
 
-void OTRExporter_Vtx::SaveArr(const std::vector<ZResource*>& vec, BinaryWriter* writer)
+void OTRExporter_Vtx::SaveArr(ZResource* res, const fs::path& outPath, const std::vector<ZResource*>& vec, BinaryWriter* writer)
 {
-	writer->Write((uint8_t)Endianess::Little);
-	writer->Write((uint32_t)Ship::ResourceType::Vertex);
-	writer->Write((uint32_t)Ship::Version::Deckard);
-	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
-	writer->Write((uint32_t)vec.size());
-
+	WriteHeader(res, outPath, writer, Ship::ResourceType::Vertex);
+	
 	for (auto& res: vec) {
 		ZVtx* vtx = (ZVtx*)res;
 		writer->Write(vtx->x);

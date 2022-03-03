@@ -37,6 +37,7 @@
     <ClInclude Include="RoomExporter.h" />
     <ClInclude Include="TextExporter.h" />
     <ClInclude Include="TextureExporter.h" />
+    <ClInclude Include="VersionInfo.h" />
     <ClInclude Include="VtxExporter.h" />
     <ClInclude Include="z64cutscene.h" />
     <ClInclude Include="z64cutscene_commands.h" />
@@ -59,6 +60,7 @@
     <ClCompile Include="RoomExporter.cpp" />
     <ClCompile Include="TextExporter.cpp" />
     <ClCompile Include="TextureExporter.cpp" />
+    <ClCompile Include="VersionInfo.cpp" />
     <ClCompile Include="VtxExporter.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

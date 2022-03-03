@@ -11,6 +11,7 @@
 #include <string>
 #include "MtxExporter.h"
 #include <Utils/File.h>
+#include "VersionInfo.h"
 //#include "gbi.h"
 //#include "Lib/Fast3D/U64/PR/gbi.h"
 
@@ -876,8 +877,9 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 						// OTRTODO: Stupid stupid hack we need to just call arrayexporter...
 						vtxWriter.Write((uint8_t)Endianess::Little);
 						vtxWriter.Write((uint32_t)Ship::ResourceType::Array);
-						vtxWriter.Write((uint32_t)Ship::Version::Deckard);
+						vtxWriter.Write((uint32_t)MAJOR_VERSION);
 						vtxWriter.Write((uint64_t)0xDEADBEEFDEADBEEF); // id
+						vtxWriter.Write((uint32_t)resourceVersions[Ship::ResourceType::Array]); // id
 
 						vtxWriter.Write((uint32_t)ZResourceType::Vertex);
 						vtxWriter.Write((uint32_t)arrCnt);
