@@ -483,6 +483,8 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 				File::WriteAllBytes("Extract\\" + path, pathStream->ToVector());
 
 				//otrArchive->AddFile(path, (uintptr_t)pathStream->ToVector().data(), pathWriter.GetBaseAddress());
+
+				int bp = 0;
 			}
 		}
 			break;

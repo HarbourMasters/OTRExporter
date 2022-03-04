@@ -238,6 +238,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 				Declaration* mtxDecl = dList->parent->GetDeclaration(GETSEGOFFSET(mm));
 
+				int bp = 0;
+
 				writer->Write(word0);
 				writer->Write(word1);
 
@@ -337,6 +339,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 			Declaration* dListDecl = dList->parent->GetDeclaration(dListPtr);
 
+			int bp = 0;
+
 			Gfx value = gsSPBranchLessZraw2(0xDEADABCD, (a / 5) | (b / 2), z);
 			word0 = (value.words.w0 & 0x00FFFFFF) + (G_BRANCH_Z_OTR << 24);
 			word1 = value.words.w1;
@@ -426,8 +430,14 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 					auto data2 = dList->instructions[dataIdx - 1];
 					dListPtr = GETSEGOFFSET(data2);
 				}
+				else
+				{
+					int bp = 0;
+				}
 
 				Declaration* dListDecl = dList->parent->GetDeclaration(dListPtr);
+
+				int bp = 0;
 
 				writer->Write(word0);
 				writer->Write(word1);
