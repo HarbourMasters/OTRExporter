@@ -12,5 +12,6 @@ public:
 	virtual void Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer) override;
 	static std::string GetParentFolderName(ZResource* res);
 	static std::string GetPathToRes(ZResource* res, std::string varName);
+	static std::string GetPrefix(ZResource* res);
 
 };

@@ -8,5 +8,5 @@
 class OTRExporter : public ZResourceExporter
 {
 protected:
-	void WriteHeader(ZResource* res, const fs::path& outPath, BinaryWriter* writer, Ship::ResourceType resType);
+	static void WriteHeader(ZResource* res, const fs::path& outPath, BinaryWriter* writer, Ship::ResourceType resType);
 };

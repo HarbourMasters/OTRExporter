@@ -247,28 +247,10 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 				{
 					std::string vName = StringHelper::Sprintf("%s\\%s", (GetParentFolderName(res).c_str()), mtxDecl->varName.c_str());
 
-
-
-
-
-					/*std::string vName = "";
-
-					if (GETSEGNUM(mm) == SEGMENT_SCENE || GETSEGNUM(mm) == SEGMENT_ROOM)
-						vName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), texName.c_str());
-					else
-						vName = StringHelper::Sprintf("%s\\%s", assocFileName.c_str(), texName.c_str());*/
-
-					//std::string vName = StringHelper::Sprintf("%s\\%s", (GetParentFolderName(res).c_str()), mtxDecl->varName.c_str());
-
 					uint64_t hash = CRC64(vName.c_str());
 
 					word0 = hash >> 32;
 					word1 = hash & 0xFFFFFFFF;
-
-
-
-					//OTRExporter_MtxExporter mtxExporter;
-					//mtxExporter.Save(outPath, vName, writer);
 				}
 				else
 				{
@@ -388,7 +370,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 				if (dListDecl2 != nullptr)
 				{
-					std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
+					//std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
+					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, dListDecl2->varName.c_str());
 
 					if (!File::Exists("Extract\\" + fName))
 					{
@@ -481,7 +464,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 					if (dListDecl2 != nullptr)
 					{
-						std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
+						//std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
+						std::string fName = OTRExporter_DisplayList::GetPathToRes(res, dListDecl2->varName.c_str());
 
 						if (!File::Exists("Extract\\" + fName))
 						{
@@ -875,11 +859,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 						}
 
 						// OTRTODO: Stupid stupid hack we need to just call arrayexporter...
-						vtxWriter.Write((uint8_t)Endianess::Little);
-						vtxWriter.Write((uint32_t)Ship::ResourceType::Array);
-						vtxWriter.Write((uint32_t)MAJOR_VERSION);
-						vtxWriter.Write((uint64_t)0xDEADBEEFDEADBEEF); // id
-						vtxWriter.Write((uint32_t)resourceVersions[Ship::ResourceType::Array]); // id
+						OTRExporter::WriteHeader(nullptr, "", &vtxWriter, Ship::ResourceType::Array);
 
 						vtxWriter.Write((uint32_t)ZResourceType::Vertex);
 						vtxWriter.Write((uint32_t)arrCnt);
@@ -891,8 +871,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 							auto start = std::chrono::steady_clock::now();
 
 							// God dammit this is so dumb
-							//auto split = StringHelper::Split(vtxDecl->text, "\n");
-
 							for (size_t i = 0; i < split.size(); i++)
 							{
 								std::string line = split[i];
@@ -918,8 +896,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 							}
 
 							File::WriteAllBytes("Extract\\" + fName, vtxStream->ToVector());
-
-							//otrArchive->AddFile(fName, (uintptr_t)vtxStream->ToVector().data(), vtxWriter.GetBaseAddress());
 
 							auto end = std::chrono::steady_clock::now();
 							size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -958,17 +934,20 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 std::string OTRExporter_DisplayList::GetPathToRes(ZResource* res, std::string varName)
 {
-	std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), varName.c_str());
+	std::string fName = "";
+	std::string prefix = GetPrefix(res);
+
+	//if (prefix != "")
+		//fName = StringHelper::Sprintf("%s\\%s\\%s", prefix.c_str(), GetParentFolderName(res).c_str(), varName.c_str());
+	//else
+		fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), varName.c_str());
+
 	return fName;
 }
 
 std::string OTRExporter_DisplayList::GetParentFolderName(ZResource* res)
 {
-	//if (StringHelper::Contains(res->parent->GetOutName(), "_scene") || StringHelper::Contains(res->parent->GetOutName(), "_room"))
-		//return (StringHelper::Split(res->parent->GetOutName(), "_")[0] + "_scene");
-	//else
-		//return res->parent->GetOutName();
-
+	std::string prefix = GetPrefix(res);
 	std::string oName = res->parent->GetOutName();
 
 	if (StringHelper::Contains(oName, "_scene"))
@@ -979,13 +958,25 @@ std::string OTRExporter_DisplayList::GetParentFolderName(ZResource* res)
 			oName += split[i] + "_";
 
 		oName += "scene";
-
-		//oName = StringHelper::Split(oName, "_")[0] + "_scene";
 	}
 	else if (StringHelper::Contains(oName, "_room"))
 	{
 		oName = StringHelper::Split(oName, "_room")[0] + "_scene";
 	}
 
+	if (prefix != "")
+		oName = prefix + "\\" + oName;
+
 	return oName;
+}
+
+std::string OTRExporter_DisplayList::GetPrefix(ZResource* res)
+{
+	std::string oName = res->parent->GetOutName();
+	std::string prefix = "";
+
+	if (StringHelper::Contains(oName, "_scene") || StringHelper::Contains(oName, "_room"))
+		prefix = "scenes";
+
+	return prefix;
 }

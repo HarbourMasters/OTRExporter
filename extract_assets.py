@@ -4,19 +4,12 @@ import argparse, json, os, signal, time, sys, shutil
 from multiprocessing import Pool, cpu_count, Event, Manager, ProcessError
 import shutil
 
-#EXTRACTED_ASSETS_NAMEFILE = ".extracted-assets.json"
-
-
 def SignalHandler(sig, frame):
     print(f'Signal {sig} received. Aborting...')
     mainAbort.set()
     # Don't exit immediately to update the extracted assets file.
 
-def BuildOTR():
-    #if globalAbort.is_set():
-        # Don't extract if another file wasn't extracted properly.
-    #    return
-    
+def BuildOTR():    
     shutil.copyfile("baserom/Audiobank", "Extract/Audiobank")
     shutil.copyfile("baserom/Audioseq", "Extract/Audioseq")
     shutil.copyfile("baserom/Audiotable", "Extract/Audiotable")
@@ -28,20 +21,13 @@ def BuildOTR():
     print(execStr)
     exitValue = os.system(execStr)
     if exitValue != 0:
-    #    globalAbort.set()
         print("\n")
         print("Error when building the OTR file...", file=os.sys.stderr)
         print("Aborting...", file=os.sys.stderr)
         print("\n")
 
 def ExtractFile(xmlPath, outputPath, outputSourcePath):
-    #if globalAbort.is_set():
-        # Don't extract if another file wasn't extracted properly.
-    #    return
-
     execStr = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPD/ZAPD.out"
-
-    #execStr += " e -eh -i %s -b baserom/ -o %s -osf %s -gsf 1 -rconf CFG/Config.xml -se OTR" % (xmlPath, outputPath, outputSourcePath)
     execStr += " e -eh -i %s -b baserom/ -o %s -osf %s -gsf 1 -rconf CFG/Config.xml -se OTR" % (xmlPath, outputPath, outputSourcePath)
 
     if "overlays" in xmlPath:
@@ -51,7 +37,6 @@ def ExtractFile(xmlPath, outputPath, outputSourcePath):
     exitValue = os.system(execStr)
     #exitValue = 0
     if exitValue != 0:
-    #    globalAbort.set()
         print("\n")
         print("Error when extracting from file " + xmlPath, file=os.sys.stderr)
         print("Aborting...", file=os.sys.stderr)
@@ -65,33 +50,11 @@ def ExtractFunc(fullPath):
     os.makedirs(outPath, exist_ok=True)
     outSourcePath = outPath
 
-    #if fullPath in globalExtractedAssetsTracker:
-    #    timestamp = globalExtractedAssetsTracker[fullPath]["timestamp"]
-    #    modificationTime = int(os.path.getmtime(fullPath))
-    #    if modificationTime < timestamp:
-    #        # XML has not been modified since last extraction.
-    #        return
-
-    #currentTimeStamp = int(time.time())
-
     ExtractFile(fullPath, outPath, outSourcePath)
 
-    #if not globalAbort.is_set():
-    #    # Only update timestamp on succesful extractions
-    #    if fullPath not in globalExtractedAssetsTracker:
-    #        globalExtractedAssetsTracker[fullPath] = globalManager.dict()
-    #    globalExtractedAssetsTracker[fullPath]["timestamp"] = currentTimeStamp
-
-#def initializeWorker(abort, unaccounted: bool, extractedAssetsTracker: dict, manager):
 def initializeWorker(abort, test):
     global globalAbort
-    #global globalUnaccounted
-    #global globalExtractedAssetsTracker
-    #global globalManager
     globalAbort = abort
-    #globalUnaccounted = unaccounted
-    #globalExtractedAssetsTracker = extractedAssetsTracker
-    #globalManager = manager
 
 
 def main():
@@ -107,9 +70,6 @@ def main():
     signal.signal(signal.SIGINT, SignalHandler)
 
     extractedAssetsTracker = manager.dict()
-    #if os.path.exists(EXTRACTED_ASSETS_NAMEFILE) and not args.force:
-    #    with open(EXTRACTED_ASSETS_NAMEFILE, encoding='utf-8') as f:
-    #        extractedAssetsTracker.update(json.load(f, object_hook=manager.dict))
 
     asset_path = args.single
     if asset_path is not None:
@@ -118,9 +78,6 @@ def main():
             print(f"Error. File {fullPath} doesn't exists.", file=os.sys.stderr)
             exit(1)
 
-        # Always extract if -s is used.
-    #    if fullPath in extractedAssetsTracker:
-    #        del extractedAssetsTracker[fullPath]
         ExtractFunc(fullPath)
     else:
         extract_text_path = "assets/text/message_data.h"
@@ -154,15 +111,6 @@ def main():
 
         BuildOTR()
         shutil.rmtree("Extract")
-
-    #with open(EXTRACTED_ASSETS_NAMEFILE, 'w', encoding='utf-8') as f:
-    #    serializableDict = dict()
-    #    for xml, data in extractedAssetsTracker.items():
-    #        serializableDict[xml] = dict(data)
-    #    json.dump(dict(serializableDict), f, ensure_ascii=False, indent=4)
-
-    #if mainAbort.is_set():
-    #    exit(1)
 
 if __name__ == "__main__":
     main()

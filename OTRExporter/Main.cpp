@@ -1,5 +1,4 @@
 #include <Archive.h>
-//#include <Factories/OTRArchiveFactory.h>
 #include "BackgroundExporter.h"
 #include "TextureExporter.h"
 #include "RoomExporter.h"
@@ -22,9 +21,12 @@
 #include <Utils/MemoryStream.h>
 #include <Utils/BinaryWriter.h>
 
+std::string otrFileName;
 std::shared_ptr<Ship::Archive> otrArchive;
 BinaryWriter* fileWriter;
 std::chrono::steady_clock::time_point fileStart, resStart;
+
+void InitVersionInfo();
 
 enum class ExporterFileMode
 {
@@ -37,11 +39,10 @@ static void ExporterParseFileMode(const std::string& buildMode, ZFileMode& fileM
 	{
 		fileMode = (ZFileMode)ExporterFileMode::BuildOTR;
 
-		// Do the magic...
 		if (File::Exists("oot.otr"))
 			otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive("oot.otr", true));
 		else
-			otrArchive = Ship::Archive::CreateArchive("oot.otr");
+			otrArchive = Ship::Archive::CreateArchive("oot.otr", 65536 / 2);
 
 		auto lst = Directory::ListFiles("Extract");
 
@@ -57,13 +58,10 @@ static void ExporterParseArgs(int argc, char* argv[], int& i)
 {
 	std::string arg = argv[i];
 
-	if (arg == "--do-x")
+	if (arg == "--otrfile")
 	{
-
-	}
-	else if (arg == "--do-y")
-	{
-
+		otrFileName = argv[i + 1];
+		i++;
 	}
 }
 
@@ -79,8 +77,6 @@ static bool ExporterProcessFileMode(ZFileMode fileMode)
 
 static void ExporterFileBegin(ZFile* file)
 {
-	//printf("ExporterFileBegin() called on ZFile %s.\n", file->GetName().c_str());
-
 	fileStart = std::chrono::steady_clock::now();
 
 	MemoryStream* stream = new MemoryStream();
@@ -89,22 +85,12 @@ static void ExporterFileBegin(ZFile* file)
 
 static void ExporterFileEnd(ZFile* file)
 {
-	//printf("ExporterFileEnd() called on ZFile %s.\n", file->GetName().c_str());
-
-	auto fileEnd = std::chrono::steady_clock::now();
-	size_t diff = std::chrono::duration_cast<std::chrono::milliseconds>(fileEnd - fileStart).count();
-
-	//printf("File Export Ended %s in %zums\n", file->GetName().c_str(), diff);
-
-	//MemoryStream* strem = (MemoryStream*)fileWriter->GetStream().get();
-	//otrArchive->AddFile(file->GetName(), (uintptr_t)strem->ToVector().data(), strem->GetLength());
-
-	//File::WriteAllBytes(StringHelper::Sprintf("conv/%s"));
 }
 
 static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 {
-	MemoryStream* strem = (MemoryStream*)writer.GetStream().get();
+	auto streamShared = writer.GetStream();
+	MemoryStream* strem = (MemoryStream*)streamShared.get();
 
 	auto start = std::chrono::steady_clock::now();
 
@@ -112,8 +98,11 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 	{
 		std::string oName = res->parent->GetOutName();
 		std::string rName = res->GetName();
+		std::string prefix = OTRExporter_DisplayList::GetPrefix(res);
 
-		//if (res->GetResourceType() == ZResourceType::Room || res->GetResourceType() == ZResourceType::Scene)
+		//auto xmlFilePath = res->parent->GetXmlFilePath();
+		//prefix = StringHelper::Split(StringHelper::Split(xmlFilePath.string(), "xml\\")[1], ".xml")[0];
+
 		if (StringHelper::Contains(oName, "_scene"))
 		{
 			auto split = StringHelper::Split(oName, "_");
@@ -122,25 +111,20 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 				oName += split[i] + "_";
 
 			oName += "scene";
-
-			//oName = StringHelper::Split(oName, "_")[0] + "_scene";
 		}
 		else if (StringHelper::Contains(oName, "_room"))
 		{
 			oName = StringHelper::Split(oName, "_room")[0] + "_scene";
 		}
 
-		std::string fName = StringHelper::Sprintf("%s\\%s", oName.c_str(), rName.c_str());
+		std::string fName = "";
 
-#ifdef _DEBUG
-		//if (otrArchive->HasFile(fName))
-			//otrArchive->RemoveFile(fName);
-#endif
+		if (prefix != "")
+			fName = StringHelper::Sprintf("%s\\%s\\%s", prefix.c_str(), oName.c_str(), rName.c_str());
+		else
+			fName = StringHelper::Sprintf("%s\\%s", oName.c_str(), rName.c_str());
 
 		File::WriteAllBytes("Extract\\" + fName, strem->ToVector());
-
-		//if (!otrArchive->HasFile(fName))
-			//otrArchive->AddFile(fName, (uintptr_t)strem->ToVector().data(), writer.GetBaseAddress());
 	}
 
 	auto end = std::chrono::steady_clock::now();
@@ -152,19 +136,10 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 
 static void ExporterXMLBegin()
 {
-	//printf("ExporterXMLBegin() called.\n");
-
-	//if (File::Exists("oot.otr"))
-		//otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive("oot.otr", true));
-	//else
-		//otrArchive = Ship::Archive::CreateArchive("oot.otr");
 }
 
 static void ExporterXMLEnd()
 {
-	//printf("ExporterXMLEnd() called.\n");
-
-	//ARCHIVE;
 }
 
 static void ImportExporters()
@@ -200,6 +175,8 @@ static void ImportExporters()
 	exporterSet->exporters[ZResourceType::Mtx] = new OTRExporter_MtxExporter();
 
 	Globals::AddExporter("OTR", exporterSet);
+
+	InitVersionInfo();
 }
 
 // When ZAPD starts up, it will automatically call the below function, which in turn sets up our exporters.
