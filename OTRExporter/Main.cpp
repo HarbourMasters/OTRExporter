@@ -21,7 +21,7 @@
 #include <Utils/MemoryStream.h>
 #include <Utils/BinaryWriter.h>
 
-std::string otrFileName;
+std::string otrFileName = "oot.otr";
 std::shared_ptr<Ship::Archive> otrArchive;
 BinaryWriter* fileWriter;
 std::chrono::steady_clock::time_point fileStart, resStart;
@@ -39,10 +39,10 @@ static void ExporterParseFileMode(const std::string& buildMode, ZFileMode& fileM
 	{
 		fileMode = (ZFileMode)ExporterFileMode::BuildOTR;
 
-		if (File::Exists("oot.otr"))
-			otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive("oot.otr", true));
+		if (File::Exists(otrFileName))
+			otrArchive = std::shared_ptr<Ship::Archive>(new Ship::Archive(otrFileName, true));
 		else
-			otrArchive = Ship::Archive::CreateArchive("oot.otr", 65536 / 2);
+			otrArchive = Ship::Archive::CreateArchive(otrFileName, 65536 / 2);
 
 		auto lst = Directory::ListFiles("Extract");
 

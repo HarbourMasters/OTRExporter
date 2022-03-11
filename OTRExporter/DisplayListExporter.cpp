@@ -12,8 +12,6 @@
 #include "MtxExporter.h"
 #include <Utils/File.h>
 #include "VersionInfo.h"
-//#include "gbi.h"
-//#include "Lib/Fast3D/U64/PR/gbi.h"
 
 #define GFX_SIZE 8
 
@@ -474,14 +472,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 							Save(dList->otherDLists[i], outPath, &dlWriter);
 
-#ifdef _DEBUG
-							//if (otrArchive->HasFile(fName))
-								//otrArchive->RemoveFile(fName);
-#endif
-
 							File::WriteAllBytes("Extract\\" + fName, dlStream->ToVector());
-
-							//otrArchive->AddFile(fName, (uintptr_t)dlStream->ToVector().data(), dlWriter.GetBaseAddress());
 						}
 					}
 					else
@@ -838,7 +829,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 					word0 = hash >> 32;
 					word1 = hash & 0xFFFFFFFF;
 
-					//if (!otrArchive->HasFile(fName))
 					if (!File::Exists("Extract\\" + fName))
 					{
 						//printf("Exporting VTX Data %s\n", fName.c_str());
@@ -858,7 +848,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 								arrCnt++;
 						}
 
-						// OTRTODO: Stupid stupid hack we need to just call arrayexporter...
+						// OTRTODO: Once we aren't relying on text representations, we should call ArrayExporter...
 						OTRExporter::WriteHeader(nullptr, "", &vtxWriter, Ship::ResourceType::Array);
 
 						vtxWriter.Write((uint32_t)ZResourceType::Vertex);

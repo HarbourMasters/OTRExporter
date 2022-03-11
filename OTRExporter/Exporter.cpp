@@ -7,5 +7,5 @@ void OTRExporter::WriteHeader(ZResource* res, const fs::path& outPath, BinaryWri
 	writer->Write((uint32_t)resType);
 	writer->Write((uint32_t)MAJOR_VERSION);
 	writer->Write((uint64_t)0xDEADBEEFDEADBEEF); // id
-	writer->Write((uint32_t)resourceVersions[resType]); // id
+	writer->Write((uint32_t)resourceVersions[resType]);
 }
