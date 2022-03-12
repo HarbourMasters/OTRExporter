@@ -712,7 +712,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 				Gfx value = gsDPSetTextureImage(fmt, siz, www - 1, __);
 				word0 = value.words.w0 & 0x00FFFFFF;
 				word0 += (G_SETTIMG_OTR << 24);
-				word1 = value.words.w1;
+				//word1 = value.words.w1;
+				word1 = 0;
 
 				writer->Write(word0);
 				writer->Write(word1);
