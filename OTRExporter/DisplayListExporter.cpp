@@ -314,8 +314,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 		// OTRTODO: FINISH IMPLEMENTATION
 		case G_TEXRECT:
 		{
-			int32_t xxx = (data & 0x00FFF00000000000) >> 48;
-			int32_t yyy = (data & 0x00000FFF00000000) >> 36;
+			int32_t xxx = (data & 0x00FFF00000000000) >> 44;
+			int32_t yyy = (data & 0x00000FFF00000000) >> 32;
 			int32_t i = (data & 0x000000000F000000) >> 24;
 			int32_t XXX = (data & 0x0000000000FFF000) >> 12;
 			int32_t YYY = (data & 0x0000000000000FFF);
