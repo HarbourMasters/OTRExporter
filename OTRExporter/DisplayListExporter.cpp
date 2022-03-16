@@ -702,13 +702,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 				uint32_t fmt = (__ & 0xE0) >> 5;
 				uint32_t siz = (__ & 0x18) >> 3;
 
-				// Hack here because the original devs apparantely used the wrong size here...?
-				if (texName == "gSun1Tex" || texName == "gSun2Tex" || texName == "gSun3Tex")
-				{
-					texName = "gSun1Tex";
-					siz = G_IM_SIZ_4b;
-				}
-
 				Gfx value = gsDPSetTextureImage(fmt, siz, www - 1, __);
 				word0 = value.words.w0 & 0x00FFFFFF;
 				word0 += (G_SETTIMG_OTR << 24);
@@ -725,10 +718,10 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 					std::string fName = "";
 					
 					if (GETSEGNUM(seg) == SEGMENT_SCENE || GETSEGNUM(seg) == SEGMENT_ROOM)
-						fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), texName.c_str());
+						fName = GetPathToRes(res, texName.c_str());
 					else
-						fName = StringHelper::Sprintf("%s\\%s", assocFileName.c_str(), texName.c_str());
-					
+						fName = GetPathToRes(assocFile->resources[0], texName.c_str());
+
 					uint64_t hash = CRC64(fName.c_str());
 
 					word0 = hash >> 32;
@@ -925,13 +918,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 std::string OTRExporter_DisplayList::GetPathToRes(ZResource* res, std::string varName)
 {
-	std::string fName = "";
 	std::string prefix = GetPrefix(res);
-
-	//if (prefix != "")
-		//fName = StringHelper::Sprintf("%s\\%s\\%s", prefix.c_str(), GetParentFolderName(res).c_str(), varName.c_str());
-	//else
-		fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), varName.c_str());
+	std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), varName.c_str());
 
 	return fName;
 }
@@ -965,9 +953,22 @@ std::string OTRExporter_DisplayList::GetPrefix(ZResource* res)
 {
 	std::string oName = res->parent->GetOutName();
 	std::string prefix = "";
+	std::string xmlPath = StringHelper::Replace(res->parent->GetXmlFilePath().string(), "\\", "/");
 
 	if (StringHelper::Contains(oName, "_scene") || StringHelper::Contains(oName, "_room"))
 		prefix = "scenes";
+	else if (StringHelper::Contains(xmlPath, "objects/"))
+		prefix = "objects";
+	else if (StringHelper::Contains(xmlPath, "textures/"))
+		prefix = "textures";
+	else if (StringHelper::Contains(xmlPath, "overlays/"))
+		prefix = "overlays";
+	else if (StringHelper::Contains(xmlPath, "misc/"))
+		prefix = "misc";
+	else if (StringHelper::Contains(xmlPath, "text/"))
+		prefix = "text";
+	else if (StringHelper::Contains(xmlPath, "code/"))
+		prefix = "code";
 
 	return prefix;
 }

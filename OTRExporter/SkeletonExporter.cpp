@@ -1,6 +1,7 @@
 #include "SkeletonExporter.h"
 #include <Resource.h>
 #include <Globals.h>
+#include "DisplayListExporter.h"
 
 void OTRExporter_Skeleton::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
@@ -28,8 +29,7 @@ void OTRExporter_Skeleton::Save(ZResource* res, const fs::path& outPath, BinaryW
 			if (name.at(0) == '&')
 				name.erase(0, 1);
 
-			std::string fName = StringHelper::Sprintf("%s\\%s", skel->parent->GetOutName().c_str(), name.c_str());
-			writer->Write(fName);
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(res, name));
 		}
 		else
 		{

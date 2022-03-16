@@ -97,7 +97,6 @@ def main():
         try:
             numCores = 2
             print("Extracting assets with " + str(numCores) + " CPU cores.")
-            #with Pool(numCores,  initializer=initializeWorker, initargs=(mainAbort, args.unaccounted, extractedAssetsTracker, manager)) as p:
             with Pool(numCores, initializer=initializeWorker, initargs=(mainAbort, 0)) as p:
                 p.map(ExtractFunc, xmlFiles)
         except Exception as e:
