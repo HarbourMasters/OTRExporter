@@ -311,7 +311,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 			word1 = value.words.w1;
 		}
 		break;
-		// OTRTODO: FINISH IMPLEMENTATION
 		case G_TEXRECT:
 		{
 			int32_t xxx = (data & 0x00FFF00000000000) >> 44;

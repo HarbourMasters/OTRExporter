@@ -165,12 +165,9 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
 			for (size_t i = 0; i < cmdCsCam->cameras.size(); i++)
 			{
-				// OTRTODO: FINISH THIS...
 				writer->Write(cmdCsCam->cameras[i].baseOffset);
 				writer->Write(cmdCsCam->cameras[i].type);
 				writer->Write(cmdCsCam->cameras[i].numPoints);
-				//writer->Write(cmdCsCam->cameras[i].camAddress);
-				//writer->Write(cmdCsCam->cameras[i].segmentOffset);
 			}
 
 			writer->Write((uint32_t)cmdCsCam->points.size());
