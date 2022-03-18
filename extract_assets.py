@@ -9,7 +9,7 @@ def SignalHandler(sig, frame):
     mainAbort.set()
     # Don't exit immediately to update the extracted assets file.
 
-def BuildOTR():    
+def BuildOTR():
     shutil.copyfile("baserom/Audiobank", "Extract/Audiobank")
     shutil.copyfile("baserom/Audioseq", "Extract/Audioseq")
     shutil.copyfile("baserom/Audiotable", "Extract/Audiotable")
@@ -109,7 +109,7 @@ def main():
 
 
         BuildOTR()
-        shutil.rmtree("Extract")
+        # shutil.rmtree("Extract")
 
 if __name__ == "__main__":
     main()
