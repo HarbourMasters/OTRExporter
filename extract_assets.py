@@ -14,6 +14,8 @@ def BuildOTR():
     shutil.copyfile("baserom/Audioseq", "Extract/Audioseq")
     shutil.copyfile("baserom/Audiotable", "Extract/Audiotable")
 
+    shutil.copytree("assets", "Extract/assets")
+
     execStr = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPD/ZAPD.out"
 
     execStr += " botr -se OTR"
@@ -109,7 +111,7 @@ def main():
 
 
         BuildOTR()
-        # shutil.rmtree("Extract")
+        shutil.rmtree("Extract")
 
 if __name__ == "__main__":
     main()
