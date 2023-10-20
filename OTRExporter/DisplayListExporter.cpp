@@ -12,6 +12,8 @@
 #include "MtxExporter.h"
 #include <Utils/DiskFile.h>
 #include "VersionInfo.h"
+#include <libultraship/../src/resource/type/Array.h> // Hush you
+
 
 #define GFX_SIZE 8
 
@@ -788,7 +790,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 						// OTRTODO: Once we aren't relying on text representations, we should call ArrayExporter...
 						OTRExporter::WriteHeader(nullptr, "", &vtxWriter, LUS::ResourceType::Array);
 
-						vtxWriter.Write((uint32_t)ZResourceType::Vertex);
+						vtxWriter.Write((uint32_t)LUS::ArrayResourceType::Vertex);
 						vtxWriter.Write((uint32_t)arrCnt);
 
 						auto start = std::chrono::steady_clock::now();
