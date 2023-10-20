@@ -187,7 +187,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
 			if (cmdMesh->meshHeaderType == 0 || cmdMesh->meshHeaderType == 2)
 			{
-				PolygonType2* poly = (PolygonType2*)cmdMesh->polyType.get();
+				RoomShapeCullable* poly = (RoomShapeCullable*)cmdMesh->polyType.get();
 
 				writer->Write(poly->num);
 
@@ -200,17 +200,17 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
 				writer->Write(poly->format);
 
-				auto test = (PolygonDlist*)&poly->polyDLists[0];
+				auto test = (RoomShapeDListsEntry*)&poly->polyDLists[0];
 				Declaration* dListDeclOpa = poly->parent->GetDeclaration(GETSEGOFFSET(test->opa));
 				Declaration* dListDeclXlu = poly->parent->GetDeclaration(GETSEGOFFSET(test->xlu));
 
 				if (test->opa != 0)
-					writer->Write(StringHelper::Sprintf("%s/%s", OTRExporter_DisplayList::GetParentFolderName(res).c_str(), dListDeclOpa->varName.c_str()));
+					writer->Write(StringHelper::Sprintf("%s/%s", OTRExporter_DisplayList::GetParentFolderName(res).c_str(), dListDeclOpa->declName.c_str()));
 				else
 					writer->Write("");
 
 				if (test->xlu != 0)
-					writer->Write(StringHelper::Sprintf("%s/%s", OTRExporter_DisplayList::GetParentFolderName(res).c_str(), dListDeclXlu->varName.c_str()));
+					writer->Write(StringHelper::Sprintf("%s/%s", OTRExporter_DisplayList::GetParentFolderName(res).c_str(), dListDeclXlu->declName.c_str()));
 				else
 					writer->Write("");
 
@@ -225,7 +225,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
 						Declaration* bgDecl = poly->parent->GetDeclarationRanged(GETSEGOFFSET(poly->multiList[i].source));
 
-						writer->Write(OTRExporter_DisplayList::GetPathToRes(poly->multiList[i].sourceBackground, bgDecl->varName));
+						writer->Write(OTRExporter_DisplayList::GetPathToRes(poly->multiList[i].sourceBackground, bgDecl->declName));
 
 						writer->Write(poly->multiList[i].unk_0C);
 						writer->Write(poly->multiList[i].tlut);
@@ -246,7 +246,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
 					Declaration* bgDecl = poly->parent->GetDeclarationRanged(GETSEGOFFSET(poly->single.source));
 
-					writer->Write(OTRExporter_DisplayList::GetPathToRes(poly->single.sourceBackground, bgDecl->varName));
+					writer->Write(OTRExporter_DisplayList::GetPathToRes(poly->single.sourceBackground, bgDecl->declName));
 
 					writer->Write(poly->single.unk_0C);
 					writer->Write(poly->single.tlut);
@@ -349,7 +349,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 			SetCollisionHeader* cmdCollHeader = (SetCollisionHeader*)cmd;
 
 			Declaration* colHeaderDecl = room->parent->GetDeclaration(cmdCollHeader->segmentOffset);
-			std::string path = OTRExporter_DisplayList::GetPathToRes(room, colHeaderDecl->varName);
+			std::string path = OTRExporter_DisplayList::GetPathToRes(room, colHeaderDecl->declName);
 			writer->Write(path);
 		}
 		break;
@@ -359,7 +359,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
 			writer->Write((uint32_t)cmdEntrance->entrances.size());
 
-			for (EntranceEntry entry : cmdEntrance->entrances)
+			for (Spawn entry : cmdEntrance->entrances)
 			{
 				writer->Write((uint8_t)entry.startPositionIndex);
 				writer->Write((uint8_t)entry.roomToLoad);
@@ -464,7 +464,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 			{
 				Declaration* decl = room->parent->GetDeclaration(GETSEGOFFSET(cmdSetPathways->pathwayList.pathways[i].listSegmentAddress));
 				//std::string path = StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(res).c_str(), decl->varName.c_str());
-				std::string path = OTRExporter_DisplayList::GetPathToRes(room, decl->varName);
+				std::string path = OTRExporter_DisplayList::GetPathToRes(room, decl->declName);
 				writer->Write(path);
 
 				MemoryStream* pathStream = new MemoryStream();
@@ -486,7 +486,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 	}
 }
 
-void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, ZRoom* room, PolygonDlist* dlist)
+void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, ZRoom* room, RoomShapeDListsEntry* dlist)
 {
 	writer->Write(dlist->polyType);
 
@@ -504,7 +504,7 @@ void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, ZRoom* room, Polygon
 		if (dlist->opaDList != nullptr)
 		{
 			auto opaDecl = room->parent->GetDeclaration(GETSEGOFFSET(dlist->opaDList->GetRawDataIndex()));
-			writer->Write(StringHelper::Sprintf("%s/%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), opaDecl->varName.c_str()));
+			writer->Write(StringHelper::Sprintf("%s/%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), opaDecl->declName.c_str()));
 		}
 		else
 			writer->Write("");
@@ -512,7 +512,7 @@ void OTRExporter_Room::WritePolyDList(BinaryWriter* writer, ZRoom* room, Polygon
 		if (dlist->xluDList != nullptr)
 		{
 			auto xluDecl = room->parent->GetDeclaration(GETSEGOFFSET(dlist->xluDList->GetRawDataIndex()));
-			writer->Write(StringHelper::Sprintf("%s/%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), xluDecl->varName.c_str()));
+			writer->Write(StringHelper::Sprintf("%s/%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), xluDecl->declName.c_str()));
 		}
 		else
 			writer->Write("");
