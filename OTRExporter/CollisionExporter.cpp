@@ -38,26 +38,26 @@ void OTRExporter_Collision::Save(ZResource* res, const fs::path& outPath, Binary
 		writer->Write(col->polygons[i].dist);
 	}
 
-	writer->Write((uint32_t)col->PolygonTypes.size());
+	writer->Write((uint32_t)col->polygonTypes.size());
 
-	for (uint16_t i = 0; i < col->PolygonTypes.size(); i++) {
-		writer->Write(col->PolygonTypes[i].data[1]);
-		writer->Write(col->PolygonTypes[i].data[0]);
+	for (uint16_t i = 0; i < col->polygonTypes.size(); i++) {
+		writer->Write(col->polygonTypes[i].data[1]);
+		writer->Write(col->polygonTypes[i].data[0]);
 	}
 
 	writer->Write((uint32_t)col->camData->entries.size());
 
 	for (auto entry : col->camData->entries)
 	{
-		auto camPosDecl = col->parent->GetDeclarationRanged(Seg2Filespace(entry->cameraPosDataSeg, col->parent->baseAddress));
+		auto camPosDecl = col->parent->GetDeclarationRanged(Seg2Filespace(entry.cameraPosDataSeg, col->parent->baseAddress));
 		
 		int idx = 0;
 
 		if (camPosDecl != nullptr)
-			idx = ((entry->cameraPosDataSeg & 0x00FFFFFF) - camPosDecl->address) / 6;
+			idx = ((entry.cameraPosDataSeg & 0x00FFFFFF) - camPosDecl->address) / 6;
 		
-		writer->Write(entry->cameraSType);
-		writer->Write(entry->numData);
+		writer->Write(entry.cameraSType);
+		writer->Write(entry.numData);
 		writer->Write((uint32_t)idx);
 	}
 
@@ -65,9 +65,9 @@ void OTRExporter_Collision::Save(ZResource* res, const fs::path& outPath, Binary
 
 	for (auto entry : col->camData->cameraPositionData)
 	{
-		writer->Write(entry->x);
-		writer->Write(entry->y);
-		writer->Write(entry->z);
+		writer->Write(entry.x);
+		writer->Write(entry.y);
+		writer->Write(entry.z);
 	}
 
 	writer->Write((uint32_t)col->waterBoxes.size());

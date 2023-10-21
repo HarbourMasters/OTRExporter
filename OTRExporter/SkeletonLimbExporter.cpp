@@ -12,12 +12,12 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, const fs::path& outPath, Bin
 	writer->Write((uint8_t)limb->type);
 	writer->Write((uint8_t)limb->skinSegmentType);
 
-	if (limb->skinSegmentType == ZLimbSkinType::SkinType_DList && limb->type == ZLimbType::Skin)
+	if (limb->skinSegmentType == ZLimbSkinType::SkinType_Normal && limb->type == ZLimbType::Skin)
 	{
 		auto childDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->skinSegment));
 
 		if (childDecl != nullptr)
-			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, childDecl->varName));
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, childDecl->declName));
 		else
 			writer->Write("");
 	}
@@ -26,45 +26,45 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, const fs::path& outPath, Bin
 		writer->Write("");
 	}
 
-	writer->Write((uint16_t)limb->segmentStruct.unk_0);
-	writer->Write((uint32_t)limb->segmentStruct.unk_4_arr.size());
+	writer->Write((uint16_t)limb->segmentStruct.totalVtxCount);
+	writer->Write((uint32_t)limb->segmentStruct.limbModifications_arr.size());
 	
-	for (auto item : limb->segmentStruct.unk_4_arr)
+	for (auto item : limb->segmentStruct.limbModifications_arr)
 	{
 		writer->Write(item.unk_4);
 
-		writer->Write((uint32_t)item.unk_8_arr.size());
+		writer->Write((uint32_t)item.skinVertices_arr.size());
 
-		for (auto item2 : item.unk_8_arr)
+		for (auto item2 : item.skinVertices_arr)
 		{
-			writer->Write(item2.unk_0);
-			writer->Write(item2.unk_2);
-			writer->Write(item2.unk_4);
-			writer->Write(item2.unk_6);
-			writer->Write(item2.unk_7);
-			writer->Write(item2.unk_8);
-			writer->Write(item2.unk_9);
+			writer->Write(item2.index);
+			writer->Write(item2.s);
+			writer->Write(item2.t);
+			writer->Write(item2.normX);
+			writer->Write(item2.normY);
+			writer->Write(item2.normZ);
+			writer->Write(item2.alpha);
 		}
 
-		writer->Write((uint32_t)item.unk_C_arr.size());
+		writer->Write((uint32_t)item.limbTransformations_arr.size());
 
-		for (auto item2 : item.unk_C_arr)
+		for (auto item2 : item.limbTransformations_arr)
 		{
-			writer->Write(item2.unk_0);
+			writer->Write(item2.limbIndex);
 			writer->Write(item2.x);
 			writer->Write(item2.y);
 			writer->Write(item2.z);
-			writer->Write(item2.unk_8);
+			writer->Write(item2.scale);
 		}
 	}
 
-	if (limb->segmentStruct.unk_8 != 0)
+	if (limb->segmentStruct.dlist != SEGMENTED_NULL)
 	{
-		auto skinGfxDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->segmentStruct.unk_8));
+		auto skinGfxDecl = limb->parent->GetDeclaration(GETSEGOFFSET(limb->segmentStruct.dlist));
 
 		if (skinGfxDecl != nullptr)
 		{
-			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, skinGfxDecl->varName));
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, skinGfxDecl->declName));
 		}
 		else
 		{
