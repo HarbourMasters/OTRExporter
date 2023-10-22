@@ -10,7 +10,7 @@ import argparse
 
 def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None, customAssetsPath=None, customOtrFile=None, portVer=None):
     if not zapd_exe:
-        zapd_exe = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
+        zapd_exe = "Debug\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
 
     exec_cmd = [zapd_exe, "ed", "-eh", "-i", xmlPath, "-b", rom, "-fl", "CFG/filelists",
                 "-o", "placeholder", "-osf", "placeholder", "-rconf", "CFG/Config.xml"]
@@ -22,7 +22,7 @@ def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None, customAssetsPath=None
         # generate otrs, but not headers
         exec_cmd.extend(["-gsf", "0", "-se", "OTR", "--customAssetsPath", customAssetsPath,
                 "--customOtrFile", customOtrFile, "--otrfile",
-                "oot-mq.otr" if Z64Rom.isMqRom(rom) else "oot.otr"])
+                "oot-mq.otr" if Z64Rom.isMqRom(rom) else "mm.otr"])
 
     if portVer:
         exec_cmd.extend(["--portVer", portVer])
@@ -37,7 +37,7 @@ def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None, customAssetsPath=None
 
 def BuildCustomOtr(zapd_exe=None, assets_path=None, otrfile=None, portVer=None):
     if not zapd_exe:
-        zapd_exe = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
+        zapd_exe = "Debug\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
 
     if not assets_path or not otrfile:
         print("\n")
@@ -77,10 +77,12 @@ def main():
         BuildCustomOtr(args.zapd_exe, args.custom_assets_path, args.custom_otr_file, portVer=args.port_ver)
         return
 
-    roms = [ Z64Rom(args.rom) ] if args.rom else rom_chooser.chooseROM(args.verbose, args.non_interactive)
-    for rom in roms:
-        BuildOTR(os.path.join(args.xml_root, rom.version.xml_ver), rom.file_path, zapd_exe=args.zapd_exe, genHeaders=args.gen_headers,
-                 customAssetsPath=args.custom_assets_path, customOtrFile=args.custom_otr_file, portVer=args.port_ver)
+#    //roms = [ Z64Rom(args.rom) ] if args.rom else rom_chooser.chooseROM(args.verbose, args.non_interactive)
+#    //for rom in roms:
+#    //    if (os.path.exists("Extract")):
+#    //        shutil.rmtree("Extract")
+
+        BuildOTR("../mm/assets/xml/", baserom_uncompressed.z64, zapd_exe=args.zapd_exe, genHeaders=args.gen_headers)
 
 if __name__ == "__main__":
     main()

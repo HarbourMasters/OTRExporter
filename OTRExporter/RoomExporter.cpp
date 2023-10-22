@@ -1,3 +1,5 @@
+#define NO_GDI
+#define WIN32_LEAN_AND_MEAN
 #include "RoomExporter.h"
 #include "Utils/BinaryWriter.h"
 #include "Utils/MemoryStream.h"
@@ -34,6 +36,7 @@
 #include <ZRoom/Commands/SetTransitionActorList.h>
 #include "PathExporter.h"
 #undef FindResource
+
 
 void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
@@ -441,17 +444,39 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 			SetCutscenes* cmdSetCutscenes = (SetCutscenes*)cmd;
 			
 			std::string listName;
-			Globals::Instance->GetSegmentedPtrName(cmdSetCutscenes->cmdArg2, room->parent, "CutsceneData", listName, res->parent->workerID);
-			std::string fName = OTRExporter_DisplayList::GetPathToRes(room, listName);
-			//std::string fName = StringHelper::Sprintf("%s\\%s", OTRExporter_DisplayList::GetParentFolderName(room).c_str(), listName.c_str());
-			writer->Write(fName);
-			
-			MemoryStream* csStream = new MemoryStream();
-			BinaryWriter csWriter = BinaryWriter(csStream);
-			OTRExporter_Cutscene cs;
-			cs.Save(cmdSetCutscenes->cutscenes[0], "", &csWriter);
-			
-			AddFile(fName, csStream->ToVector());
+			if (Globals::Instance->game == ZGame::MM_RETAIL) {
+				writer->Seek(-1, SeekOffsetType::Current);
+				writer->Write((uint8_t)RoomCommand::SetCutscenesMM);
+				writer->Write(cmdSetCutscenes->numCutscenes);
+				for (size_t i = 0; i < cmdSetCutscenes->cutsceneEntries.size(); i++) {
+					Globals::Instance->GetSegmentedPtrName(cmdSetCutscenes->cutsceneEntries[i].segmentPtr, room->parent, "CutsceneData", listName, res->parent->workerID);
+					std::string fName = OTRExporter_DisplayList::GetPathToRes(room, listName);
+					writer->Write(fName);
+					writer->Write(cmdSetCutscenes->cutsceneEntries[i].exit);
+					writer->Write(cmdSetCutscenes->cutsceneEntries[i].entrance);
+					writer->Write(cmdSetCutscenes->cutsceneEntries[i].flag);
+					
+					MemoryStream* csStream = new MemoryStream();
+					BinaryWriter csWriter = BinaryWriter(csStream);
+					OTRExporter_Cutscene cs;
+					ZResource* newCs = res->parent->FindResource(cmdSetCutscenes->cutsceneEntries[i].segmentPtr & 0x00FFFFFF);
+					cs.Save((ZCutscene*)newCs, "", &csWriter);
+
+					AddFile(fName, csStream->ToVector());
+				}
+			}
+			else {
+				Globals::Instance->GetSegmentedPtrName(cmdSetCutscenes->cmdArg2, room->parent, "CutsceneData", listName, res->parent->workerID);
+				std::string fName = OTRExporter_DisplayList::GetPathToRes(room, listName);
+				writer->Write(fName);
+
+				MemoryStream* csStream = new MemoryStream();
+				BinaryWriter csWriter = BinaryWriter(csStream);
+				OTRExporter_Cutscene cs;
+				cs.Save(cmdSetCutscenes->cutscenes[0], "", &csWriter);
+
+				AddFile(fName, csStream->ToVector());
+			}
 		}
 			break;
 		case RoomCommand::SetPathways:

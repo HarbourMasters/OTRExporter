@@ -26,7 +26,7 @@
 #include <bit>
 #include <mutex>
 
-std::string otrFileName = "oot.otr";
+std::string otrFileName = "mm.otr";
 std::string customOtrFileName = "";
 std::string customAssetsPath = "";
 std::string portVersionString = "0.0.0";

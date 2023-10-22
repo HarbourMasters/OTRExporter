@@ -1,5 +1,6 @@
 #pragma once
-
+#define NO_GDI
+#define WIN32_LEAN_AND_MEAN
 #include "ZResource.h"
 #include "Exporter.h"
 #include "ZRoom/ZRoom.h"
