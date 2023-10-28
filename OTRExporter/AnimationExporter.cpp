@@ -1,5 +1,9 @@
 #include "AnimationExporter.h"
 #include <resource/type/Animation.h>
+#include <Globals.h>
+#include "DisplayListExporter.h"
+#undef FindResource
+
 
 void OTRExporter_Animation::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
@@ -14,7 +18,20 @@ void OTRExporter_Animation::Save(ZResource* res, const fs::path& outPath, Binary
 	{
 		writer->Write((uint32_t)SOH::AnimationType::Link);
 		writer->Write((uint16_t)linkAnim->frameCount);
-		writer->Write((uint32_t)linkAnim->segmentAddress);
+		std::string name;
+		bool found = Globals::Instance->GetSegmentedPtrName((linkAnim->segmentAddress), res->parent, "", name, res->parent->workerID);
+		if (found)
+		{
+			if (name.at(0) == '&')
+				name.erase(0, 1);
+
+			writer->Write(StringHelper::Sprintf("__OTR__misc/link_animetion/%s", name.c_str()));
+		}
+		else
+		{
+			writer->Write("");
+		}
+		//writer->Write((uint32_t)linkAnim->segmentAddress);
 	}
 	else if (curveAnim != nullptr)
 	{

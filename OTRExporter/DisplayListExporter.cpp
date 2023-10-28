@@ -869,7 +869,10 @@ std::string OTRExporter_DisplayList::GetParentFolderName(ZResource* res)
 	}
 	else if (StringHelper::Contains(oName, "_room"))
 	{
-		oName = StringHelper::Split(oName, "_room")[0] + "_scene";
+		if (Globals::Instance->game != ZGame::MM_RETAIL)
+			oName = StringHelper::Split(oName, "_room")[0] + "_scene";
+		else
+			oName = StringHelper::Split(oName, "_room")[0];
 	}
 
 	if (prefix != "")
@@ -883,21 +886,15 @@ std::string OTRExporter_DisplayList::GetPrefix(ZResource* res)
 	std::string oName = res->parent->GetOutName();
 	std::string prefix = "";
 	std::string xmlPath = StringHelper::Replace(res->parent->GetXmlFilePath().string(), "\\", "/");
-
-	if (StringHelper::Contains(oName, "_scene") || StringHelper::Contains(oName, "_room")) {
-		prefix = "scenes/shared";
-
-		// Regex for xml paths that are dungeons with unique MQ variants (only the main dungeon, not boss rooms)
-		std::regex dungeonsWithMQ(R"(((ydan)|(ddan)|(bdan)|(Bmori1)|(HIDAN)|(MIZUsin)|(jyasinzou)|(HAKAdan)|(HAKAdanCH)|(ice_doukutu)|(men)|(ganontika))\.xml)");
-
-		if (StringHelper::Contains(xmlPath, "dungeons/") && std::regex_search(xmlPath, dungeonsWithMQ)) {
-			if (Globals::Instance->rom->IsMQ()) {
-				prefix = "scenes/mq";
-			} else {
-				prefix = "scenes/nonmq";
-			}
-		}
-	}
+	// BENTODO bring in the existing OTRExporter changes from SoHs
+	if (StringHelper::Contains(oName, "_scene") || StringHelper::Contains(oName, "_room") || (StringHelper::Contains(res->parent->GetXmlFilePath().string(), "/scenes/") || StringHelper::Contains(res->parent->GetXmlFilePath().string(), "\\scenes\\"))) {
+		prefix = "scenes";
+        if (Globals::Instance->rom->IsMQ()) {
+            prefix += "/mq";
+        } else {
+            prefix += "/nonmq";
+        }
+    }
 	else if (StringHelper::Contains(xmlPath, "objects/"))
 		prefix = "objects";
 	else if (StringHelper::Contains(xmlPath, "textures/"))

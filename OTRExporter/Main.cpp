@@ -17,6 +17,7 @@
 #include "BlobExporter.h"
 #include "MtxExporter.h"
 #include "AudioExporter.h"
+#include "TextureAnimationExporter.h"
 #include <Globals.h>
 #include <Utils/DiskFile.h>
 #include <Utils/Directory.h>
@@ -298,7 +299,10 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 		}
 		else if (StringHelper::Contains(oName, "_room"))
 		{
-			oName = StringHelper::Split(oName, "_room")[0] + "_scene";
+			if (Globals::Instance->game != ZGame::MM_RETAIL)
+				oName = StringHelper::Split(oName, "_room")[0] + "_scene";
+			else
+				oName = StringHelper::Split(oName, "_room")[0];
 		}
 
 		std::string fName = "";
@@ -383,6 +387,7 @@ void ImportExporters()
 	exporterSet->exporters[ZResourceType::Blob] = new OTRExporter_Blob();
 	exporterSet->exporters[ZResourceType::Mtx] = new OTRExporter_MtxExporter();
 	exporterSet->exporters[ZResourceType::Audio] = new OTRExporter_Audio();
+	exporterSet->exporters[ZResourceType::TextureAnimation] = new OTRExporter_TextureAnimation();
 
 	Globals::AddExporter("OTR", exporterSet);
 

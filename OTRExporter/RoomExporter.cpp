@@ -340,7 +340,12 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 			for (size_t i = 0;i < cmdRoom->romfile->numRooms; i++)
 			{
 				//std::string roomName = StringHelper::Sprintf("%s/%s_room_%i", (StringHelper::Split(room->GetName(), "_")[0] + "_scene").c_str(), StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i);
-				std::string roomName = OTRExporter_DisplayList::GetPathToRes(room, StringHelper::Sprintf("%s_room_%i", StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i));
+				std::string roomName;
+				if (Globals::Instance->game != ZGame::MM_RETAIL)
+					roomName = OTRExporter_DisplayList::GetPathToRes(room, StringHelper::Sprintf("%s_room_%i", StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i));
+				else
+					roomName = OTRExporter_DisplayList::GetPathToRes(room, StringHelper::Sprintf("%s_room_%02d", StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i));
+
 				writer->Write(roomName);
 				writer->Write(cmdRoom->romfile->rooms[i].virtualAddressStart);
 				writer->Write(cmdRoom->romfile->rooms[i].virtualAddressEnd);
