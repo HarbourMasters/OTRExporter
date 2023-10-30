@@ -72,7 +72,7 @@ static void ExporterProgramEnd()
 	uint32_t crc = 0xFFFFFFFF;
 	const uint8_t endianness = (uint8_t)Endianness::Big;
 
-	std::vector<int16_t> portVersion = {};
+	std::vector<uint16_t> portVersion = {};
 	std::vector<std::string> versionParts = StringHelper::Split(portVersionString, ".");
 
 	// If a major.minor.patch string was not passed in, fallback to 0 0 0 
@@ -81,9 +81,9 @@ static void ExporterProgramEnd()
 	} else {
 		// Parse version values to number
 		for (const auto& val : versionParts) {
-			int16_t num = 0;
+			uint16_t num = 0;
 			try {
-				num = std::stoi(val, nullptr);
+				num = (uint16_t)std::stoi(val, nullptr);
 			} catch (std::invalid_argument &e) {
 				num = 0;
 			} catch (std::out_of_range &e) {
