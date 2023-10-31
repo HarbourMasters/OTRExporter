@@ -11,10 +11,9 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 {
 	auto* anim = (ZTextureAnimation*)res;
 	WriteHeader(res, outPath, writer, LUS::ResourceType::TSH_TexAnim, 0);
+	writer->Write((uint32_t)anim->entries.size());
 
 	for (const auto& e : anim->entries) {
-		if (GETSEGNUM(e.paramsPtr) == 0x80)
-			int bp = 0;
 		auto* params = (ZTextureAnimationParams*)res->parent->FindResource(Seg2Filespace(e.paramsPtr, res->parent->baseAddress));
 		writer->Write(e.segment);
 		writer->Write((uint8_t)e.type);
@@ -42,10 +41,10 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 			case TextureAnimationParamsType::ColorChangeLagrange: {
 				auto* colorParams = (TextureColorChangingParams*)params;
 				writer->Write(colorParams->animLength);
+				writer->Write((uint16_t)colorParams->primColorList.size());
 				for (const auto f : colorParams->frameDataList) {
 					writer->Write(f);
 				}
-				writer->Write(colorParams->primColorList.size());
 				for (const auto prim : colorParams->primColorList) {
 					writer->Write(prim.r);
 					writer->Write(prim.g);
@@ -53,7 +52,7 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 					writer->Write(prim.a);
 					writer->Write(prim.lodFrac);
 				}
-				writer->Write(colorParams->envColorList.size());
+				writer->Write((uint16_t)colorParams->envColorList.size());
 				for (const auto env : colorParams->envColorList) {
 					writer->Write(env.r);
 					writer->Write(env.g);
@@ -65,8 +64,9 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 			case TextureAnimationParamsType::TextureCycle: {
 				auto* cycleParams = (TextureCyclingParams*)params;
 				
+				// cycleLength is the same langth 
 				writer->Write(cycleParams->cycleLength);
-				writer->Write(cycleParams->textureList.size());
+				//writer->Write(cycleParams->textureList.size());
 
 				for (const auto t : cycleParams->textureList) {
 					std::string name;

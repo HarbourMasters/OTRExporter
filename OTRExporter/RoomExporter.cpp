@@ -34,6 +34,7 @@
 #include <ZRoom/Commands/SetCutscenes.h>
 #include "CutsceneExporter.h"
 #include <ZRoom/Commands/SetTransitionActorList.h>
+#include <ZRoom/Commands/SetCutsceneEntryList.h>
 #include "PathExporter.h"
 #undef FindResource
 
@@ -450,8 +451,8 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 			
 			std::string listName;
 			if (Globals::Instance->game == ZGame::MM_RETAIL) {
-				writer->Seek(-1, SeekOffsetType::Current);
-				writer->Write((uint8_t)RoomCommand::SetCutscenesMM);
+				writer->Seek(-4, SeekOffsetType::Current);
+				writer->Write((uint32_t)RoomCommand::SetCutscenesMM);
 				writer->Write(cmdSetCutscenes->numCutscenes);
 				for (size_t i = 0; i < cmdSetCutscenes->cutsceneEntries.size(); i++) {
 					Globals::Instance->GetSegmentedPtrName(cmdSetCutscenes->cutsceneEntries[i].segmentPtr, room->parent, "CutsceneData", listName, res->parent->workerID);
@@ -508,6 +509,25 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 			break;
 		case RoomCommand::EndMarker:
 			break;
+		case RoomCommand::SetActorCutsceneList:
+		{
+			SetActorCutsceneList* list = (SetActorCutsceneList*)cmd;
+			writer->Write((uint32_t)list->cutscenes.size());
+
+			for (const auto& e : list->cutscenes) {
+				writer->Write(e.priority);
+				writer->Write(e.length);
+				writer->Write(e.csCamId);
+				writer->Write(e.scriptIndex);
+				writer->Write(e.additionalCsId);
+				writer->Write(e.endSfx);
+				writer->Write(e.customValue);
+				writer->Write(e.hudVisibility);
+				writer->Write(e.endCam);
+				writer->Write(e.letterboxSize);
+			}
+			break;
+		}
 		default:
 			printf("UNIMPLEMENTED COMMAND: 0x%02X\n", (int)cmd->cmdID);
 
