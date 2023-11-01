@@ -22,7 +22,6 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 			case TextureAnimationParamsType::DualScroll: {
 				auto* scrollParams = (TextureScrollingParams*)params;
 				
-				writer->Write(scrollParams->count);
 				writer->Write(scrollParams->rows[0].xStep);
 				writer->Write(scrollParams->rows[0].yStep);
 				writer->Write(scrollParams->rows[0].width);
@@ -41,10 +40,13 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 			case TextureAnimationParamsType::ColorChangeLagrange: {
 				auto* colorParams = (TextureColorChangingParams*)params;
 				writer->Write(colorParams->animLength);
-				writer->Write((uint16_t)colorParams->primColorList.size());
+				writer->Write(colorParams->colorListCount);
+
+				writer->Write((uint32_t)colorParams->frameDataList.size());
 				for (const auto f : colorParams->frameDataList) {
 					writer->Write(f);
 				}
+				writer->Write((uint32_t)colorParams->primColorList.size());
 				for (const auto prim : colorParams->primColorList) {
 					writer->Write(prim.r);
 					writer->Write(prim.g);

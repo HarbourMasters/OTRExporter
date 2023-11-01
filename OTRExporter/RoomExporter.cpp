@@ -35,6 +35,8 @@
 #include "CutsceneExporter.h"
 #include <ZRoom/Commands/SetTransitionActorList.h>
 #include <ZRoom/Commands/SetCutsceneEntryList.h>
+#include <ZRoom/Commands/SetAnimatedMaterialList.h>
+#include "TextureAnimationExporter.h"
 #include "PathExporter.h"
 #undef FindResource
 
@@ -528,6 +530,25 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 			}
 			break;
 		}
+		case RoomCommand::SetAnimatedMaterialList: {
+			SetAnimatedMaterialList* list = (SetAnimatedMaterialList*)cmd;
+			std::string listName;
+			Globals::Instance->GetSegmentedPtrName(cmd->cmdArg2, cmd->parent, "AnimatedMaterial", listName,
+				res->parent->workerID);
+			listName = OTRExporter_DisplayList::GetPathToRes(room, listName);
+			writer->Write(listName);
+
+			MemoryStream* animatedMatStream = new MemoryStream();
+			BinaryWriter animatedMatWriter = BinaryWriter(animatedMatStream);
+			OTRExporter_TextureAnimation texAnim;
+			
+			texAnim.Save(&list->textureAnimation, outPath, &animatedMatWriter);
+
+			AddFile(listName, animatedMatStream->ToVector());
+
+			break;
+		}
+
 		default:
 			printf("UNIMPLEMENTED COMMAND: 0x%02X\n", (int)cmd->cmdID);
 
