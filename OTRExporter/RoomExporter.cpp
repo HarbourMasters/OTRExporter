@@ -36,6 +36,8 @@
 #include <ZRoom/Commands/SetTransitionActorList.h>
 #include <ZRoom/Commands/SetCutsceneEntryList.h>
 #include <ZRoom/Commands/SetAnimatedMaterialList.h>
+#include <ZRoom/Commands/SetMinimapList.h>
+#include <ZRoom/Commands/SetMinimapChests.h>
 #include "TextureAnimationExporter.h"
 #include "PathExporter.h"
 #undef FindResource
@@ -548,7 +550,36 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
 			break;
 		}
+		case RoomCommand::SetMinimapList: {
+			SetMinimapList* list = (SetMinimapList*)cmd;
 
+			writer->Write((uint32_t)list->minimaps.size());
+			writer->Write(list->scale);
+			
+			for (const auto& m : list->minimaps) {
+				writer->Write(m.unk0);
+				writer->Write(m.unk2);
+				writer->Write(m.unk4);
+				writer->Write(m.unk6);
+				writer->Write(m.unk8);
+			}
+
+			break;
+		}
+		case RoomCommand::SetMinimapChests: {
+			SetMinimapChests* chests = (SetMinimapChests*)cmd;
+
+			writer->Write((uint32_t)chests->chests.size());
+
+			for (const auto& c : chests->chests) {
+				writer->Write(c.unk0);
+				writer->Write(c.unk2);
+				writer->Write(c.unk4);
+				writer->Write(c.unk6);
+				writer->Write(c.unk8);
+			}
+			break;
+		}
 		default:
 			printf("UNIMPLEMENTED COMMAND: 0x%02X\n", (int)cmd->cmdID);
 
