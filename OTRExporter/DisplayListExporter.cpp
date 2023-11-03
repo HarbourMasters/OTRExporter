@@ -67,6 +67,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 	writer->Write((uint32_t)(hash & 0xFFFFFFFF));
 
 	auto dlStart = std::chrono::steady_clock::now();
+	uint8_t lastOpCode;
 
 	//for (auto data : dList->instructions)
 	for (size_t dataIdx = 0; dataIdx < dList->instructions.size(); dataIdx++)
@@ -837,6 +838,13 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 		writer->Write(word0);
 		writer->Write(word1);
+		lastOpCode = opcode;
+	}
+
+	if (lastOpCode != G_ENDDL) {
+		Gfx value = { gsSPEndDisplayList() };
+		writer->Write(value.words.w0);
+		writer->Write(value.words.w1);
 	}
 
 	auto dlEnd = std::chrono::steady_clock::now();

@@ -168,21 +168,15 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 			SetCsCamera* cmdCsCam = (SetCsCamera*)cmd;
 
 			writer->Write((uint32_t)cmdCsCam->cameras.size());
-
-			for (size_t i = 0; i < cmdCsCam->cameras.size(); i++)
-			{
-				writer->Write(cmdCsCam->cameras[i].baseOffset);
-				writer->Write(cmdCsCam->cameras[i].type);
-				writer->Write(cmdCsCam->cameras[i].numPoints);
-			}
-
-			writer->Write((uint32_t)cmdCsCam->points.size());
-
-			for (size_t i = 0; i < cmdCsCam->points.size(); i++)
-			{
-				writer->Write(cmdCsCam->points[i].scalars[0].scalarData.s16);
-				writer->Write(cmdCsCam->points[i].scalars[1].scalarData.s16);
-				writer->Write(cmdCsCam->points[i].scalars[2].scalarData.s16);
+				segptr_t arrBase = cmdCsCam->cameras[0].baseOffset;
+			for (const auto& c : cmdCsCam->cameras) {
+				writer->Write(c.type);
+				writer->Write(c.numPoints);
+				for (size_t i = 0; i < c.numPoints; i++) {
+					writer->Write(cmdCsCam->points[((c.baseOffset - arrBase) / 6) + i].scalars[0].scalarData.s16);
+					writer->Write(cmdCsCam->points[((c.baseOffset - arrBase) / 6) + i].scalars[1].scalarData.s16);
+					writer->Write(cmdCsCam->points[((c.baseOffset - arrBase) / 6) + i].scalars[2].scalarData.s16);
+				}
 			}
 		}
 		break;
