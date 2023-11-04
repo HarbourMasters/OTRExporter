@@ -884,11 +884,15 @@ std::string OTRExporter_DisplayList::GetPrefix(ZResource* res)
 
 	if (StringHelper::Contains(oName, "_scene") || StringHelper::Contains(oName, "_room")) {
 		prefix = "scenes";
-        if (Globals::Instance->rom->IsMQ()) {
-            prefix += "/mq";
-        } else {
-            prefix += "/nonmq";
-        }
+		if (StringHelper::Contains(xmlPath, "dungeons/")) {
+			if (Globals::Instance->rom->IsMQ()) {
+				prefix += "/mq";
+			} else {
+				prefix += "/nonmq";
+			}
+		} else {
+			prefix += "/shared";
+		}
     }
 	else if (StringHelper::Contains(xmlPath, "objects/"))
 		prefix = "objects";
