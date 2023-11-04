@@ -8,7 +8,7 @@ import struct
 import subprocess
 import argparse
 
-def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None, customAssetsPath=None, customOtrFile=None):
+def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None, customAssetsPath=None, customOtrFile=None, portVer=None):
     if not zapd_exe:
         zapd_exe = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
 
@@ -24,6 +24,9 @@ def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None, customAssetsPath=None
                 "--customOtrFile", customOtrFile, "--otrfile",
                 "oot-mq.otr" if Z64Rom.isMqRom(rom) else "oot.otr"])
 
+    if portVer:
+        exec_cmd.extend(["--portVer", portVer])
+
     print(exec_cmd)
     exitValue = subprocess.call(exec_cmd)
     if exitValue != 0:
@@ -32,7 +35,7 @@ def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None, customAssetsPath=None
         print("Aborting...", file=os.sys.stderr)
         print("\n")
 
-def BuildCustomOtr(zapd_exe=None, assets_path=None, otrfile=None):
+def BuildCustomOtr(zapd_exe=None, assets_path=None, otrfile=None, portVer=None):
     if not zapd_exe:
         zapd_exe = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
 
@@ -43,6 +46,9 @@ def BuildCustomOtr(zapd_exe=None, assets_path=None, otrfile=None):
         return
 
     exec_cmd = [zapd_exe, "botr", "-se", "OTR", "--norom", "--customAssetsPath", assets_path, "--customOtrFile", otrfile]
+
+    if portVer:
+        exec_cmd.extend(["--portVer", portVer])
 
     print(exec_cmd)
     exitValue = subprocess.call(exec_cmd)
@@ -63,17 +69,18 @@ def main():
     parser.add_argument("--xml-root", help="Root path for the rom xmls", dest="xml_root", type=str)
     parser.add_argument("--custom-assets-path", help="Path to custom assets for the custom otr file", dest="custom_assets_path", type=str)
     parser.add_argument("--custom-otr-file", help="Name for custom otr file", dest="custom_otr_file", type=str)
+    parser.add_argument("--port-ver", help="Store the port version in the otr", dest="port_ver", type=str)
 
     args = parser.parse_args()
 
     if args.norom:
-        BuildCustomOtr(args.zapd_exe, args.custom_assets_path, args.custom_otr_file)
+        BuildCustomOtr(args.zapd_exe, args.custom_assets_path, args.custom_otr_file, portVer=args.port_ver)
         return
 
     roms = [ Z64Rom(args.rom) ] if args.rom else rom_chooser.chooseROM(args.verbose, args.non_interactive)
     for rom in roms:
         BuildOTR(os.path.join(args.xml_root, rom.version.xml_ver), rom.file_path, zapd_exe=args.zapd_exe, genHeaders=args.gen_headers,
-                 customAssetsPath=args.custom_assets_path, customOtrFile=args.custom_otr_file)
+                 customAssetsPath=args.custom_assets_path, customOtrFile=args.custom_otr_file, portVer=args.port_ver)
 
 if __name__ == "__main__":
     main()
