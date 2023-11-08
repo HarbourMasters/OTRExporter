@@ -13,7 +13,7 @@
 #include "MtxExporter.h"
 #include <Utils/DiskFile.h>
 #include "VersionInfo.h"
-
+#undef FindResource
 
 #define GFX_SIZE 8
 
@@ -238,6 +238,24 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 					word0 = hash >> 32;
 					word1 = hash & 0xFFFFFFFF;
+
+					// Write the Matrix
+					for (ZMtx mtx : dList->mtxList)
+					{
+						if (mtx.GetRawDataIndex() == mtxDecl->address)
+						{
+							MemoryStream* mtxStream = new MemoryStream();
+							BinaryWriter mtxWriter = BinaryWriter(mtxStream);
+
+							OTRExporter_MtxExporter mtxExporter;
+
+							//printf("Adding MTX %s\n", vName.c_str());
+
+							mtxExporter.Save(&mtx, "", &mtxWriter);
+							AddFile(vName, mtxStream->ToVector());
+							break;
+						}
+					}
 				}
 				else
 				{
