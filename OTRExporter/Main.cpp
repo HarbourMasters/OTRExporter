@@ -14,6 +14,7 @@
 #include "CutsceneExporter.h"
 #include "PathExporter.h"
 #include "TextExporter.h"
+#include "TextMMExporter.h"
 #include "BlobExporter.h"
 #include "MtxExporter.h"
 #include "AudioExporter.h"
@@ -384,6 +385,7 @@ void ImportExporters()
 	exporterSet->exporters[ZResourceType::Array] = new OTRExporter_Array();
 	exporterSet->exporters[ZResourceType::Path] = new OTRExporter_Path();
 	exporterSet->exporters[ZResourceType::Text] = new OTRExporter_Text();
+	exporterSet->exporters[ZResourceType::TextMM] = new OTRExporter_TextMM();
 	exporterSet->exporters[ZResourceType::Blob] = new OTRExporter_Blob();
 	exporterSet->exporters[ZResourceType::Mtx] = new OTRExporter_MtxExporter();
 	exporterSet->exporters[ZResourceType::Audio] = new OTRExporter_Audio();
