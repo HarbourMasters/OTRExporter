@@ -3,7 +3,7 @@
 #include "ZResource.h"
 #include "ZTextureAnimation.h"
 #include "Exporter.h"
-#include <utils/BinaryWriter.h>
+#include <Utils/BinaryWriter.h>
 
 class OTRExporter_TextureAnimation : public OTRExporter
 {

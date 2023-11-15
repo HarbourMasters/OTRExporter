@@ -450,8 +450,8 @@ void OTRExporter_Cutscene::SaveOot(ZCutscene* cs, BinaryWriter* writer) {
 }
 // MUST be uint16_t for -1
 typedef enum : uint16_t{
-    /* -1 */ CS_TEXT_TYPE_NONE = -1,
-    /*  0 */ CS_TEXT_TYPE_DEFAULT,
+    /* -1 */ CS_TEXT_TYPE_NONE = (uint16_t)-1,
+    /*  0 */ CS_TEXT_TYPE_DEFAULT = 0,
     /*  1 */ CS_TEXT_TYPE_1,
     /*  2 */ CS_TEXT_OCARINA_ACTION,
     /*  3 */ CS_TEXT_TYPE_3,
