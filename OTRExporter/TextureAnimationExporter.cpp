@@ -86,7 +86,7 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 						writer->Write("");
 					}
 				}
-				writer->Write(cycleParams->textureIndexList.size());
+				//writer->Write(cycleParams->textureIndexList.size());
 				for (const auto index : cycleParams->textureIndexList) {
 					writer->Write(index);
 				}
