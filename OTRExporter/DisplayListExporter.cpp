@@ -274,6 +274,12 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 			int32_t xxx = (data & 0x0000000000FFF000) >> 12;
 			int32_t ddd = (data & 0x0000000000000FFF);
 
+			// gSunDL Textures are rendered as i8 instead of i4
+			if (res->GetName() == "gSunDL" && ttt != G_TX_LOADTILE)
+			{
+				xxx = (xxx+1)/2-1;
+			}
+
 			Gfx value = {gsDPLoadBlock(i, sss, ttt, xxx, ddd)};
 			word0 = value.words.w0;
 			word1 = value.words.w1;
@@ -603,6 +609,12 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 			int32_t dd = (data & 0b0000000000000000000000000000000000000000000000000000001100000000) >> 8;
 			int32_t bbbb = (data & 0b0000000000000000000000000000000000000000000000000000000011110000) >> 4;
 			int32_t uuuu = (data & 0b0000000000000000000000000000000000000000000000000000000000001111);
+
+			// gSunDL Textures are rendered as i8 instead of i4
+			if (res->GetName() == "gSunDL" && ttt != G_TX_LOADTILE)
+			{
+				ii = G_IM_SIZ_4b;
+			}
 
 			Gfx value = {gsDPSetTile(fff, ii, nnnnnnnnn, mmmmmmmmm, ttt, pppp, cc, aaaa, ssss, dd, bbbb, uuuu)};
 			word0 = value.words.w0;
