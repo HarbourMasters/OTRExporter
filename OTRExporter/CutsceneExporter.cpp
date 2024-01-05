@@ -489,7 +489,7 @@ void OTRExporter_Cutscene::SaveMM(ZCutscene* cs, BinaryWriter* writer) {
             // BENTODO: Can these stay consilidated?
             case CutsceneMM_CommandType::CS_CMD_CAMERA_SPLINE: {
                 writer->Write((uint32_t)CutsceneMM_CommandType::CS_CMD_CAMERA_SPLINE);
-                writer->Write((uint32_t)cs->commands[i]->entries.size() * sizeof(uint32_t));
+                writer->Write((uint32_t)(cs->commands[i]->entries.size() * sizeof(uint32_t)));
                 for (const auto e : cs->commands[i]->entries) {
                     auto* cmd = (CutsceneSubCommandEntry_Camera*)e;
                     writer->Write(CMD_HH(cmd->base, cmd->startFrame));

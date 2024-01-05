@@ -873,8 +873,8 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 	if (lastOpCode != G_ENDDL) {
 		Gfx value = { gsSPEndDisplayList() };
-		writer->Write(value.words.w0);
-		writer->Write(value.words.w1);
+		writer->Write((uint32_t)value.words.w0);
+		writer->Write((uint32_t)value.words.w1);
 	}
 
 	auto dlEnd = std::chrono::steady_clock::now();
