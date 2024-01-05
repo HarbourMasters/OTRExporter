@@ -176,14 +176,14 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
             SetCsCamera* cmdCsCam = (SetCsCamera*)cmd;
 
             writer->Write((uint32_t)cmdCsCam->cameras.size());
-                segptr_t arrBase = cmdCsCam->cameras[0].baseOffset;
+            segptr_t arrBase = cmdCsCam->cameras[0].segmentOffset;
             for (const auto& c : cmdCsCam->cameras) {
                 writer->Write(c.type);
                 writer->Write(c.numPoints);
                 for (int16_t i = 0; i < c.numPoints; i++) {
-                    writer->Write(cmdCsCam->points[((c.baseOffset - arrBase) / 6) + i].scalars[0].scalarData.s16);
-                    writer->Write(cmdCsCam->points[((c.baseOffset - arrBase) / 6) + i].scalars[1].scalarData.s16);
-                    writer->Write(cmdCsCam->points[((c.baseOffset - arrBase) / 6) + i].scalars[2].scalarData.s16);
+                    writer->Write(cmdCsCam->points[((c.segmentOffset - arrBase) / 6) + i].scalars[0].scalarData.s16);
+                    writer->Write(cmdCsCam->points[((c.segmentOffset - arrBase) / 6) + i].scalars[1].scalarData.s16);
+                    writer->Write(cmdCsCam->points[((c.segmentOffset - arrBase) / 6) + i].scalars[2].scalarData.s16);
                 }
             }
         }
