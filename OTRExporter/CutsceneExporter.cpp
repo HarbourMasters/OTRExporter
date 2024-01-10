@@ -425,6 +425,13 @@ typedef enum : uint16_t {
     /*  5 */ CS_TEXT_TYPE_ALL_NORMAL_MASKS
 } CutsceneTextType;
 
+typedef enum : uint8_t {
+    /* 0 */ Header,
+    /* 1 */ CamPoint,
+    /* 2 */ CamMisc,
+    /* 3 */ Footer,
+} CutsceneSplineType;
+
 #define WRITE_CMD_PROLOG(cmd)     \
     writer->Write((uint32_t)cmd); \
     writer->Write((uint32_t)cs->commands[i]->entries.size());
@@ -490,10 +497,49 @@ void OTRExporter_Cutscene::SaveMM(ZCutscene* cs, BinaryWriter* writer) {
             case CutsceneMM_CommandType::CS_CMD_CAMERA_SPLINE: {
                 writer->Write((uint32_t)CutsceneMM_CommandType::CS_CMD_CAMERA_SPLINE);
                 writer->Write((uint32_t)(cs->commands[i]->entries.size() * sizeof(uint32_t)));
-                for (const auto e : cs->commands[i]->entries) {
-                    auto* cmd = (CutsceneSubCommandEntry_Camera*)e;
-                    writer->Write(CMD_HH(cmd->base, cmd->startFrame));
+                // monkaS
+                size_t j = 0;
+                for (;;) {
+                    auto* header = dynamic_cast<CutsceneSubCommandEntry_SplineHeader*>(cs->commands[i]->entries[j]);
+
+                    //Debugging check, can probably remove after testing
+                    assert(header != nullptr);
+                    uint32_t numEntries = header->numEntries;
+                    writer->Write(CMD_HH(header->numEntries, header->unused0));
+                    writer->Write(CMD_HH(header->unused1, header->duration));
+
+                    for (size_t k = 0; k < numEntries * 2; k++) {
+                        auto* element =
+                            dynamic_cast<CutsceneSubCommandEntry_SplineCamPoint*>(cs->commands[i]->entries[++j]); 
+                        // Debugging check, can probably remove after testing
+                        assert(element != nullptr);
+                        writer->Write(CMD_BBH(element->interpType, element->weight, element->duration));
+                        writer->Write(CMD_HH(element->posX, element->posY));
+                        writer->Write(CMD_HH(element->posZ, element->relTo));
+                    }
+                    for (size_t k = 0; k < numEntries; k++) {
+                        auto* element =
+                            dynamic_cast<CutsceneSubCommandEntry_SplineMiscPoint*>(cs->commands[i]->entries[++j]);
+                        // Debugging check, can probably remove after testing
+                        assert(element != nullptr);
+                        writer->Write(CMD_HH(element->unused0, element->roll));
+                        writer->Write(CMD_HH(element->fov, element->unused1));
+                    }
+
+                    auto* header2 = dynamic_cast<CutsceneSubCommandEntry_SplineFooter*>(cs->commands[i]->entries[++j]);
+                    if (header2 != nullptr) {
+                        if (header2->base == 0xFFFF) {
+                            break;
+                        }
+                    }
                 }
+                
+                // The footer exists as an error checking type and a way to output an empty macro. It holds no actual data.
+                auto* footer = dynamic_cast<CutsceneSubCommandEntry_SplineFooter*>(cs->commands[i]->entries[j]);
+                assert(footer != nullptr);
+                writer->Write((uint16_t)0xFFFF);
+                writer->Write((uint16_t)0x0004);
+                //i += j;
                 break;
             }
             case CutsceneMM_CommandType::CS_CMD_MISC: {
