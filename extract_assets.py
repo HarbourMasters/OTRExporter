@@ -77,12 +77,15 @@ def main():
         BuildCustomOtr(args.zapd_exe, args.custom_assets_path, args.custom_otr_file, portVer=args.port_ver)
         return
 
-#    //roms = [ Z64Rom(args.rom) ] if args.rom else rom_chooser.chooseROM(args.verbose, args.non_interactive)
-#    //for rom in roms:
-#    //    if (os.path.exists("Extract")):
-#    //        shutil.rmtree("Extract")
+    roms = [ Z64Rom(args.rom) ] if args.rom else rom_chooser.chooseROM(args.verbose, args.non_interactive)
+    for rom in roms:
+        if (not rom.isMMRom):
+            continue
 
-        BuildOTR("../mm/assets/xml/", baserom_uncompressed.z64, zapd_exe=args.zapd_exe, genHeaders=args.gen_headers)
+        if (os.path.exists("Extract")):
+            shutil.rmtree("Extract")
+
+        BuildOTR("../mm/assets/xml/", rom.file_path, zapd_exe=args.zapd_exe, genHeaders=args.gen_headers)
 
 if __name__ == "__main__":
     main()
