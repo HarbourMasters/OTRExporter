@@ -496,7 +496,11 @@ void OTRExporter_Cutscene::SaveMM(ZCutscene* cs, BinaryWriter* writer) {
             // BENTODO: Can these stay consilidated?
             case CutsceneMM_CommandType::CS_CMD_CAMERA_SPLINE: {
                 writer->Write((uint32_t)CutsceneMM_CommandType::CS_CMD_CAMERA_SPLINE);
-                writer->Write((uint32_t)(cs->commands[i]->entries.size() * sizeof(uint32_t)));
+                // This command uses 4 different macros that are all different sizes and uses the number of bytes of the 
+                // whole command instead of entries like most other commands. numEntries isn't actually the number of entries in the command
+                // rather the number of bytes the command will take up in the rom. We also can not simply use GetCommandSize because it returns
+                // a larger size to help ZAPD know where to start reading for the next command.
+                writer->Write(cs->commands[i]->numEntries);
                 // monkaS
                 size_t j = 0;
                 for (;;) {
