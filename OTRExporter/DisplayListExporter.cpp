@@ -793,6 +793,22 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 				int32_t aa = (data & 0x000000FF00000000ULL) >> 32;
 				int32_t nn = (data & 0x000FF00000000000ULL) >> 44;
+				bool isSegmentedPtr = false;
+				std::string fName = "";
+
+				// If we can't find the display list in this file, try looking in other files based on the segment number
+				if (vtxDecl == nullptr) {
+					uint32_t seg = data & 0xFFFFFFFF;
+					std::string resourceName = "";
+					isSegmentedPtr = Globals::Instance->GetSegmentedPtrName(seg, dList->parent, "", resourceName, res->parent->workerID);
+
+					if (isSegmentedPtr) {
+						ZFile* assocFile = Globals::Instance->GetSegment(GETSEGNUM(seg), res->parent->workerID);
+						std::string assocFileName = assocFile->GetName();
+						fName = GetPathToRes(assocFile->resources[0], resourceName.c_str());
+						vtxDecl = assocFile->GetDeclarationRanged(segOffset);
+					}
+				}
 
 				if (vtxDecl != nullptr && vtxDecl->declName != "Gfx")
 				{
@@ -808,7 +824,9 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 					writer->Write(word0);
 					writer->Write(word1);
 
-					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->declName);
+					if (!isSegmentedPtr) {
+						fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->declName);
+					}
 
 					uint64_t hash = CRC64(fName.c_str());
 
