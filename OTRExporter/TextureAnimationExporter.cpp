@@ -4,6 +4,7 @@
 #include <Globals.h>
 #include "TextureAnimationExporter.h"
 #include "DisplayListExporter.h"
+#include <spdlog/spdlog.h>
 
 #undef FindResource
 
@@ -16,7 +17,7 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 	for (const auto& e : anim->entries) {
 		auto* params = (ZTextureAnimationParams*)res->parent->FindResource(Seg2Filespace(e.paramsPtr, res->parent->baseAddress));
 		writer->Write(e.segment);
-		writer->Write((uint8_t)e.type);
+		writer->Write((int16_t)e.type);
 		switch ((TextureAnimationParamsType)e.type) {
 			case TextureAnimationParamsType::SingleScroll: 
 			case TextureAnimationParamsType::DualScroll: {
@@ -72,8 +73,15 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 
 				for (const auto t : cycleParams->textureList) {
 					std::string name;
-					//ZTexture* tex = (ZTexture*)res->parent->FindResource(t & 0x00FFFFFF);
 					bool found = Globals::Instance->GetSegmentedPtrName(GETSEGOFFSET(t), res->parent, "", name, res->parent->workerID);
+
+					if (!found) {
+						ZTexture* tex = (ZTexture*)res->parent->FindResource(t & 0x00FFFFFF);
+						if (tex != nullptr) {
+							name = tex->GetName();
+							found = true;
+						}
+					}
 					if (found)
 					{
 						if (name.at(0) == '&')
@@ -83,6 +91,7 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 					}
 					else
 					{
+						spdlog::error("Texture not found: 0x{:X}", t);
 						writer->Write("");
 					}
 				}
