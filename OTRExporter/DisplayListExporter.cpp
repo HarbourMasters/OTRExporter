@@ -723,9 +723,6 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 			}
 			else
 			{
-				std::string texName = "";
-				bool foundDecl = Globals::Instance->GetSegmentedPtrName(seg, dList->parent, "", texName, res->parent->workerID);
-
 				int32_t __ = (data & 0x00FF000000000000) >> 48;
 				int32_t www = (data & 0x00000FFF00000000) >> 32;
 
@@ -741,18 +738,35 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 				writer->Write(word0);
 				writer->Write(word1);
 
+				bool foundDecl = false;
+				std::string resourcePath = "";
+
+				// First check current file
+				if (res->parent->segment == GETSEGNUM(seg)) {
+					uint32_t segmentOffset = GETSEGOFFSET(seg);
+					Declaration* resourceDecl = dList->parent->GetDeclaration(segmentOffset);
+
+					if (resourceDecl != nullptr)
+					{
+						foundDecl = true;
+						resourcePath = OTRExporter_DisplayList::GetPathToRes(res, resourceDecl->declName);
+					}
+				}
+
+				// Then check in global resources
+				if (!foundDecl) {
+					foundDecl = Globals::Instance->GetSegmentedPtrName(seg, dList->parent, "", resourcePath, res->parent->workerID);
+
+					if (foundDecl) {
+						ZFile* assocFile = Globals::Instance->GetSegment(GETSEGNUM(seg), res->parent->workerID);
+						std::string assocFileName = assocFile->GetName();
+						resourcePath = GetPathToRes(assocFile->resources[0], resourcePath);
+					}
+				}
+
 				if (foundDecl)
 				{
-					ZFile* assocFile = Globals::Instance->GetSegment(GETSEGNUM(seg), res->parent->workerID);
-					std::string assocFileName = assocFile->GetName();
-					std::string fName = "";
-
-					if (GETSEGNUM(seg) == SEGMENT_SCENE || GETSEGNUM(seg) == SEGMENT_ROOM)
-						fName = GetPathToRes(res, texName.c_str());
-					else
-						fName = GetPathToRes(assocFile->resources[0], texName.c_str());
-
-					uint64_t hash = CRC64(fName.c_str());
+					uint64_t hash = CRC64(resourcePath.c_str());
 
 					word0 = hash >> 32;
 					word1 = hash & 0xFFFFFFFF;
