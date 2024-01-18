@@ -354,7 +354,13 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
                 if (Globals::Instance->game != ZGame::MM_RETAIL)
                     roomName = OTRExporter_DisplayList::GetPathToRes(room, StringHelper::Sprintf("%s_room_%i", StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i));
                 else
-                    roomName = OTRExporter_DisplayList::GetPathToRes(room, StringHelper::Sprintf("%s_room_%02d", StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i));
+                {
+                    // Alt headers use the rooms from their parent room. For example we want SPOT00/SPOT00_room_00, not SPOT00/SPOT00Set_00A050_room_00
+                    if (room->zroomType == ZResourceType::AltHeader)
+                        roomName = OTRExporter_DisplayList::GetPathToRes(room, StringHelper::Sprintf("%s_room_%02d", cmd->parent->GetName().c_str(), i));
+                    else
+                        roomName = OTRExporter_DisplayList::GetPathToRes(room, StringHelper::Sprintf("%s_room_%02d", StringHelper::Split(room->GetName(), "_scene")[0].c_str(), i));
+                }
 
                 writer->Write(roomName);
                 writer->Write(cmdRoom->romfile->rooms[i].virtualAddressStart);
