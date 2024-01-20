@@ -432,75 +432,38 @@ typedef enum : uint8_t {
     /* 3 */ Footer,
 } CutsceneSplineType;
 
-#define WRITE_CMD_PROLOG(cmd)     \
-    writer->Write((uint32_t)cmd); \
-    writer->Write((uint32_t)cs->commands[i]->entries.size());
-
 void OTRExporter_Cutscene::SaveMM(ZCutscene* cs, BinaryWriter* writer) {
     for (size_t i = 0; i < cs->commands.size(); i++) {
+        writer->Write((uint32_t)cs->commands[i]->commandID);
+
         if (((cs->commands[i]->commandID >= (uint32_t)CutsceneMM_CommandType::CS_CMD_ACTOR_CUE_100) &&
              (cs->commands[i]->commandID <= (uint32_t)CutsceneMM_CommandType::CS_CMD_ACTOR_CUE_149)) ||
             (cs->commands[i]->commandID == (uint32_t)CutsceneMM_CommandType::CS_CMD_ACTOR_CUE_201) ||
             ((cs->commands[i]->commandID >= (uint32_t)CutsceneMM_CommandType::CS_CMD_ACTOR_CUE_450) &&
              (cs->commands[i]->commandID <= (uint32_t)CutsceneMM_CommandType::CS_CMD_ACTOR_CUE_599))) {
-            WRITE_CMD_PROLOG(cs->commands[i]->commandID);
             goto actorCue;
         }
+
         switch ((CutsceneMM_CommandType)cs->commands[i]->commandID) {
             case CutsceneMM_CommandType::CS_CMD_TEXT: {
-                writer->Write((uint32_t)CutsceneMM_CommandType::CS_CMD_TEXT);
                 writer->Write((uint32_t)cs->commands[i]->entries.size());
                 for (const auto& e : cs->commands[i]->entries) {
                     auto* cmd = (CutsceneMMSubCommandEntry_Text*)e;
 
-                    switch ((CutsceneTextType)cmd->type) {
-                        case CS_TEXT_TYPE_DEFAULT: // 0
-                            writer->Write(CMD_HH(cmd->base, cmd->startFrame));
-                            writer->Write(CMD_HH(cmd->endFrame, cmd->type));
-                            writer->Write(CMD_HH(cmd->textId1, cmd->textId2));
-                            break;
-                        case CS_TEXT_TYPE_1: // 1
-                            writer->Write(CMD_HH(cmd->base, cmd->startFrame));
-                            writer->Write(CMD_HH(cmd->endFrame, cmd->type));
-                            writer->Write(CMD_HH(cmd->textId1, cmd->textId2));
-                            break;
-                        case CS_TEXT_OCARINA_ACTION: // 2
-                            writer->Write(CMD_HH(cmd->base, cmd->startFrame));
-                            writer->Write(CMD_HH(cmd->endFrame, cmd->type));
-                            writer->Write(CMD_HH(cmd->textId1, 0xFFFF));
-                            break;
-                        case CS_TEXT_TYPE_3: // 3
-                            writer->Write(CMD_HH(cmd->base, cmd->startFrame));
-                            writer->Write(CMD_HH(cmd->endFrame, cmd->type));
-                            writer->Write(CMD_HH(cmd->textId1, cmd->textId2));
-                            break;
-                        case CS_TEXT_TYPE_BOSSES_REMAINS: // 4
-                            writer->Write(CMD_HH(cmd->base, cmd->startFrame));
-                            writer->Write(CMD_HH(cmd->endFrame, cmd->type));
-                            writer->Write(CMD_HH(cmd->textId1, 0xFFFF));
-                            break;
-                        case CS_TEXT_TYPE_ALL_NORMAL_MASKS: // 5
-                            writer->Write(CMD_HH(cmd->base, cmd->startFrame));
-                            writer->Write(CMD_HH(cmd->endFrame, cmd->type));
-                            writer->Write(CMD_HH(cmd->textId1, 0xFFFF));
-                            break;
-                        case CS_TEXT_TYPE_NONE: // -1
-                            writer->Write(CMD_HH(0xFFFF, cmd->startFrame));
-                            writer->Write(CMD_HH(cmd->endFrame, 0xFFFF));
-                            writer->Write(CMD_HH(0xFFFF, 0xFFFF));
-                    }
+                    writer->Write(CMD_HH(cmd->base, cmd->startFrame));
+                    writer->Write(CMD_HH(cmd->endFrame, cmd->type));
+                    writer->Write(CMD_HH(cmd->textId1, cmd->textId2));
                 }
                 break;
             }
 
             // BENTODO: Can these stay consilidated?
             case CutsceneMM_CommandType::CS_CMD_CAMERA_SPLINE: {
-                writer->Write((uint32_t)CutsceneMM_CommandType::CS_CMD_CAMERA_SPLINE);
                 // This command uses 4 different macros that are all different sizes and uses the number of bytes of the 
                 // whole command instead of entries like most other commands. numEntries isn't actually the number of entries in the command
                 // rather the number of bytes the command will take up in the rom. We also can not simply use GetCommandSize because it returns
                 // a larger size to help ZAPD know where to start reading for the next command.
-                writer->Write(cs->commands[i]->numEntries);
+                writer->Write((uint32_t)cs->commands[i]->numEntries);
                 // monkaS
                 size_t j = 0;
                 for (;;) {
@@ -546,8 +509,22 @@ void OTRExporter_Cutscene::SaveMM(ZCutscene* cs, BinaryWriter* writer) {
                 //i += j;
                 break;
             }
-            case CutsceneMM_CommandType::CS_CMD_MISC: {
-                writer->Write((uint32_t)CutsceneMM_CommandType::CS_CMD_MISC);
+            case CutsceneMM_CommandType::CS_CMD_MISC:
+            case CutsceneMM_CommandType::CS_CMD_LIGHT_SETTING:
+            case CutsceneMM_CommandType::CS_CMD_TRANSITION:
+            case CutsceneMM_CommandType::CS_CMD_MOTION_BLUR:
+            case CutsceneMM_CommandType::CS_CMD_GIVE_TATL:
+            case CutsceneMM_CommandType::CS_CMD_STOP_SEQ:
+            case CutsceneMM_CommandType::CS_CMD_START_SEQ:
+            case CutsceneMM_CommandType::CS_CMD_SFX_REVERB_INDEX_2:
+            case CutsceneMM_CommandType::CS_CMD_SFX_REVERB_INDEX_1:
+            case CutsceneMM_CommandType::CS_CMD_MODIFY_SEQ:
+            case CutsceneMM_CommandType::CS_CMD_START_AMBIENCE:
+            case CutsceneMM_CommandType::CS_CMD_FADE_OUT_AMBIENCE:
+            case CutsceneMM_CommandType::CS_CMD_DESTINATION:
+            case CutsceneMM_CommandType::CS_CMD_CHOOSE_CREDITS_SCENES:
+            default:
+            {
                 writer->Write((uint32_t)cs->commands[i]->entries.size());
                 for (const auto e : cs->commands[i]->entries) {
                     writer->Write(CMD_HH(e->base, e->startFrame));
@@ -555,83 +532,8 @@ void OTRExporter_Cutscene::SaveMM(ZCutscene* cs, BinaryWriter* writer) {
                 }
                 break;
             }
-            case CutsceneMM_CommandType::CS_CMD_LIGHT_SETTING: {
-                writer->Write((uint32_t)CutsceneMM_CommandType::CS_CMD_LIGHT_SETTING);
-                writer->Write((uint32_t)cs->commands[i]->entries.size());
-                for (const auto e : cs->commands[i]->entries) {
-                    writer->Write(CMD_BBH(0, e->base, e->startFrame));
-                    writer->Write(CMD_HH(e->endFrame, e->endFrame));
-                }
-                break;
-            }
-
-            case CutsceneMM_CommandType::CS_CMD_TRANSITION: {
-                WRITE_CMD_PROLOG(CutsceneMM_CommandType::CS_CMD_TRANSITION);
-
-                for (const auto e : cs->commands[i]->entries) {
-                    writer->Write(CMD_HH(e->base, e->startFrame));
-                    writer->Write(CMD_HH(e->endFrame, e->endFrame));
-                }
-                break;
-            }
-            case CutsceneMM_CommandType::CS_CMD_MOTION_BLUR: {
-                WRITE_CMD_PROLOG(CutsceneMM_CommandType::CS_CMD_MOTION_BLUR);
-
-                for (const auto e : cs->commands[i]->entries) {
-                    writer->Write(CMD_HH(e->base, e->startFrame));
-                    writer->Write(CMD_HH(e->endFrame, e->endFrame));
-                }
-                break;
-            }
-            case CutsceneMM_CommandType::CS_CMD_GIVE_TATL: {
-                WRITE_CMD_PROLOG(CutsceneMM_CommandType::CS_CMD_GIVE_TATL);
-
-                for (const auto e : cs->commands[i]->entries) {
-                    writer->Write(CMD_HH(e->base, e->startFrame));
-                    writer->Write(CMD_HH(e->endFrame, e->endFrame));
-                }
-                break;
-            }
-            case CutsceneMM_CommandType::CS_CMD_STOP_SEQ:
-            case CutsceneMM_CommandType::CS_CMD_START_SEQ: {
-                WRITE_CMD_PROLOG(CutsceneMM_CommandType::CS_CMD_START_SEQ);
-                for (const auto e : cs->commands[i]->entries) {
-                    writer->Write(CMD_BBH(0, e->base, e->startFrame));
-                    writer->Write(CMD_HH(e->endFrame, e->endFrame));
-                }
-                break;
-            }
-            case CutsceneMM_CommandType::CS_CMD_SFX_REVERB_INDEX_2:
-            case CutsceneMM_CommandType::CS_CMD_SFX_REVERB_INDEX_1:
-            case CutsceneMM_CommandType::CS_CMD_MODIFY_SEQ:
-
-            case CutsceneMM_CommandType::CS_CMD_START_AMBIENCE:
-            case CutsceneMM_CommandType::CS_CMD_FADE_OUT_AMBIENCE:
-            case CutsceneMM_CommandType::CS_CMD_DESTINATION:
-            case CutsceneMM_CommandType::CS_CMD_CHOOSE_CREDITS_SCENES:
-
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_FA:
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_FE:
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_FF:
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_100:
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_101:
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_102:
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_103:
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_104:
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_105:
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_108:
-            case CutsceneMM_CommandType::CS_CMD_UNK_DATA_109: {
-                writer->Write((uint32_t)cs->commands[i]->commandID);
-                writer->Write((uint32_t)cs->commands[i]->entries.size());
-                for (const auto e : cs->commands[i]->entries) {
-                    writer->Write(CMD_BBH(0, e->base, e->startFrame));
-                    writer->Write(CMD_HH(e->endFrame, e->endFrame));
-                }
-                break;
-            }
             case CutsceneMM_CommandType::CS_CMD_TRANSITION_GENERAL: {
-                WRITE_CMD_PROLOG(CutsceneMM_CommandType::CS_CMD_TRANSITION_GENERAL);
-
+                writer->Write((uint32_t)cs->commands[i]->entries.size());
                 for (const auto e : cs->commands[i]->entries) {
                     auto* cmd = (CutsceneSubCommandEntry_TransitionGeneral*)e;
 
@@ -642,29 +544,28 @@ void OTRExporter_Cutscene::SaveMM(ZCutscene* cs, BinaryWriter* writer) {
                 break;
             }
             case CutsceneMM_CommandType::CS_CMD_FADE_OUT_SEQ: {
-                WRITE_CMD_PROLOG(CutsceneMM_CommandType::CS_CMD_FADE_OUT_SEQ);
-
+                writer->Write((uint32_t)cs->commands[i]->entries.size());
                 for (const auto e : cs->commands[i]->entries) {
                     writer->Write(CMD_HH(e->base, e->startFrame));
-                    writer->Write(CMD_HH(e->endFrame, 0));
+                    writer->Write(CMD_HH(e->endFrame, e->pad));
+                    writer->Write(CMD_W(0));
                 }
                 break;
             }
             case CutsceneMM_CommandType::CS_CMD_TIME: {
-                WRITE_CMD_PROLOG(CutsceneMM_CommandType::CS_CMD_TIME);
-
+                writer->Write((uint32_t)cs->commands[i]->entries.size());
                 for (const auto e : cs->commands[i]->entries) {
                     auto* cmd = (CutsceneSubCommandEntry_SetTime*)e;
 
                     writer->Write(CMD_HH(cmd->base, cmd->startFrame));
                     writer->Write(CMD_HBB(cmd->endFrame, cmd->hour, cmd->minute));
-                    // Skipping the zero word
+                    writer->Write(CMD_W(0));
                 }
                 break;
             }
             case CutsceneMM_CommandType::CS_CMD_PLAYER_CUE: {
-                WRITE_CMD_PROLOG(CutsceneMM_CommandType::CS_CMD_PLAYER_CUE);
             actorCue:
+                writer->Write((uint32_t)cs->commands[i]->entries.size());
                 for (const auto e : cs->commands[i]->entries) {
                     auto* cmd = (CutsceneMMSubCommandEntry_ActorCue*)e;
 
@@ -684,8 +585,7 @@ void OTRExporter_Cutscene::SaveMM(ZCutscene* cs, BinaryWriter* writer) {
                 break;
             }
             case CutsceneMM_CommandType::CS_CMD_RUMBLE: {
-                WRITE_CMD_PROLOG(CutsceneMM_CommandType::CS_CMD_RUMBLE);
-
+                writer->Write((uint32_t)cs->commands[i]->entries.size());
                 for (const auto e : cs->commands[i]->entries) {
                     auto* cmd = (CutsceneMMSubCommandEntry_Rumble*)e;
 
@@ -693,11 +593,6 @@ void OTRExporter_Cutscene::SaveMM(ZCutscene* cs, BinaryWriter* writer) {
                     writer->Write(CMD_HBB(cmd->endFrame, cmd->intensity, cmd->decayTimer));
                     writer->Write(CMD_BBBB(cmd->decayStep, 0, 0, 0));
                 }
-                break;
-            }
-            default: {
-                // writer->Write((uint32_t)cs->commands[i]->commandID);
-                printf("Undefined CS Opcode: %04X\n", cs->commands[i]->commandID);
                 break;
             }
         }
