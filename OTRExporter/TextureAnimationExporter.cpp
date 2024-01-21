@@ -67,9 +67,9 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 			case TextureAnimationParamsType::TextureCycle: {
 				auto* cycleParams = (TextureCyclingParams*)params;
 				
-				// cycleLength is the same langth 
 				writer->Write(cycleParams->cycleLength);
-				//writer->Write(cycleParams->textureList.size());
+				// Texture list may or may not be the same size as the index list, so we need to write the size of the list for the importer
+				writer->Write((uint32_t)cycleParams->textureList.size());
 
 				for (const auto t : cycleParams->textureList) {
 					std::string name;
@@ -95,7 +95,6 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 						writer->Write("");
 					}
 				}
-				//writer->Write(cycleParams->textureIndexList.size());
 				for (const auto index : cycleParams->textureIndexList) {
 					writer->Write(index);
 				}
