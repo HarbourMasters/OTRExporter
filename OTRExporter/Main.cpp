@@ -19,6 +19,7 @@
 #include "MtxExporter.h"
 #include "AudioExporter.h"
 #include "TextureAnimationExporter.h"
+#include "CKeyFrameExporter.h"
 #include <Globals.h>
 #include <Utils/DiskFile.h>
 #include <Utils/Directory.h>
@@ -390,7 +391,8 @@ void ImportExporters()
 	exporterSet->exporters[ZResourceType::Mtx] = new OTRExporter_MtxExporter();
 	exporterSet->exporters[ZResourceType::Audio] = new OTRExporter_Audio();
 	exporterSet->exporters[ZResourceType::TextureAnimation] = new OTRExporter_TextureAnimation();
-
+    exporterSet->exporters[ZResourceType::KeyFrameSkel] = new OTRExporter_CKeyFrameSkel();
+    exporterSet->exporters[ZResourceType::KeyFrameAnimation] = new OTRExporter_CKeyFrameAnim();
 	Globals::AddExporter("OTR", exporterSet);
 
 	InitVersionInfo();
