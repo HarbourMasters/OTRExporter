@@ -75,8 +75,8 @@ void OTRExporter_CKeyFrameAnim::Save(ZResource* res, const fs::path& outPath, Bi
             writer->Write(b);
         }
     } else {
-        writer->Write((uint32_t)anim->bitFlagsFLex.size());
-        for (const auto b : anim->bitFlagsFLex) {
+        writer->Write((uint32_t)anim->bitFlagsFlex.size());
+        for (const auto b : anim->bitFlagsFlex) {
             writer->Write(b);
         }
     }
@@ -93,8 +93,8 @@ void OTRExporter_CKeyFrameAnim::Save(ZResource* res, const fs::path& outPath, Bi
         writer->Write(kf);
     }
 
-    writer->Write((uint32_t)anim->presentValues.size());
-    for (const auto pv : anim->presentValues) {
+    writer->Write((uint32_t)anim->presetValues.size());
+    for (const auto pv : anim->presetValues) {
         writer->Write(pv);
     }
 
