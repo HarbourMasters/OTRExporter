@@ -8,6 +8,9 @@ ExporterArchive::ExporterArchive(const std::string& path, bool enableWriting) : 
     Load(enableWriting);
 }
 
+ExporterArchive::~ExporterArchive() {
+    Unload();
+}
 
 bool ExporterArchive::Load(bool enableWriting) {
     HANDLE mpqHandle = NULL;
@@ -37,6 +40,24 @@ bool ExporterArchive::Load(bool enableWriting) {
     }
 
     return true;
+}
+
+bool ExporterArchive::Unload() {
+    bool success = true;
+
+    bool closeArchiveSuccess;
+    {
+        const std::lock_guard<std::mutex> lock(mMutex);
+        closeArchiveSuccess = SFileCloseArchive(mMpq);
+    }
+    if (!closeArchiveSuccess) {
+        printf("Failed to close mpq\n");
+        success = false;
+    }
+
+    mMpq = nullptr;
+
+    return success;
 }
 
 std::shared_ptr<ExporterArchive> ExporterArchive::CreateArchive(const std::string& archivePath, size_t fileCapacity) {

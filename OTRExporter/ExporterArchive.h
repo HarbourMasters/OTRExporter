@@ -12,6 +12,8 @@
 class ExporterArchive : public std::enable_shared_from_this<ExporterArchive> {
   public:
     ExporterArchive(const std::string& path, bool enableWriting);
+    ~ExporterArchive();
+
     static std::shared_ptr<ExporterArchive> CreateArchive(const std::string& archivePath, size_t fileCapacity);
     bool AddFile(const std::string& filePath, uintptr_t fileData, DWORD fileSize);
 
@@ -23,4 +25,5 @@ class ExporterArchive : public std::enable_shared_from_this<ExporterArchive> {
     std::unordered_map<uint64_t, std::string> mHashes;
 
     bool Load(bool enableWriting);
+    bool Unload();
 };
