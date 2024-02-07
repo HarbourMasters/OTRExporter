@@ -1,6 +1,6 @@
 #include "ExporterArchive.h"
 #include "Utils/StringHelper.h"
-#include <StrHash64.h>
+#include <StrHash64/StrHash64.h>
 #include <filesystem>
 
 ExporterArchive::ExporterArchive(const std::string& path, bool enableWriting) : mPath(path) {
