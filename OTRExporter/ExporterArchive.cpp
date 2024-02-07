@@ -17,11 +17,16 @@ bool ExporterArchive::Load(bool enableWriting) {
 
     bool baseLoaded = false;
     std::string fullPath = std::filesystem::absolute(mPath).string();
+
+    TCHAR* fullPathTchar = new TCHAR[fullPath.size() + 1];
+    fullPathTchar[fullPath.size()] = 0;
+    std::copy(fullPath.begin(), fullPath.end(), fullPathTchar);
+
     bool openArchiveSuccess;
     {
         const std::lock_guard<std::mutex> lock(mMutex);
         openArchiveSuccess =
-            SFileOpenArchive(fullPath.c_str(), 0, enableWriting ? 0 : MPQ_OPEN_READ_ONLY, &mpqHandle);
+            SFileOpenArchive(fullPathTchar, 0, enableWriting ? 0 : MPQ_OPEN_READ_ONLY, &mpqHandle);
     }
     if (openArchiveSuccess) {
         printf("Opened mpq file ");
