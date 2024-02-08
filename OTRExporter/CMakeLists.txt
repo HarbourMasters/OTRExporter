@@ -118,8 +118,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 			">"
 			"_CONSOLE;"
 			"_CRT_SECURE_NO_WARNINGS;"
-			"UNICODE;"
-			"_UNICODE"
 			STORMLIB_NO_AUTO_LINK
 		)
 	elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x86")
@@ -133,8 +131,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 			">"
 			"WIN32;"
 			"_CONSOLE;"
-			"UNICODE;"
-			"_UNICODE"
 			STORMLIB_NO_AUTO_LINK
 		)
 	endif()
@@ -150,8 +146,6 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang|AppleClang")
 		">"
 		"_CONSOLE;"
 		"_CRT_SECURE_NO_WARNINGS;"
-		"UNICODE;"
-		"_UNICODE"
 	)
 endif()
 ################################################################################
