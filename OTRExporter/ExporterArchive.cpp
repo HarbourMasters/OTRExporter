@@ -18,15 +18,11 @@ bool ExporterArchive::Load(bool enableWriting) {
     bool baseLoaded = false;
     std::string fullPath = std::filesystem::absolute(mPath).string();
 
-    TCHAR* fullPathTchar = new TCHAR[fullPath.size() + 1];
-    fullPathTchar[fullPath.size()] = 0;
-    std::copy(fullPath.begin(), fullPath.end(), fullPathTchar);
-
     bool openArchiveSuccess;
     {
         const std::lock_guard<std::mutex> lock(mMutex);
         openArchiveSuccess =
-            SFileOpenArchive(fullPathTchar, 0, enableWriting ? 0 : MPQ_OPEN_READ_ONLY, &mpqHandle);
+            SFileOpenArchive(fullPath.c_str(), 0, enableWriting ? 0 : MPQ_OPEN_READ_ONLY, &mpqHandle);
     }
     if (openArchiveSuccess) {
         printf("Opened mpq file ");
@@ -68,19 +64,13 @@ bool ExporterArchive::Unload() {
 std::shared_ptr<ExporterArchive> ExporterArchive::CreateArchive(const std::string& archivePath, size_t fileCapacity) {
     auto archive = std::make_shared<ExporterArchive>(archivePath, true);
 
-    TCHAR* fileName = new TCHAR[archivePath.size() + 1];
-    fileName[archivePath.size()] = 0;
-    std::copy(archivePath.begin(), archivePath.end(), fileName);
-
     bool success;
     {
         const std::lock_guard<std::mutex> lock(archive->mMutex);
-        success = SFileCreateArchive(fileName, MPQ_CREATE_LISTFILE | MPQ_CREATE_ATTRIBUTES | MPQ_CREATE_ARCHIVE_V2,
+        success = SFileCreateArchive(archivePath.c_str(), MPQ_CREATE_LISTFILE | MPQ_CREATE_ATTRIBUTES | MPQ_CREATE_ARCHIVE_V2,
                                      fileCapacity, &archive->mMpq);
     }
     int32_t error = GetLastError();
-
-    delete[] fileName;
 
     if (success) {
         return archive;
