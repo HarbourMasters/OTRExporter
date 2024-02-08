@@ -31,7 +31,7 @@ std::string customOtrFileName = "";
 std::string customAssetsPath = "";
 std::string portVersionString = "0.0.0";
 
-std::shared_ptr<LUS::Archive> otrArchive;
+std::shared_ptr<ExporterArchive> otrArchive;
 BinaryWriter* fileWriter;
 std::chrono::steady_clock::time_point fileStart, resStart;
 std::map<std::string, std::vector<char>> files;
@@ -53,9 +53,9 @@ static void ExporterParseFileMode(const std::string& buildMode, ZFileMode& fileM
 		printf("BOTR: Generating OTR Archive...\n");
 
 		if (DiskFile::Exists(otrFileName))
-			otrArchive = std::shared_ptr<LUS::Archive>(new LUS::Archive(otrFileName, true));
+			otrArchive = std::shared_ptr<ExporterArchive>(new ExporterArchive(otrFileName, true));
 		else
-			otrArchive = LUS::Archive::CreateArchive(otrFileName, 40000);
+			otrArchive = ExporterArchive::CreateArchive(otrFileName, 40000);
 
 		auto lst = Directory::ListFiles("Extract");
 
@@ -125,7 +125,7 @@ static void ExporterProgramEnd()
 		printf("Created version file.\n");
 
 		printf("Generating OTR Archive...\n");
-		otrArchive = LUS::Archive::CreateArchive(otrFileName, 40000);
+		otrArchive = ExporterArchive::CreateArchive(otrFileName, 40000);
 
 		printf("Adding game version file.\n");
 		otrArchive->AddFile("version", (uintptr_t)versionStream->ToVector().data(), versionStream->GetLength());
@@ -167,7 +167,7 @@ static void ExporterProgramEnd()
 	const auto& lst = Directory::ListFiles(customAssetsPath);
 
 	printf("Generating Custom OTR Archive...\n");
-	std::shared_ptr<LUS::Archive> customOtr = LUS::Archive::CreateArchive(customOtrFileName, 4096);
+	std::shared_ptr<ExporterArchive> customOtr = ExporterArchive::CreateArchive(customOtrFileName, 4096);
 
 	printf("Adding portVersion file.\n");
 	customOtr->AddFile("portVersion", (uintptr_t)portVersionStream->ToVector().data(), portVersionStream->GetLength());
