@@ -12,13 +12,13 @@ void OTRExporter_Animation::Save(ZResource* res, const fs::path& outPath, Binary
 	ZLinkAnimation* linkAnim = dynamic_cast<ZLinkAnimation*>(anim);
 	if (linkAnim != nullptr)
 	{
-		writer->Write((uint32_t)LUS::AnimationType::Link);
+		writer->Write((uint32_t)AnimationType::Link);
 		writer->Write((uint16_t)linkAnim->frameCount);
 		writer->Write((uint32_t)linkAnim->segmentAddress);
 	}
 	else if (curveAnim != nullptr)
 	{
-		writer->Write((uint32_t)LUS::AnimationType::Curve);
+		writer->Write((uint32_t)AnimationType::Curve);
 		writer->Write((uint16_t)curveAnim->frameCount);
 
 		writer->Write((uint32_t)curveAnim->refIndexArr.size());
@@ -44,7 +44,7 @@ void OTRExporter_Animation::Save(ZResource* res, const fs::path& outPath, Binary
 	}
 	else if (normalAnim != nullptr)
 	{
-		writer->Write((uint32_t)LUS::AnimationType::Normal);
+		writer->Write((uint32_t)AnimationType::Normal);
 		writer->Write((uint16_t)normalAnim->frameCount);
 
 		writer->Write((uint32_t)normalAnim->rotationValues.size());
@@ -65,6 +65,6 @@ void OTRExporter_Animation::Save(ZResource* res, const fs::path& outPath, Binary
 	}
 	else
 	{
-		writer->Write((uint32_t)LUS::AnimationType::Legacy);
+		writer->Write((uint32_t)AnimationType::Legacy);
 	}
 }
