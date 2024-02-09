@@ -5,7 +5,7 @@ void OTRExporter_PlayerAnimationExporter::Save(ZResource* res, const fs::path& o
 {
 	ZPlayerAnimationData* anim = (ZPlayerAnimationData*)res;
 
-	WriteHeader(res, outPath, writer, LUS::ResourceType::SOH_PlayerAnimation);
+	WriteHeader(res, outPath, writer, static_cast<uint32_t>(SohResourceType::SOH_PlayerAnimation));
 
 	auto start = std::chrono::steady_clock::now();
 	

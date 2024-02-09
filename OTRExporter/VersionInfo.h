@@ -4,4 +4,4 @@
 #include <vector>
 #include "src/resource/Resource.h"
 
-extern std::map<LUS::ResourceType, uint32_t> resourceVersions;
+extern std::map<uint32_t, uint32_t> resourceVersions;
