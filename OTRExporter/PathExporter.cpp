@@ -5,7 +5,7 @@ void OTRExporter_Path::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 {
 	ZPath* path = (ZPath*)res;
 
-	WriteHeader(res, outPath, writer, static_cast<uint32_t>(SohResourceType::SOH_Path));
+	WriteHeader(res, outPath, writer, static_cast<uint32_t>(SOH::ResourceType::SOH_Path));
 	
 	writer->Write((uint32_t)path->pathways.size());
 

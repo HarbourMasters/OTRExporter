@@ -39,7 +39,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 {
 	ZRoom* room = (ZRoom*)res;
 
-	WriteHeader(res, outPath, writer, static_cast<uint32_t>(SohResourceType::SOH_Room));
+	WriteHeader(res, outPath, writer, static_cast<uint32_t>(SOH::ResourceType::SOH_Room));
 
 	writer->Write((uint32_t)room->commands.size());
 

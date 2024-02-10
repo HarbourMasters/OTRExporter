@@ -5,7 +5,7 @@ void OTRExporter_Cutscene::Save(ZResource* res, const fs::path& outPath, BinaryW
 {
 	ZCutscene* cs = (ZCutscene*)res;
 
-	WriteHeader(cs, outPath, writer, static_cast<uint32_t>(SohResourceType::SOH_Cutscene));
+	WriteHeader(cs, outPath, writer, static_cast<uint32_t>(SOH::ResourceType::SOH_Cutscene));
 
 	writer->Write((uint32_t)0);
 

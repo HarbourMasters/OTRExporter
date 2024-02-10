@@ -6,7 +6,7 @@
 #include <Utils/BinaryWriter.h>
 #include <libultraship/bridge.h>
 #include "VersionInfo.h"
-#include "SohResourceType.h"
+#include "../../soh/soh/resource/type/SohResourceType.h"
 
 class OTRExporter : public ZResourceExporter
 {
