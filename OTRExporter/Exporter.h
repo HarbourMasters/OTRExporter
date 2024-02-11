@@ -2,7 +2,6 @@
 #include "ZResource.h"
 #include "ZArray.h"
 #include "stdint.h"
-//#include "OTRExporter.h"
 #include <Utils/BinaryWriter.h>
 #include <libultraship/bridge.h>
 #include "VersionInfo.h"
