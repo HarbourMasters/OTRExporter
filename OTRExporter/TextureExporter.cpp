@@ -5,7 +5,7 @@ void OTRExporter_Texture::Save(ZResource* res, const fs::path& outPath, BinaryWr
 {
 	ZTexture* tex = (ZTexture*)res;
 	
-	WriteHeader(tex, outPath, writer, LUS::ResourceType::Texture);
+	WriteHeader(tex, outPath, writer, static_cast<uint32_t>(LUS::ResourceType::Texture));
 
 	auto start = std::chrono::steady_clock::now();
 

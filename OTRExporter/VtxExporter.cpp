@@ -5,7 +5,7 @@
 
 void OTRExporter_Vtx::SaveArr(ZResource* res, const fs::path& outPath, const std::vector<ZResource*>& vec, BinaryWriter* writer)
 {
-	WriteHeader(res, outPath, writer, LUS::ResourceType::Vertex);
+	WriteHeader(res, outPath, writer, static_cast<uint32_t>(LUS::ResourceType::Vertex));
 	
 	for (auto& res: vec) {
 		ZVtx* vtx = (ZVtx*)res;
@@ -27,7 +27,7 @@ void OTRExporter_Vtx::Save(ZResource* res, const fs::path& outPath, BinaryWriter
 {
 	ZVtx* vtx = (ZVtx*)res;
 
-	WriteHeader(res, outPath, writer, LUS::ResourceType::Vertex);
+	WriteHeader(res, outPath, writer, static_cast<uint32_t>(LUS::ResourceType::Vertex));
 
 	writer->Write((uint32_t)1); //Yes I'm hard coding it to one, it *should* be fine.
 

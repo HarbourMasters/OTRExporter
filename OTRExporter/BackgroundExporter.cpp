@@ -5,7 +5,7 @@ void OTRExporter_Background::Save(ZResource* res, const fs::path& outPath, Binar
 {
 	ZBackground* bg = (ZBackground*)res;
 
-	WriteHeader(bg, outPath, writer, LUS::ResourceType::SOH_Background);
+	WriteHeader(bg, outPath, writer, static_cast<uint32_t>(SOH::ResourceType::SOH_Background));
 
 	writer->Write((uint32_t)bg->GetRawDataSize());
 	
