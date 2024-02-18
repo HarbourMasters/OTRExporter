@@ -782,17 +782,15 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 		break;
 		case G_VTX:
 		{
-			if (GETSEGNUM(data) == 0xC || GETSEGNUM(data) == 0x8)
+			if (!Globals::Instance->HasSegment(GETSEGNUM(data), res->parent->workerID))
 			{
-				// hack for dynamic verticies used in en_ganon_mant and en_jsjutan
-				// TODO is there a better way?
 				int32_t aa = (data & 0x000000FF00000000ULL) >> 32;
 				int32_t nn = (data & 0x000FF00000000000ULL) >> 44;
 
-				Gfx value = {gsSPVertex(data & 0xFFFFFFFF, nn, ((aa >> 1) - nn))};
+				Gfx value = {gsSPVertex((data & 0xFFFFFFFF) + 1, nn, ((aa >> 1) - nn))};
 
 				word0 = value.words.w0;
-				word1 = value.words.w1 | 1;
+				word1 = value.words.w1;
 			}
 			else
 			{
