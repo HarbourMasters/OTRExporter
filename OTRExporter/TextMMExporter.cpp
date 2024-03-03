@@ -5,7 +5,7 @@ void OTRExporter_TextMM::Save(ZResource* res, const fs::path& outPath, BinaryWri
 {
 	ZTextMM* txt = (ZTextMM*)res;
 
-	WriteHeader(txt, outPath, writer, LUS::ResourceType::SOH_TextMM);
+	WriteHeader(txt, outPath, writer, static_cast<uint32_t>(SOH::ResourceType::TSH_TextMM));
 
 	writer->Write((uint32_t)txt->messages.size());
 

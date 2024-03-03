@@ -11,7 +11,7 @@
 void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	auto* anim = (ZTextureAnimation*)res;
-	WriteHeader(res, outPath, writer, LUS::ResourceType::TSH_TexAnim, 0);
+	WriteHeader(res, outPath, writer, static_cast<uint32_t>(SOH::ResourceType::TSH_TexAnim), 0);
 	writer->Write((uint32_t)anim->entries.size());
 
 	for (const auto& e : anim->entries) {

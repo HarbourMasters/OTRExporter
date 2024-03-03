@@ -12,7 +12,7 @@ void OTRExporter_CKeyFrameSkel::Save(ZResource* res, const fs::path& outPath, Bi
     ZKeyFrameSkel* skel = (ZKeyFrameSkel*)res;
     ZKeyFrameLimbList* list = skel->limbList.get();
 
-    WriteHeader(res, outPath, writer, LUS::ResourceType::TSH_CKeyFrameSkel);
+    WriteHeader(res, outPath, writer, static_cast<uint32_t>(SOH::ResourceType::TSH_CKeyFrameSkel));
 
     writer->Write(skel->limbCount);
     writer->Write(skel->dListCount);
@@ -66,7 +66,7 @@ void OTRExporter_CKeyFrameSkel::Save(ZResource* res, const fs::path& outPath, Bi
 void OTRExporter_CKeyFrameAnim::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer) {
     ZKeyFrameAnim* anim = (ZKeyFrameAnim*)res;
 
-    WriteHeader(res, outPath, writer, LUS::ResourceType::TSH_CKeyFrameAnim);
+    WriteHeader(res, outPath, writer, static_cast<uint32_t>(SOH::ResourceType::TSH_CKeyFrameAnim));
 
     writer->Write((uint8_t)anim->skel->limbType);
     if (anim->skel->limbType == ZKeyframeSkelType::Normal) {
