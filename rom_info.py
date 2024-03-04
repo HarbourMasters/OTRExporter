@@ -46,8 +46,8 @@ ROM_INFO_TABLE[Checksums.OOT_PAL_GC_MQ_DBG] = RomVersion("CFG/filelists/dbg.txt"
 ROM_INFO_TABLE[Checksums.OOT_PAL_10] = RomVersion("CFG/filelists/pal_oot.txt", 0x7950, "N64_PAL_10")
 ROM_INFO_TABLE[Checksums.OOT_PAL_11] = RomVersion("CFG/filelists/pal_oot.txt", 0x7950, "N64_PAL_11")
 
-ROM_INFO_TABLE[Checksums.MM_US_10] = RomVersion("CFG/filelists/mm.txt", 0x1A500, "N64_PAL_11", is_mm=True)
-ROM_INFO_TABLE[Checksums.MM_US_10_UNCOMPRESSED] = RomVersion("CFG/filelists/mm.txt", 0x1A500, "N64_PAL_11", is_mm=True)
+ROM_INFO_TABLE[Checksums.MM_US_10] = RomVersion("CFG/filelists/mm.txt", 0x1A500, "", is_mm=True)
+ROM_INFO_TABLE[Checksums.MM_US_10_UNCOMPRESSED] = RomVersion("CFG/filelists/mm.txt", 0x1A500, "", is_mm=True)
 
 class RomDmaEntry:
     def __init__(self, rom, i):
