@@ -43,25 +43,40 @@ void OTRExporter_TextureAnimation::Save(ZResource* res, const fs::path& outPath,
 				writer->Write(colorParams->animLength);
 				writer->Write(colorParams->colorListCount);
 
-				writer->Write((uint32_t)colorParams->frameDataList.size());
-				for (const auto f : colorParams->frameDataList) {
-					writer->Write(f);
+				if (colorParams->frameDataListAddress != 0) { // NULL
+					writer->Write((uint16_t)colorParams->frameDataList.size());
+					for (const auto f : colorParams->frameDataList) {
+						writer->Write(f);
+					}
+				} else {
+					writer->Write((uint16_t)0);
 				}
-				writer->Write((uint32_t)colorParams->primColorList.size());
-				for (const auto prim : colorParams->primColorList) {
-					writer->Write(prim.r);
-					writer->Write(prim.g);
-					writer->Write(prim.b);
-					writer->Write(prim.a);
-					writer->Write(prim.lodFrac);
+
+				if (colorParams->primColorListAddress != 0) { // NULL
+					writer->Write((uint16_t)colorParams->primColorList.size());
+					for (const auto prim : colorParams->primColorList) {
+						writer->Write(prim.r);
+						writer->Write(prim.g);
+						writer->Write(prim.b);
+						writer->Write(prim.a);
+						writer->Write(prim.lodFrac);
+					}
+				} else {
+					writer->Write((uint16_t)0);
 				}
-				writer->Write((uint16_t)colorParams->envColorList.size());
-				for (const auto env : colorParams->envColorList) {
-					writer->Write(env.r);
-					writer->Write(env.g);
-					writer->Write(env.b);
-					writer->Write(env.a);
+
+				if (colorParams->envColorListAddress != 0) { // NULL
+					writer->Write((uint16_t)colorParams->envColorList.size());
+					for (const auto env : colorParams->envColorList) {
+						writer->Write(env.r);
+						writer->Write(env.g);
+						writer->Write(env.b);
+						writer->Write(env.a);
+					}
+				} else {
+					writer->Write((uint16_t)0);
 				}
+
 				break;
 			}
 			case TextureAnimationParamsType::TextureCycle: {
