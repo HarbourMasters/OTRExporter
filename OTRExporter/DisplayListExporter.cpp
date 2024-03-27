@@ -413,12 +413,28 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 				Gfx value;
 
-				u32 dListVal = (data & 0x0FFFFFFF) + 1;
+				u32 segNum = GETSEGNUM(data);
+				u32 segOffset = GETSEGOFFSET(data);
 
-				if (pp != 0)
-					value = {gsSPBranchList(dListVal)};
-				else
-					value = {gsSPDisplayList(dListVal)};
+				// Use regular DL opcode for 0 offsets
+				if (segOffset == 0) {
+					u32 dListVal = (data & 0x0FFFFFFF) + 1;
+
+					if (pp != 0)
+						value = {gsSPBranchList(dListVal)};
+					else
+						value = {gsSPDisplayList(dListVal)};
+				} else {
+					// Convert the offset value to an index value by diving by the original size for Gfx on hardware
+					// Adding 1 for seg addr flow will be handled on the renderer side
+					u32 dListVal = (segNum << 24) | (segOffset / (sizeof(u32) * 2));
+
+					if (pp != 0)
+						value = {gsSPBranchListIndex(dListVal)};
+					else
+						value = {gsSPDisplayListIndex(dListVal)};
+				}
+
 
 				word0 = value.words.w0;
 				word1 = value.words.w1;
