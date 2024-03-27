@@ -134,7 +134,9 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, const fs::path& outPath, Bin
 			if (name.at(0) == '&')
 				name.erase(0, 1);
 
-			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, name));
+			ZFile* assocFile = Globals::Instance->GetSegment(GETSEGNUM(limb->dListPtr), res->parent->workerID);
+
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(assocFile->resources[0], name));
 		}
 		else
 		{
@@ -155,7 +157,9 @@ void OTRExporter_SkeletonLimb::Save(ZResource* res, const fs::path& outPath, Bin
 			if (name.at(0) == '&')
 				name.erase(0, 1);
 
-			writer->Write(OTRExporter_DisplayList::GetPathToRes(limb, name));
+			ZFile* assocFile = Globals::Instance->GetSegment(GETSEGNUM(limb->dList2Ptr), res->parent->workerID);
+
+			writer->Write(OTRExporter_DisplayList::GetPathToRes(assocFile->resources[0], name));
 		}
 		else
 		{
