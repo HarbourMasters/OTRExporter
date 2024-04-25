@@ -82,7 +82,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Sub-projects
 ################################################################################
 if (NOT TARGET libultraship)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libultraship ${CMAKE_BINARY_DIR}/libultraship)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libultraship/resource ${CMAKE_BINARY_DIR}/libultraship/resource)
 endif()
 
 if (NOT TARGET ZAPD)
