@@ -164,11 +164,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/extern/ZAPDUtils
 	${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/extern/StormLib/src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/extern/spdlog/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/extern/nlohmann-json/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/src/resource
     ${CMAKE_CURRENT_SOURCE_DIR}/../../soh/soh
 	.
 )
+
+find_package(nlohmann_json REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
 
 if(MSVC)
     if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
