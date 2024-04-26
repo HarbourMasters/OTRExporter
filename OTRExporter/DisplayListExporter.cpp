@@ -344,7 +344,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 			uint32_t z = (data & 0x00000000FFFFFFFF) >> 0;
 			uint32_t h = (data & 0xFFFFFFFF);
 
-			auto data2 = dList->instructions[dataIdx - 1];
+			auto data2 = dList->instructions[dataIdx + 1];
 			uint32_t dListPtr = GETSEGOFFSET(data2);
 
 			Declaration* dListDecl = dList->parent->GetDeclaration(dListPtr);
@@ -445,7 +445,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 				if ((int)opF3D == G_BRANCH_Z)
 				{
-					auto data2 = dList->instructions[dataIdx - 1];
+					auto data2 = dList->instructions[dataIdx + 1];
 					dListPtr = GETSEGOFFSET(data2);
 				}
 				else
