@@ -162,7 +162,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/extern/Mercury
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/extern/tinyxml2
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/extern/ZAPDUtils
-	${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/extern/StormLib/src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/src/resource
     ${CMAKE_CURRENT_SOURCE_DIR}/../../soh/soh
 	.
@@ -173,6 +172,14 @@ target_link_libraries(${PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
 
 find_package(spdlog REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC spdlog::spdlog)
+
+FetchContent_Declare(
+    StormLib
+    GIT_REPOSITORY https://github.com/ladislav-zezula/StormLib.git
+    GIT_TAG v9.25
+)
+FetchContent_MakeAvailable(StormLib)
+target_include_directories(${PROJECT_NAME} PRIVATE ${stormlib_SOURCE_DIR}/src)
 
 if(MSVC)
     if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
