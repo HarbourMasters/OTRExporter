@@ -89,8 +89,4 @@ if (NOT TARGET ZAPD)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ZAPDTR/ZAPD ${CMAKE_BINARY_DIR}/ZAPD)
 endif()
 
-if (NOT TARGET ZAPDUtils)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libultraship/extern/ZAPDUtils ${CMAKE_BINARY_DIR}/ZAPDUtils)
-endif()
-
 add_subdirectory(OTRExporter)
