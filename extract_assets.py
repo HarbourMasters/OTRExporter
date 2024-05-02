@@ -12,7 +12,7 @@ def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None, customAssetsPath=None
     if not zapd_exe:
         zapd_exe = "x64\\Release\\ZAPD.exe" if sys.platform == "win32" else "../ZAPDTR/ZAPD.out"
 
-    exec_cmd = [zapd_exe, "ed", "-i", xmlPath, "-b", rom, "-fl", "CFG/filelists",
+    exec_cmd = [zapd_exe, "ed", "-eh", "-i", xmlPath, "-b", rom, "-fl", "CFG/filelists",
                 "-o", "placeholder", "-osf", "placeholder", "-rconf", "CFG/Config.xml"]
 
     # generate headers, but not otrs by excluding the otr exporter

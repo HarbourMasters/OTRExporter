@@ -14,6 +14,7 @@
 #include <Utils/DiskFile.h>
 #include "VersionInfo.h"
 
+
 #define GFX_SIZE 8
 
 #define gsDPSetCombineLERP_NoMacros(a0, b0, c0, d0, Aa0, Ab0, Ac0, Ad0,      \
@@ -58,7 +59,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 	// DEBUG: Write in a marker
 	Declaration* dbgDecl = dList->parent->GetDeclaration(dList->GetRawDataIndex());
-	std::string dbgName = StringHelper::Sprintf("%s/%s", GetParentFolderName(res).c_str(), dbgDecl->varName.c_str());
+	std::string dbgName = StringHelper::Sprintf("%s/%s", GetParentFolderName(res).c_str(), dbgDecl->declName.c_str());
 	uint64_t hash = CRC64(dbgName.c_str());
 	writer->Write((uint32_t)(G_MARKER << 24));
 	writer->Write((uint32_t)0xBEEFBEEF);
@@ -230,7 +231,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 				if (mtxDecl != nullptr)
 				{
-					std::string vName = StringHelper::Sprintf("%s/%s", (GetParentFolderName(res).c_str()), mtxDecl->varName.c_str());
+					std::string vName = StringHelper::Sprintf("%s/%s", (GetParentFolderName(res).c_str()), mtxDecl->declName.c_str());
 
 					uint64_t hash = CRC64(vName.c_str());
 
@@ -334,7 +335,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 			if (dListDecl != nullptr)
 			{
-				std::string vName = StringHelper::Sprintf("%s/%s", (GetParentFolderName(res).c_str()), dListDecl->varName.c_str());
+				std::string vName = StringHelper::Sprintf("%s/%s", (GetParentFolderName(res).c_str()), dListDecl->declName.c_str());
 
 				uint64_t hash = CRC64(vName.c_str());
 
@@ -355,7 +356,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 				if (dListDecl2 != nullptr)
 				{
 					//std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
-					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, dListDecl2->varName.c_str());
+					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, dListDecl2->declName.c_str());
 
 					if (files.find(fName) == files.end() && !DiskFile::Exists("Extract/" + fName))
 					{
@@ -420,7 +421,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 				if (dListDecl != nullptr)
 				{
-					std::string vName = StringHelper::Sprintf("%s/%s", (GetParentFolderName(res).c_str()), dListDecl->varName.c_str());
+					std::string vName = StringHelper::Sprintf("%s/%s", (GetParentFolderName(res).c_str()), dListDecl->declName.c_str());
 
 					uint64_t hash = CRC64(vName.c_str());
 
@@ -441,7 +442,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 					if (dListDecl2 != nullptr)
 					{
 						//std::string fName = StringHelper::Sprintf("%s\\%s", GetParentFolderName(res).c_str(), dListDecl2->varName.c_str());
-						std::string fName = OTRExporter_DisplayList::GetPathToRes(res, dListDecl2->varName.c_str());
+						std::string fName = OTRExporter_DisplayList::GetPathToRes(res, dListDecl2->declName.c_str());
 
 						if (files.find(fName) == files.end() && !DiskFile::Exists("Extract/" + fName))
 						{
@@ -747,7 +748,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 				int32_t aa = (data & 0x000000FF00000000ULL) >> 32;
 				int32_t nn = (data & 0x000FF00000000000ULL) >> 44;
 
-				if (vtxDecl != nullptr && vtxDecl->varType != "Gfx")
+				if (vtxDecl != nullptr && vtxDecl->declName != "Gfx")
 				{
 					uint32_t diff = segOffset - vtxDecl->address;
 
@@ -761,7 +762,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 					writer->Write(word0);
 					writer->Write(word1);
 
-					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->varName);
+					std::string fName = OTRExporter_DisplayList::GetPathToRes(res, vtxDecl->declName);
 
 					uint64_t hash = CRC64(fName.c_str());
 
@@ -776,7 +777,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 
 						int arrCnt = 0;
 
-						auto split = StringHelper::Split(vtxDecl->text, "\n");
+						auto split = StringHelper::Split(vtxDecl->declBody, "\n");
 
 						for (size_t i = 0; i < split.size(); i++)
 						{
