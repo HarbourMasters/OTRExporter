@@ -369,9 +369,24 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 			}
 			else
 			{
-				word0 = 0;
-				word1 = 0;
-				spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = {:08X}", GETSEGOFFSET(data)));
+				// If we can't find the display list in this file, try looking in other files based on the segment number
+				uint32_t seg = data2 & 0xFFFFFFFF;
+				std::string resourceName = "";
+				bool foundDecl = Globals::Instance->GetSegmentedPtrName(seg, dList->parent, "", resourceName, res->parent->workerID);
+				if (foundDecl) {
+					ZFile* assocFile = Globals::Instance->GetSegment(GETSEGNUM(seg), res->parent->workerID);
+					std::string assocFileName = assocFile->GetName();
+					std::string fName = GetPathToRes(assocFile->resources[0], resourceName.c_str());
+
+					uint64_t hash = CRC64(fName.c_str());
+
+					word0 = hash >> 32;
+					word1 = hash & 0xFFFFFFFF;
+				} else {
+					word0 = 0;
+					word1 = 0;
+					spdlog::error(StringHelper::Sprintf("dListDecl == nullptr! Addr = {:08X}", GETSEGOFFSET(data2)));
+				}
 			}
 
 			for (size_t i = 0; i < dList->otherDLists.size(); i++)
