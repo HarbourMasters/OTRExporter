@@ -11,19 +11,16 @@
 
 class ExporterArchive : public std::enable_shared_from_this<ExporterArchive> {
   public:
+    ExporterArchive() {}
     ExporterArchive(const std::string& path, bool enableWriting);
     ~ExporterArchive();
 
-    static std::shared_ptr<ExporterArchive> CreateArchive(const std::string& archivePath, size_t fileCapacity);
-    bool AddFile(const std::string& filePath, uintptr_t fileData, DWORD fileSize);
+    virtual int CreateArchive(size_t fileCapacity) = 0;
+    virtual bool AddFile(const std::string& filePath, void* fileData, size_t fileSize) = 0;
 
-  private:
     std::string mPath;
-    HANDLE mMpq;
-    std::mutex mMutex;
-    std::vector<std::string> mAddedFiles;
-    std::unordered_map<uint64_t, std::string> mHashes;
+    std::mutex mMutex;  
 
-    bool Load(bool enableWriting);
-    bool Unload();
+    virtual bool Load(bool enableWriting) = 0;
+    virtual bool Unload() = 0;
 };

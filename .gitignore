@@ -348,6 +348,7 @@ baserom_ntsc/
 *.a
 *.z64
 *.n64
+*.zip
 Extract/
 
 tmp.txt

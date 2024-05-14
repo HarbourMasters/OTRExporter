@@ -21,7 +21,7 @@ def BuildOTR(xmlPath, rom, zapd_exe=None, genHeaders=None, customAssetsPath=None
     else:
         # generate otrs, but not headers
         exec_cmd.extend(["-gsf", "0", "-se", "OTR", "--customAssetsPath", customAssetsPath,
-                "--customOtrFile", customOtrFile, "--otrfile", "mm.otr"])
+                "--customOtrFile", customOtrFile, "--otrfile", "mm.zip"])
 
     if portVer:
         exec_cmd.extend(["--portVer", portVer])
