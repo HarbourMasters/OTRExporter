@@ -120,7 +120,7 @@ static void ExporterProgramEnd()
     portVerWriter.Write(portVersion[1]); // Minor
     portVerWriter.Write(portVersion[2]); // Patch
     portVerWriter.Close();
-    
+
     if (Globals::Instance->fileMode == ZFileMode::ExtractDirectory)
     {
         std::string romPath = Globals::Instance->baseRomPath.string();
@@ -147,10 +147,12 @@ static void ExporterProgramEnd()
         otrArchive->CreateArchive(40000);
 
         printf("Adding game version file.\n");
-        otrArchive->AddFile("version", versionStream->ToVector().data(), versionStream->GetLength());
+        auto versionStreamBuffer = versionStream->ToVector();
+        otrArchive->AddFile("version", (void*)versionStreamBuffer.data(), versionStream->GetLength());
 
         printf("Adding portVersion file.\n");
-        otrArchive->AddFile("portVersion", portVersionStream->ToVector().data(), portVersionStream->GetLength());
+        auto portVersionStreamBuffer = portVersionStream->ToVector();
+        otrArchive->AddFile("portVersion", (void*)portVersionStreamBuffer.data(), portVersionStream->GetLength());
 
         for (const auto& item : files)
         {
@@ -166,9 +168,10 @@ static void ExporterProgramEnd()
             const auto& fileData = item.second;
             otrArchive->AddFile(fName, (void*)fileData.data(),	fileData.size());
         }
+
+        otrArchive = nullptr;
     }
 
-    otrArchive = nullptr;
     delete fileWriter;
     files.clear();
 
