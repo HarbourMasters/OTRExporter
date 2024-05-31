@@ -255,6 +255,9 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang|AppleClang")
         $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>
 	)
 endif()
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC -DF3DEX_GBI_2)
+
 ################################################################################
 # Dependencies
 ################################################################################
@@ -264,4 +267,3 @@ add_dependencies(${PROJECT_NAME}
 
 # Link with other targets.
 target_link_libraries(${PROJECT_NAME} PUBLIC "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
-
