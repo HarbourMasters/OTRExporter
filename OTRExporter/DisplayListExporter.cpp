@@ -787,7 +787,7 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 						}
 
 						// OTRTODO: Once we aren't relying on text representations, we should call ArrayExporter...
-						OTRExporter::WriteHeader(nullptr, "", &vtxWriter, static_cast<uint32_t>(LUS::ResourceType::Array));
+						OTRExporter::WriteHeader(nullptr, "", &vtxWriter, static_cast<uint32_t>(SOH::ResourceType::SOH_Array));
 
 						vtxWriter.Write((uint32_t)ZResourceType::Vertex);
 						vtxWriter.Write((uint32_t)arrCnt);

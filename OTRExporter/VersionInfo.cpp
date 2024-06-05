@@ -19,7 +19,7 @@ void InitVersionInfo()
 	{ static_cast<uint32_t>(SOH::ResourceType::SOH_Path), 0 },
 	{ static_cast<uint32_t>(LUS::ResourceType::Vertex), 0 },
 	{ static_cast<uint32_t>(SOH::ResourceType::SOH_Cutscene), 0 },
-	{ static_cast<uint32_t>(LUS::ResourceType::Array), 0 },
+	{ static_cast<uint32_t>(SOH::ResourceType::SOH_Array), 0 },
 	{ static_cast<uint32_t>(SOH::ResourceType::SOH_Text), 0 },
 	{ static_cast<uint32_t>(LUS::ResourceType::Blob), 0 },
 	};
