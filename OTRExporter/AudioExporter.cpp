@@ -102,14 +102,14 @@ void OTRExporter_Audio::WriteSoundFontEntry(ZAudio* audio, SoundFontEntry* entry
 void OTRExporter_Audio::WriteSoundFontEntry(ZAudio* audio, SoundFontEntry* entry,
                                             std::map<uint32_t, SampleEntry*> samples, tinyxml2::XMLElement* xmlDoc,
                                             const char* name) {
-    if (entry == nullptr) {
-        return;
-    }
     tinyxml2::XMLElement* sfEntry = xmlDoc->InsertNewChildElement(name);
 
+    if (entry != nullptr) {
     sfEntry->SetAttribute("SampleRef", GetSampleEntryReference(audio, entry->sampleEntry, samples).c_str());
     sfEntry->SetAttribute("Tuning", entry->tuning);
     
+
+    }
     xmlDoc->InsertEndChild(sfEntry);
 }
 
@@ -177,7 +177,7 @@ void OTRExporter_Audio::WriteSoundFontTableXML(ZAudio* audio) {
             instrument->SetAttribute("Loaded", i.loaded);
             instrument->SetAttribute("NormalRangeLo", i.normalRangeLo);
             instrument->SetAttribute("NormalRangeHi", i.normalRangeHi);
-            instrument->SetAttribute("ReleseRate", i.releaseRate);
+            instrument->SetAttribute("ReleaseRate", i.releaseRate);
 
             WriteEnvData(i.env, instrument);
 
