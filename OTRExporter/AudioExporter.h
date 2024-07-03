@@ -14,6 +14,8 @@ public:
 private:
     void WriteSoundFontTableBinary(ZAudio* audio);
     void WriteSoundFontTableXML(ZAudio* audio);
+    void WriteSequenceBinary(ZAudio* audio);
+    void WriteSequenceXML(ZAudio* audio);
     std::string GetSampleEntryReference(ZAudio* audio, SampleEntry* entry, std::map<uint32_t, SampleEntry*> samples);
     void WriteEnvData(std::vector<AdsrEnvelope*> envelopes, BinaryWriter* writer);
     void WriteEnvData(std::vector<AdsrEnvelope*> envelopes, tinyxml2::XMLElement* xmlDoc);
