@@ -94,6 +94,8 @@ void OTRExporter_Audio::WriteSoundFontEntry(ZAudio* audio, SoundFontEntry* entry
 
     if (entry != nullptr)
     {
+        // This second byte isn't used but is needed to maintain compatibility with the V2 format.
+        writer->Write((uint8_t)(entry != nullptr ? 1 : 0));
         writer->Write(GetSampleEntryReference(audio, entry->sampleEntry, samples));
         writer->Write(entry->tuning);
     }
@@ -363,8 +365,8 @@ void OTRExporter_Audio::Save(ZResource* res, const fs::path& outPath, BinaryWrit
     }
 
     // Write the soundfont table
-    WriteSoundFontTableXML(audio);
+    WriteSoundFontTableBinary(audio);
     
     // Write Sequences
-    WriteSequenceXML(audio);
+    WriteSequenceBinary(audio);
 }
