@@ -344,6 +344,7 @@ baserom/
 baserom_ntsc/
 *.vtx.inc
 *.otr
+*.o2r
 *.swp
 *.a
 *.z64
