@@ -423,7 +423,9 @@ void OTRExporter_Audio::WriteSampleXML(ZAudio* audio) {
 
         WriteSampleEntry(pair.second, root);
 
-        root->SetAttribute("SampleSize", (size_t)pair.second->data.size());
+        // There is no overload for size_t. MSVC and GCC are fine with `size` being cast
+        // to size_t and passed in, but apple clang is not.
+        root->SetAttribute("SampleSize", (uint64_t)pair.second->data.size());
         sample.InsertEndChild(root);
         
         std::string sampleDataPath = GetSampleDataStr(audio, pair.second);
