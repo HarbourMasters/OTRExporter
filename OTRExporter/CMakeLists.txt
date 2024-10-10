@@ -9,12 +9,15 @@ set(Header_Files
     "AudioExporter.h"
     "BackgroundExporter.h"
     "BlobExporter.h"
+	"CKeyFrameExporter.h"
     "CollisionExporter.h"
     "command_macros_base.h"
     "CutsceneExporter.h"
     "DisplayListExporter.h"
     "Exporter.h"
     "ExporterArchive.h"
+    "ExporterArchiveO2R.h"
+    "ExporterArchiveOTR.h"
     "Main.h"
     "MtxExporter.h"
     "PathExporter.h"
@@ -23,7 +26,9 @@ set(Header_Files
     "SkeletonExporter.h"
     "SkeletonLimbExporter.h"
     "TextExporter.h"
+    "TextMMExporter.h"
     "TextureExporter.h"
+    "TextureAnimationExporter.h"
     "VersionInfo.h"
     "VtxExporter.h"
     "z64cutscene.h"
@@ -38,10 +43,13 @@ set(Source_Files
     "BackgroundExporter.cpp"
     "BlobExporter.cpp"
     "CollisionExporter.cpp"
+	"CKeyFrameExporter.cpp"
     "CutsceneExporter.cpp"
     "DisplayListExporter.cpp"
     "Exporter.cpp"
     "ExporterArchive.cpp"
+    "ExporterArchiveO2R.cpp"
+    "ExporterArchiveOTR.cpp"
     "Main.cpp"
     "MtxExporter.cpp"
     "PathExporter.cpp"
@@ -50,7 +58,9 @@ set(Source_Files
     "SkeletonExporter.cpp"
     "SkeletonLimbExporter.cpp"
     "TextExporter.cpp"
+    "TextMMExporter.cpp"
     "TextureExporter.cpp"
+    "TextureAnimationExporter.cpp"
     "VersionInfo.cpp"
     "VtxExporter.cpp"
 )
@@ -80,7 +90,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		set_target_properties(${PROJECT_NAME} PROPERTIES
 			INTERPROCEDURAL_OPTIMIZATION_RELEASE "TRUE"
 		)
-	elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x86")
+	elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32")
 		set_target_properties(${PROJECT_NAME} PROPERTIES
 			INTERPROCEDURAL_OPTIMIZATION_RELEASE "TRUE"
 		)
@@ -91,7 +101,7 @@ endif()
 ################################################################################
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	get_property(MSVC_RUNTIME_LIBRARY_DEFAULT TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY)
-	if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
+	if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32" OR "${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
 		string(CONCAT "MSVC_RUNTIME_LIBRARY_STR"
 			$<$<CONFIG:Debug>:
 				MultiThreadedDebug
@@ -120,7 +130,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 			"_CRT_SECURE_NO_WARNINGS;"
 			STORMLIB_NO_AUTO_LINK
 		)
-	elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x86")
+	elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32")
 		target_compile_definitions(${PROJECT_NAME} PRIVATE
 			"$<$<CONFIG:Debug>:"
 				"_DEBUG;"
@@ -160,7 +170,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/extern
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libultraship/src/resource
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../soh/soh
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../mm/2s2h
 	.
 )
 
@@ -181,6 +191,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${stormlib_SOURCE_DIR}/src)
 if(MSVC)
     if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
         target_compile_options(${PROJECT_NAME} PRIVATE
+		    $<$<CONFIG:Debug>:
+            /Od;
+            /Oi-
+			>
             $<$<CONFIG:Release>:
                 /Oi;
                 /Gy
@@ -191,9 +205,13 @@ if(MSVC)
             ${DEFAULT_CXX_DEBUG_INFORMATION_FORMAT};
             ${DEFAULT_CXX_EXCEPTION_HANDLING}
         )
-    elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x86")
+    elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32")
         target_compile_options(${PROJECT_NAME} PRIVATE
-            $<$<CONFIG:Release>:
+            $<$<CONFIG:Debug>:
+            /Od;
+            /Oi-
+			>
+			$<$<CONFIG:Release>:
                 /Oi;
                 /Gy
             >
@@ -212,7 +230,7 @@ if(MSVC)
             >
             /SUBSYSTEM:CONSOLE
         )
-    elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x86")
+    elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32")
         target_link_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:Release>:
                 /DEBUG;

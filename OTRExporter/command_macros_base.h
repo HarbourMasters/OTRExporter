@@ -25,11 +25,7 @@
 
 #define CMD_W(a) (a)
 
-#if defined(__GNUC__)
-#define CMD_F(a) {.f = (a)}
-#else
 #define CMD_F(a) {(a)}
-#endif
 
 #define CMD_PTR(a) (u32)(a)
 

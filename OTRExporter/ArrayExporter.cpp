@@ -37,28 +37,32 @@ void OTRExporter_Array::Save(ZResource* res, const fs::path& outPath, BinaryWrit
 				// OTRTODO: Duplicate code here. Cleanup at a later date...
 				switch (vec->scalarType)
 				{
-				case ZScalarType::ZSCALAR_U8:
-					writer->Write(vec->scalars[k].scalarData.u8);
-					break;
 				case ZScalarType::ZSCALAR_S8:
 					writer->Write(vec->scalars[k].scalarData.s8);
 					break;
-				case ZScalarType::ZSCALAR_U16:
-					writer->Write(vec->scalars[k].scalarData.u16);
+				case ZScalarType::ZSCALAR_U8:
+				case ZScalarType::ZSCALAR_X8:
+					writer->Write(vec->scalars[k].scalarData.u8);
 					break;
 				case ZScalarType::ZSCALAR_S16:
 					writer->Write(vec->scalars[k].scalarData.s16);
+					break;
+				case ZScalarType::ZSCALAR_U16:
+				case ZScalarType::ZSCALAR_X16:
+					writer->Write(vec->scalars[k].scalarData.u16);
 					break;
 				case ZScalarType::ZSCALAR_S32:
 					writer->Write(vec->scalars[k].scalarData.s32);
 					break;
 				case ZScalarType::ZSCALAR_U32:
+				case ZScalarType::ZSCALAR_X32:
 					writer->Write(vec->scalars[k].scalarData.u32);
 					break;
 				case ZScalarType::ZSCALAR_S64:
 					writer->Write(vec->scalars[k].scalarData.s64);
 					break;
 				case ZScalarType::ZSCALAR_U64:
+				case ZScalarType::ZSCALAR_X64:
 					writer->Write(vec->scalars[k].scalarData.u64);
 					break;
 					// OTRTODO: ADD OTHER TYPES
@@ -75,28 +79,32 @@ void OTRExporter_Array::Save(ZResource* res, const fs::path& outPath, BinaryWrit
 
 			switch (scal->scalarType)
 			{
-			case ZScalarType::ZSCALAR_U8:
-				writer->Write(scal->scalarData.u8);
-				break;
 			case ZScalarType::ZSCALAR_S8:
 				writer->Write(scal->scalarData.s8);
 				break;
-			case ZScalarType::ZSCALAR_U16:
-				writer->Write(scal->scalarData.u16);
+			case ZScalarType::ZSCALAR_U8:
+			case ZScalarType::ZSCALAR_X8:
+				writer->Write(scal->scalarData.u8);
 				break;
 			case ZScalarType::ZSCALAR_S16:
 				writer->Write(scal->scalarData.s16);
+				break;
+			case ZScalarType::ZSCALAR_U16:
+			case ZScalarType::ZSCALAR_X16:
+				writer->Write(scal->scalarData.u16);
 				break;
 			case ZScalarType::ZSCALAR_S32:
 				writer->Write(scal->scalarData.s32);
 				break;
 			case ZScalarType::ZSCALAR_U32:
+			case ZScalarType::ZSCALAR_X32:
 				writer->Write(scal->scalarData.u32);
 				break;
 			case ZScalarType::ZSCALAR_S64:
 				writer->Write(scal->scalarData.s64);
 				break;
 			case ZScalarType::ZSCALAR_U64:
+			case ZScalarType::ZSCALAR_X64:
 				writer->Write(scal->scalarData.u64);
 				break;
 				// OTRTODO: ADD OTHER TYPES

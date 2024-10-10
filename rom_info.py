@@ -20,16 +20,23 @@ class Checksums(Enum):
     OOT_PAL_GC_MQ_DBG = "917D18F6"
     OOT_IQUE_TW = "3D81FB3E"
     OOT_IQUE_CN = "B1E1E07B"
-    OOT_UNKNOWN = "FFFFFFFF"
+
+    MM_US_10 = "5354631C"
+    MM_US_10_UNCOMPRESSED = "DA6983E7"
+    MM_US_GC = "B443EB08"
+    MM_JP_GC = "8473D0C1"
+
+    UNKNOWN = "FFFFFFFF"
 
     @classmethod
     def has_value(self, value):
         return value in self._value2member_map_
 
 class RomVersion:
-    def __init__(self, file_table_path, file_table_off, xml_ver):
+    def __init__(self, file_table_path, file_table_off, xml_ver, is_mm=False):
         self.file_table_off = file_table_off
         self.xml_ver = xml_ver
+        self.is_mm = is_mm
         with open(file_table_path, 'r') as f:
             self.file_table = [line.strip('\n') for line in f]
 
@@ -40,6 +47,11 @@ ROM_INFO_TABLE[Checksums.OOT_PAL_GC_DBG1] = RomVersion("CFG/filelists/dbg.txt", 
 ROM_INFO_TABLE[Checksums.OOT_PAL_GC_MQ_DBG] = RomVersion("CFG/filelists/dbg.txt", 0x12F70, "GC_MQ_D")
 ROM_INFO_TABLE[Checksums.OOT_PAL_10] = RomVersion("CFG/filelists/pal_oot.txt", 0x7950, "N64_PAL_10")
 ROM_INFO_TABLE[Checksums.OOT_PAL_11] = RomVersion("CFG/filelists/pal_oot.txt", 0x7950, "N64_PAL_11")
+
+ROM_INFO_TABLE[Checksums.MM_US_10] = RomVersion("CFG/filelists/mm.txt", 0x1A500, "N64_US", is_mm=True)
+ROM_INFO_TABLE[Checksums.MM_US_10_UNCOMPRESSED] = RomVersion("CFG/filelists/mm.txt", 0x1A500, "N64_US", is_mm=True)
+ROM_INFO_TABLE[Checksums.MM_US_GC] = RomVersion("CFG/filelists/mm_gc.txt", 0x1AE90, "GC_US", is_mm=True)
+ROM_INFO_TABLE[Checksums.MM_JP_GC] = RomVersion("CFG/filelists/mm_gc_jp.txt", 0x1AE90, "GC_JP", is_mm=True)
 
 class RomDmaEntry:
     def __init__(self, rom, i):
@@ -71,12 +83,12 @@ class Z64Rom:
 
         # get checkum
         checksum_str = self.rom_data[16:16+4].hex().upper()
-        self.checksum = Checksums(checksum_str) if Checksums.has_value(checksum_str) else Checksums.OOT_UNKNOWN
+        self.checksum = Checksums(checksum_str) if Checksums.has_value(checksum_str) else Checksums.UNKNOWN
 
-        if self.checksum == Checksums.OOT_UNKNOWN:
+        if self.checksum == Checksums.UNKNOWN:
             self.is_valid = False
             return
-        
+
         if self.checksum in [Checksums.OOT_NTSC_JP_MQ, Checksums.OOT_NTSC_US_MQ, Checksums.OOT_PAL_GC_MQ_DBG, Checksums.OOT_PAL_MQ]:
             self.isMq = True
         else:
@@ -94,7 +106,11 @@ class Z64Rom:
     @staticmethod
     def isValidRom(rom_path):
         return Z64Rom(rom_path).is_valid
-    
+
     @staticmethod
     def isMqRom(rom_path):
         return Z64Rom(rom_path).isMq
+
+    @staticmethod
+    def isMMRom(rom_path):
+        return Z64Rom(rom_path).version.is_mm
