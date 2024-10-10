@@ -409,6 +409,7 @@ void OTRExporter_Audio::WriteSampleBinary(ZAudio* audio) {
         std::string basePath = GetSampleEntryStr(audio, pair.second);
 
         std::string fName = OTRExporter_DisplayList::GetPathToRes(res, basePath);
+        fName += "_META";
         AddFile(fName, sampleStream->ToVector());
     }
 }
