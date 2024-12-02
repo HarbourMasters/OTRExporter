@@ -112,24 +112,28 @@ void OTRExporter_Audio::WriteSampleEntry(SampleEntry* entry, tinyxml2::XMLElemen
     sEntry->SetAttribute("bit26", entry->unk_bit26);
     sEntry->SetAttribute("Relocated", entry->unk_bit25);
     
-    sEntry->SetAttribute("LoopStart", entry->loop.start);
-    sEntry->SetAttribute("LoopEnd", entry->loop.end);
-    sEntry->SetAttribute("LoopCount", entry->loop.count);
-    
-    for (size_t i = 0; i < entry->loop.states.size(); i++) {
-        tinyxml2::XMLElement* loop = sEntry->InsertNewChildElement("LoopState");
-        loop->SetAttribute("Loop", entry->loop.states[i]);
-        sEntry->InsertEndChild(loop);
-    }
+    tinyxml2::XMLElement* loopRoot = sEntry->InsertNewChildElement("ADPCMLoop");
+    loopRoot->SetAttribute("Start", entry->loop.start);
+    loopRoot->SetAttribute("End", entry->loop.end);
+    loopRoot->SetAttribute("Count", (int)entry->loop.count); // Cast to int to -1 shows as -1.
 
-    sEntry->SetAttribute("Order", entry->book.order);
-    sEntry->SetAttribute("Npredictors", entry->book.npredictors);
+    for (size_t i = 0; i < entry->loop.states.size(); i++) {
+        tinyxml2::XMLElement* loop = loopRoot->InsertNewChildElement("Predictor");
+        loop->SetAttribute("State", entry->loop.states[i]);
+        loopRoot->InsertEndChild(loop);
+    }
+    sEntry->InsertEndChild(loopRoot);
+
+    tinyxml2::XMLElement* bookRoot = sEntry->InsertNewChildElement("ADPCMBook");
+    bookRoot->SetAttribute("Order", entry->book.order);
+    bookRoot->SetAttribute("Npredictors", entry->book.npredictors);
 
     for (size_t i = 0; i < entry->book.books.size(); i++) {
-        tinyxml2::XMLElement* book = sEntry->InsertNewChildElement("Books");
-        book->SetAttribute("Book", entry->book.books[i]);
-        sEntry->InsertEndChild(book);
+        tinyxml2::XMLElement* book = bookRoot->InsertNewChildElement("Book");
+        book->SetAttribute("Page", entry->book.books[i]);
+        bookRoot->InsertEndChild(book);
     }
+    sEntry->InsertEndChild(bookRoot);
 
 }
 
@@ -426,13 +430,13 @@ void OTRExporter_Audio::WriteSampleXML(ZAudio* audio) {
 
         // There is no overload for size_t. MSVC and GCC are fine with `size` being cast
         // to size_t and passed in, but apple clang is not.
-        root->SetAttribute("SampleSize", (uint64_t)pair.second->data.size());
+        root->SetAttribute("Size", (uint64_t)pair.second->data.size());
         sample.InsertEndChild(root);
         
         std::string sampleDataPath = GetSampleDataStr(audio, pair.second);
         sampleDataPath = OTRExporter_DisplayList::GetPathToRes(res, sampleDataPath);
 
-        root->SetAttribute("SamplePath", sampleDataPath.c_str());
+        root->SetAttribute("Path", sampleDataPath.c_str());
 
         std::string basePath = GetSampleEntryStr(audio, pair.second);
         std::string fName = OTRExporter_DisplayList::GetPathToRes(res, basePath);
@@ -443,8 +447,6 @@ void OTRExporter_Audio::WriteSampleXML(ZAudio* audio) {
         sample.Accept(&printer);
         std::vector<char> xmlData((printer.CStr()), printer.CStr() + printer.CStrSize() - 1);
         AddFile(fName, xmlData);
-
-
 
         MemoryStream* stream = new MemoryStream();
         BinaryWriter sampleDataWriter = BinaryWriter(stream);
