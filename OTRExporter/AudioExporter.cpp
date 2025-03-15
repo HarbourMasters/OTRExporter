@@ -463,11 +463,21 @@ void OTRExporter_Audio::Save(ZResource* res, const fs::path& outPath, BinaryWrit
     WriteHeader(res, outPath, writer, static_cast<uint32_t>(SOH::ResourceType::SOH_Audio), 2);
 
     // Write Samples as individual files
-    WriteSampleXML(audio);
+    if (Globals::Instance->xmlExtractModes & (1 << (int)XMLModeShift::Sample))
+        WriteSampleXML(audio);
+    else
+        WriteSampleBinary(audio);
+
 
     // Write the soundfont table
-    WriteSoundFontTableXML(audio);
+    if (Globals::Instance->xmlExtractModes & (1 << (int)XMLModeShift::SoundFont))
+        WriteSoundFontTableXML(audio);
+    else
+        WriteSoundFontTableBinary(audio);
     
     // Write Sequences
-    WriteSequenceXML(audio);
+    if (Globals::Instance->xmlExtractModes & (1 << (int)XMLModeShift::Sequence))
+        WriteSequenceXML(audio);
+    else
+        WriteSequenceBinary(audio);
 }
