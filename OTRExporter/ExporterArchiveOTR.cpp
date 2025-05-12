@@ -25,7 +25,7 @@ bool ExporterArchiveOtr::Load(bool enableWriting) {
     }
     if (openArchiveSuccess) {
         printf("Opened mpq file ");
-        printf(fullPath.c_str());
+        printf("%s", fullPath.c_str());
         printf("\n");
         mMpq = mpqHandle;
         mPath = fullPath;       
