@@ -24,9 +24,7 @@ bool ExporterArchiveOtr::Load(bool enableWriting) {
         openArchiveSuccess = SFileOpenArchive(fullPath.c_str(), 0, enableWriting ? 0 : MPQ_OPEN_READ_ONLY, &mpqHandle);
     }
     if (openArchiveSuccess) {
-        printf("Opened mpq file ");
-        printf(fullPath.c_str());
-        printf("\n");
+        printf("Opened mpq file %s\n", fullPath.c_str());
         mMpq = mpqHandle;
         mPath = fullPath;       
         baseLoaded = true;
