@@ -123,7 +123,7 @@ endif()
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang|AppleClang")
 	target_compile_definitions(${PROJECT_NAME} PRIVATE
 		"$<$<CONFIG:Debug>:"
-				"_DEBUG"
+			"_DEBUG"
 		">"
 		"$<$<CONFIG:Release>:"
 			"NDEBUG"
@@ -165,12 +165,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${stormlib_SOURCE_DIR}/src)
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE
         $<$<CONFIG:Debug>:
-        /Od;
-        /Oi-
+            /Od;
+            /Oi-
     	>
         $<$<CONFIG:Release>:
             /Oi;
             /Gy
+	    /O2
         >
         /permissive-;
         /sdl;
@@ -190,11 +191,11 @@ endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang|AppleClang")
 	target_compile_options(${PROJECT_NAME} PRIVATE
-		-Wall -Wextra -Wno-error
+	-Wall -Wextra -Wno-error
         -Wno-unused-parameter
         -Wno-unused-function
         -Wno-unused-variable
-		-Wno-missing-field-initializers
+	-Wno-missing-field-initializers
         -Wno-parentheses
         -Wno-narrowing
         $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>
