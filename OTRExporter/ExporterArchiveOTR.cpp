@@ -1,3 +1,4 @@
+#ifdef INCLUDE_MPQ_SUPPORT
 #include "ExporterArchiveOTR.h"
 #include "Utils/StringHelper.h"
 #include <utils/StrHash64.h>
@@ -145,3 +146,4 @@ bool ExporterArchiveOtr::AddFile(const std::string& filePath, void* fileData, si
 
     return true;
 }
+#endif

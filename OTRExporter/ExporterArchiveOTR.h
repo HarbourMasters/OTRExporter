@@ -1,5 +1,5 @@
 #pragma once
-
+#ifdef INCLUDE_MPQ_SUPPORT
 #undef _DLL
 
 #include <string>
@@ -26,3 +26,4 @@ class ExporterArchiveOtr : public ExporterArchive {
     std::vector<std::string> mAddedFiles;
     HANDLE mMpq;
 };
+#endif
