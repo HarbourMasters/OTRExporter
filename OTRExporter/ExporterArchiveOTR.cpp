@@ -1,6 +1,6 @@
 #include "ExporterArchiveOTR.h"
 #include "Utils/StringHelper.h"
-#include <utils/StrHash64.h>
+#include <ship/utils/StrHash64.h>
 #include <filesystem>
 
 ExporterArchiveOtr::ExporterArchiveOtr(const std::string& path, bool enableWriting) {
