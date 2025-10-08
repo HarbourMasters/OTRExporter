@@ -1,3 +1,4 @@
+#ifdef INCLUDE_MPQ_SUPPORT
 #include "ExporterArchiveOTR.h"
 #include "Utils/StringHelper.h"
 #include <ship/utils/StrHash64.h>
@@ -24,9 +25,7 @@ bool ExporterArchiveOtr::Load(bool enableWriting) {
         openArchiveSuccess = SFileOpenArchive(fullPath.c_str(), 0, enableWriting ? 0 : MPQ_OPEN_READ_ONLY, &mpqHandle);
     }
     if (openArchiveSuccess) {
-        printf("Opened mpq file ");
-        printf(fullPath.c_str());
-        printf("\n");
+        printf("Opened mpq file %s\n", fullPath.c_str());
         mMpq = mpqHandle;
         mPath = fullPath;       
         baseLoaded = true;
@@ -145,3 +144,4 @@ bool ExporterArchiveOtr::AddFile(const std::string& filePath, void* fileData, si
 
     return true;
 }
+#endif

@@ -9,17 +9,17 @@ project(OTRExporter C CXX)
 ################################################################################
 # Set target arch type if empty. Visual studio solution generator provides it.
 ################################################################################
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	if(NOT CMAKE_VS_PLATFORM_NAME)
-		set(CMAKE_VS_PLATFORM_NAME "x64")
-	endif()
-	message("${CMAKE_VS_PLATFORM_NAME} architecture in use")
-
-	if(NOT ("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64"
-		OR "${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32"))
-		message(FATAL_ERROR "${CMAKE_VS_PLATFORM_NAME} arch is not supported!")
-	endif()
-endif()
+#if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+#	if(NOT CMAKE_VS_PLATFORM_NAME)
+#		set(CMAKE_VS_PLATFORM_NAME "x64")
+#	endif()
+#	message("${CMAKE_VS_PLATFORM_NAME} architecture in use")
+#
+#	if(NOT ("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64"
+#		OR "${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32"))
+#		message(FATAL_ERROR "${CMAKE_VS_PLATFORM_NAME} arch is not supported!")
+#	endif()
+#endif()
 
 ################################################################################
 # Global configuration types

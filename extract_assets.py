@@ -14,13 +14,13 @@ def BuildOTR(xmlRoot, xmlVersion, rom, isMM, zapd_exe=None, genHeaders=None, cus
     xmlPath = os.path.join(xmlRoot, xmlVersion)
     exec_cmd = [zapd_exe, "ed", "-i", xmlPath, "-b", rom, "-fl", "assets/extractor/filelists",
                 "-o", "placeholder", "-osf", "placeholder", "-rconf"]
+    configFileStr = "assets/extractor/Config_" + xmlVersion + ".xml"
+    exec_cmd.extend([configFileStr])
+
     otrFileName = "oot.o2r"
     if isMM:
-        exec_cmd.extend(["CFG/Config_MM.xml"])
         otrFileName = "mm.o2r"
-    else:
-        configFileStr = "assets/extractor/Config_" + xmlVersion + ".xml"
-        exec_cmd.extend([configFileStr])
+
 
     # generate headers, but not otrs by excluding the otr exporter
     if genHeaders:
