@@ -209,7 +209,120 @@ static void ExporterProgramEnd()
 
         printf("Adding DMA file sizes (%u entries).\n", dmaEntryCount);
         auto dmaStreamBuffer = dmaStream->ToVector();
-        archive->AddFile("misc/dma_sizes", (void*)dmaStreamBuffer.data(), dmaStream->GetLength());
+        archive->AddFile("misc/dma_sizes", dmaStreamBuffer.data(), dmaStream->GetLength());
+
+        // Export actor and effect overlay VRAM sizes from the code segment's overlay tables.
+        // Find the tables dynamically by searching for known DMA entries within the code segment.
+        auto codeData = rom.GetFile("code");
+
+        // Look up a DMA file's VROM start/end by name from the DMA table in romData.
+        auto getDmaVromRange = [&](const std::string& targetName, uint32_t& outStart, uint32_t& outEnd) -> bool
+        {
+            for (size_t i = 0; i < fileListLines.size(); i++)
+            {
+                if (auto name = StringHelper::Strip(fileListLines[i], "\r"); name == targetName)
+                {
+                    const int romOff = romVersion.offset + 16 * i;
+                    outStart = BitConverter::ToUInt32BE(romData, romOff + 0);
+                    outEnd = BitConverter::ToUInt32BE(romData, romOff + 4);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Search codeData for two consecutive big-endian u32 values (the vromStart/vromEnd pattern).
+        auto findTableInCode = [&](const uint32_t vromStart, const uint32_t vromEnd) -> int
+        {
+            uint8_t needle[8];
+            needle[0] = vromStart >> 24 & 0xFF;
+            needle[1] = vromStart >> 16 & 0xFF;
+            needle[2] = vromStart >>  8 & 0xFF;
+            needle[3] = vromStart >>  0 & 0xFF;
+            needle[4] = vromEnd >> 24 & 0xFF;
+            needle[5] = vromEnd >> 16 & 0xFF;
+            needle[6] = vromEnd >>  8 & 0xFF;
+            needle[7] = vromEnd >>  0 & 0xFF;
+
+            for (size_t j = 0; j + 8 <= codeData.size(); j += 4)
+            {
+                if (memcmp(codeData.data() + j, needle, 8) == 0)
+                    return (int)j;
+            }
+            return -1;
+        };
+
+        // Actor overlay table: Search for ovl_player_actor's VROM range (actor ID 0 = first entry).
+        auto* actorStream = new MemoryStream();
+        BinaryWriter actorWriter(actorStream);
+        std::vector<char> actorStreamBuffer;
+
+        uint32_t playerVromEnd = 0;
+        if (uint32_t playerVromStart = 0; codeData.size() > 0 && getDmaVromRange(
+            "ovl_player_actor", playerVromStart, playerVromEnd))
+        {
+            if (int actorTableStart = findTableInCode(playerVromStart, playerVromEnd); actorTableStart >= 0)
+            {
+                auto actorCount = (uint32_t)Globals::Instance->cfg.actorList.size();
+
+                actorWriter.SetEndianness(Endianness::Big);
+                actorWriter.Write(actorCount);
+
+                for (uint32_t i = 0; i < actorCount; i++)
+                {
+                    uint32_t entryOffset = actorTableStart + i * 0x20;
+                    uint32_t vramStart = BitConverter::ToUInt32BE(codeData, entryOffset + 0x08);
+                    uint32_t vramEnd = BitConverter::ToUInt32BE(codeData, entryOffset + 0x0C);
+                    actorWriter.Write(vramEnd - vramStart);
+                }
+
+                actorWriter.Close();
+                printf("Adding actor overlay VRAM sizes (%u entries).\n", actorCount);
+                actorStreamBuffer = actorStream->ToVector();
+                archive->AddFile("misc/actor_overlay_sizes", actorStreamBuffer.data(),
+                                 actorStream->GetLength());
+            }
+            else
+            {
+                printf("Warning: Could not find actor overlay table in code segment.\n");
+            }
+        }
+
+        // Effect overlay table: Search for ovl_Effect_Ss_Dust's VROM range (effect type 0 = first entry).
+        auto* effectStream = new MemoryStream();
+        BinaryWriter effectWriter(effectStream);
+        std::vector<char> effectStreamBuffer;
+
+        uint32_t dustVromEnd = 0;
+        if (uint32_t dustVromStart = 0; !codeData.empty() && getDmaVromRange(
+            "ovl_Effect_Ss_Dust", dustVromStart, dustVromEnd))
+        {
+            if (int effectTableStart = findTableInCode(dustVromStart, dustVromEnd); effectTableStart >= 0)
+            {
+                uint32_t effectCount = 37; // EFFECT_SS_TYPE_MAX: constant across all OoT versions
+
+                effectWriter.SetEndianness(Endianness::Big);
+                effectWriter.Write(effectCount);
+
+                for (uint32_t i = 0; i < effectCount; i++)
+                {
+                    uint32_t entryOffset = effectTableStart + i * 0x1C;
+                    uint32_t vramStart = BitConverter::ToUInt32BE(codeData, entryOffset + 0x08);
+                    uint32_t vramEnd = BitConverter::ToUInt32BE(codeData, entryOffset + 0x0C);
+                    effectWriter.Write(vramEnd - vramStart);
+                }
+
+                effectWriter.Close();
+                printf("Adding effect overlay VRAM sizes (%u entries).\n", effectCount);
+                effectStreamBuffer = effectStream->ToVector();
+                archive->AddFile("misc/effect_overlay_sizes", effectStreamBuffer.data(),
+                                 effectStream->GetLength());
+            }
+            else
+            {
+                printf("Warning: Could not find effect overlay table in code segment.\n");
+            }
+        }
 
         for (const auto& item : files)
         {
