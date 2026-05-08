@@ -232,6 +232,15 @@ static void ExporterProgramEnd()
             return false;
         };
 
+        // Build reverse map: VROM start -> DMA file name (for loading overlay files by VROM address).
+        std::unordered_map<uint32_t, std::string> vromToName;
+        for (size_t i = 0; i < fileListLines.size(); i++)
+        {
+            const int romOff = romVersion.offset + 16 * i;
+            uint32_t vromStart = BitConverter::ToUInt32BE(romData, romOff + 0);
+            vromToName[vromStart] = StringHelper::Strip(fileListLines[i], "\r");
+        }
+
         // Search codeData for two consecutive big-endian u32 values (the vromStart/vromEnd pattern).
         auto findTableInCode = [&](const uint32_t vromStart, const uint32_t vromEnd) -> int
         {
@@ -260,6 +269,13 @@ static void ExporterProgramEnd()
         BinaryWriter actorWriter(actorStream);
         std::vector<char> actorStreamBuffer;
 
+        // Actor instance sizes: Read instanceSize from each actor's ActorProfile. The profile VRAM address is
+        // in the overlay table's initInfo field (entry + 0x14).  ActorProfile.instanceSize is at
+        // profile + 0x0C (N64 struct offset).
+        auto* instanceStream = new MemoryStream();
+        BinaryWriter instanceWriter(instanceStream);
+        std::vector<char> instanceStreamBuffer;
+
         uint32_t enTestVromEnd = 0;
         if (uint32_t enTestVromStart = 0; codeData.size() > 0 && getDmaVromRange(
             "ovl_En_Test", enTestVromStart, enTestVromEnd))
@@ -287,6 +303,148 @@ static void ExporterProgramEnd()
                 actorStreamBuffer = actorStream->ToVector();
                 archive->AddFile("misc/actor_overlay_sizes", actorStreamBuffer.data(),
                                  actorStream->GetLength());
+
+                instanceWriter.SetEndianness(Endianness::Big);
+                instanceWriter.Write(actorCount);
+
+                // Derive codeVramStart dynamically from code-resident actors.  Code-resident actors have
+                // vromStart == 0 and initInfo != 0.  The profile at initInfo starts with the actor's ID as a
+                // big-endian s16.  We search codeData for a non-zero ID, compute a candidate codeVramStart, and
+                // cross-validate against every other code-resident actor.
+                uint32_t codeVramStart = 0;
+                {
+                    struct CodeResident { uint32_t actorId; uint32_t initInfo; };
+                    std::vector<CodeResident> codeResidents;
+
+                    for (uint32_t i = 0; i < actorCount; i++)
+                    {
+                        uint32_t entryOffset = actorTableStart + i * 0x20;
+                        uint32_t vromS = BitConverter::ToUInt32BE(codeData, entryOffset + 0x00);
+                        if (uint32_t info = BitConverter::ToUInt32BE(codeData, entryOffset + 0x14); vromS == 0 &&
+                            info >= 0x80000000)
+                        {
+                            codeResidents.push_back({ i, info });
+                            printf("  Code-resident actor %u: initInfo=0x%08X\n", i, info);
+                        }
+                    }
+
+                    // Find a code-resident actor with id != 0 to use as the search anchor.
+                    for (const auto& [actorId, initInfo] : codeResidents)
+                    {
+                        if (actorId == 0)
+                        {
+                            continue;
+                        }
+
+                        uint8_t needle[2] = {
+                            (uint8_t)(actorId >> 8),
+                            (uint8_t)(actorId & 0xFF)
+                        };
+
+                        for (size_t off = 0; off + 2 <= codeData.size(); off += 2)
+                        {
+                            if (codeData[off] != needle[0] || codeData[off + 1] != needle[1])
+                            {
+                                continue;
+                            }
+
+                            uint32_t candidate = initInfo - (uint32_t)off;
+
+                            // Cross-validate: every other code-resident actor's ID must match.
+                            bool isValid = true;
+                            for (const auto& other : codeResidents)
+                            {
+                                if (other.initInfo == initInfo)
+                                {
+                                    continue;
+                                }
+
+                                uint32_t otherOff = other.initInfo - candidate;
+                                if (otherOff + 2 > codeData.size())
+                                {
+                                    isValid = false;
+                                    break;
+                                }
+
+                                if (uint16_t readId = codeData[otherOff] << 8 | codeData[otherOff + 1]; readId !=
+                                    other.actorId)
+                                {
+                                    isValid = false;
+                                    break;
+                                }
+                            }
+
+                            if (isValid)
+                            {
+                                codeVramStart = candidate;
+                                break;
+                            }
+                        }
+
+                        if (codeVramStart != 0)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (codeVramStart != 0)
+                    {
+                        printf("Derived codeVramStart = 0x%08X from %zu code-resident actors.\n",
+                               codeVramStart, codeResidents.size());
+                    }
+                    else if (!codeResidents.empty())
+                    {
+                        printf("Warning: Could not derive codeVramStart from %zu code-resident actors.\n",
+                               codeResidents.size());
+                    }
+                }
+
+                uint32_t resolved = 0;
+
+                for (size_t i = 0; i < actorCount; i++)
+                {
+                    uint32_t entryOffset = actorTableStart + i * 0x20;
+                    uint32_t actorVromStart = BitConverter::ToUInt32BE(codeData, entryOffset + 0x00);
+                    uint32_t actorVramStart = BitConverter::ToUInt32BE(codeData, entryOffset + 0x08);
+                    uint32_t initInfo = BitConverter::ToUInt32BE(codeData, entryOffset + 0x14);
+                    uint32_t instanceSize = 0;
+
+                    if (initInfo == 0)
+                    {
+                        // Unused actor ID or no profile -- leave instanceSize as 0.
+                    }
+                    else if (actorVromStart != 0)
+                    {
+                        // Overlay actor: load the decompressed overlay file and read the profile.
+                        if (auto it = vromToName.find(actorVromStart); it != vromToName.end())
+                        {
+                            auto overlayData = rom.GetFile(it->second);
+                            if (uint32_t profileOffset = initInfo - actorVramStart; profileOffset + 0x10 <=
+                                overlayData.size())
+                            {
+                                instanceSize = BitConverter::ToUInt32BE(overlayData, profileOffset + 0x0C);
+                                resolved++;
+                            }
+                        }
+                    }
+                    else if (codeVramStart != 0)
+                    {
+                        // Code-resident actor: Profile is in the code segment.
+                        if (uint32_t profileOffset = initInfo - codeVramStart; profileOffset + 0x10 <= codeData.size())
+                        {
+                            instanceSize = BitConverter::ToUInt32BE(codeData, profileOffset + 0x0C);
+                            resolved++;
+                        }
+                    }
+
+                    instanceWriter.Write(instanceSize);
+                }
+
+                instanceWriter.Close();
+                printf("Adding actor instance sizes (%u entries, %u resolved).\n", actorCount, resolved);
+                instanceStreamBuffer = instanceStream->ToVector();
+                archive->AddFile("misc/actor_instance_sizes", instanceStreamBuffer.data(),
+                                 instanceStream->GetLength());
             }
             else
             {
@@ -310,7 +468,7 @@ static void ExporterProgramEnd()
                 effectWriter.SetEndianness(Endianness::Big);
                 effectWriter.Write(effectCount);
 
-                for (uint32_t i = 0; i < effectCount; i++)
+                for (size_t i = 0; i < effectCount; i++)
                 {
                     uint32_t entryOffset = effectTableStart + i * 0x1C;
                     uint32_t vramStart = BitConverter::ToUInt32BE(codeData, entryOffset + 0x08);
