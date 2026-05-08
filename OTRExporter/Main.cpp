@@ -176,8 +176,9 @@ static void ExporterProgramEnd()
         {
             const int romOffset = romVersion.offset + 16 * i;
             const int physStart = BitConverter::ToInt32BE(romData, romOffset + 8);
-            const int physEnd = BitConverter::ToInt32BE(romData, romOffset + 12);
-            if (!(physEnd == 0xFFFFFFFF && physStart == 0xFFFFFFFF)) {
+            if (const int physEnd = BitConverter::ToInt32BE(romData, romOffset + 12); !(physEnd == 0xFFFFFFFF &&
+                physStart == 0xFFFFFFFF))
+            {
                 dmaEntryCount++;
             }
         }
@@ -252,17 +253,22 @@ static void ExporterProgramEnd()
             return -1;
         };
 
-        // Actor overlay table: Search for ovl_player_actor's VROM range (actor ID 0 = first entry).
+        // Actor overlay table: Search for ovl_En_Test's VROM range (actor ID 2). Entry 0 (ovl_player_actor) has null
+        // VROM/VRAM because it's linked into the code segment, and its VROM bytes at 0xED410 are gPlayerActorOverlay
+        // (a separate struct), not the table.
         auto* actorStream = new MemoryStream();
         BinaryWriter actorWriter(actorStream);
         std::vector<char> actorStreamBuffer;
 
-        uint32_t playerVromEnd = 0;
-        if (uint32_t playerVromStart = 0; codeData.size() > 0 && getDmaVromRange(
-            "ovl_player_actor", playerVromStart, playerVromEnd))
+        uint32_t enTestVromEnd = 0;
+        if (uint32_t enTestVromStart = 0; codeData.size() > 0 && getDmaVromRange(
+            "ovl_En_Test", enTestVromStart, enTestVromEnd))
         {
-            if (int actorTableStart = findTableInCode(playerVromStart, playerVromEnd); actorTableStart >= 0)
+            constexpr int enTestActorId = 2;
+            if (int enTestOffset = findTableInCode(enTestVromStart, enTestVromEnd);
+                enTestOffset >= 0 && enTestOffset >= enTestActorId * 0x20)
             {
+                int actorTableStart = enTestOffset - enTestActorId * 0x20;
                 auto actorCount = (uint32_t)Globals::Instance->cfg.actorList.size();
 
                 actorWriter.SetEndianness(Endianness::Big);
