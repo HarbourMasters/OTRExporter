@@ -98,7 +98,7 @@ static void ExporterProgramEnd()
     std::vector<uint16_t> portVersion = {};
     std::vector<std::string> versionParts = StringHelper::Split(portVersionString, ".");
 
-    // If a major.minor.patch string was not passed in, fallback to 0 0 0 
+    // If a major.minor.patch string was not passed in, fallback to 0 0 0
     if (versionParts.size() != 3) {
         portVersion = { 0, 0, 0 };
     } else {
@@ -159,10 +159,62 @@ static void ExporterProgramEnd()
         auto portVersionStreamBuffer = portVersionStream->ToVector();
         archive->AddFile("portVersion", (void*)portVersionStreamBuffer.data(), portVersionStream->GetLength());
 
+        // Build a ZRom to access DMA file sizes and MQ status.
+        ZRom rom(romPath);
+        const auto& romVersion = rom.GetVersion();
+
+        // Export DMA file sizes for the N64 memory model.
+        // Parse the DMA table directly from romData using the version's offset and filelist.
+        auto fileListFullPath = StringHelper::Sprintf("%s/%s",
+            Globals::Instance->fileListPath.string().c_str(), romVersion.listPath.c_str());
+        auto fileListText = DiskFile::ReadAllText(fileListFullPath);
+        auto fileListLines = StringHelper::Split(fileListText, "\n");
+
+        // Count non-deleted DMA entries first.
+        uint32_t dmaEntryCount = 0;
+        for (size_t i = 0; i < fileListLines.size(); i++)
+        {
+            const int romOffset = romVersion.offset + 16 * i;
+            const int physStart = BitConverter::ToInt32BE(romData, romOffset + 8);
+            const int physEnd = BitConverter::ToInt32BE(romData, romOffset + 12);
+            if (!(physEnd == 0xFFFFFFFF && physStart == 0xFFFFFFFF)) {
+                dmaEntryCount++;
+            }
+        }
+
+        auto* dmaStream = new MemoryStream();
+        BinaryWriter dmaWriter(dmaStream);
+        dmaWriter.SetEndianness(Endianness::Big);
+        dmaWriter.Write(dmaEntryCount);
+
+        for (size_t i = 0; i < fileListLines.size(); i++)
+        {
+            auto fileName = StringHelper::Strip(fileListLines[i], "\r");
+            const int romOffset = romVersion.offset + (16 * i);
+
+            const int virtStart = BitConverter::ToInt32BE(romData, romOffset + 0);
+            const int virtEnd = BitConverter::ToInt32BE(romData, romOffset + 4);
+            const int physStart = BitConverter::ToInt32BE(romData, romOffset + 8);
+            const int physEnd = BitConverter::ToInt32BE(romData, romOffset + 12);
+
+            if (physEnd == 0xFFFFFFFF && physStart == 0xFFFFFFFF) {
+                continue;
+            }
+
+            dmaWriter.Write((uint32_t)(virtEnd - virtStart));
+            dmaWriter.Write(fileName);
+        }
+
+        dmaWriter.Close();
+
+        printf("Adding DMA file sizes (%u entries).\n", dmaEntryCount);
+        auto dmaStreamBuffer = dmaStream->ToVector();
+        archive->AddFile("misc/dma_sizes", (void*)dmaStreamBuffer.data(), dmaStream->GetLength());
+
         for (const auto& item : files)
         {
             std::string fName = item.first;
-            if (fName.find("gTitleZeldaShieldLogoMQTex") != std::string::npos && !ZRom(romPath).IsMQ())
+            if (fName.find("gTitleZeldaShieldLogoMQTex") != std::string::npos && !rom.IsMQ())
             {
                 size_t pos = 0;
                 if ((pos = fName.find("gTitleZeldaShieldLogoMQTex", 0)) != std::string::npos)
@@ -195,7 +247,7 @@ static void ExporterProgramEnd()
     printf("Generating Custom OTR Archive...\n");
     auto customOtr = std::make_unique<ExporterArchiveO2R>(customArchiveFileName, true);
     customOtr->CreateArchive(40000);
-    
+
     printf("Adding portVersion file.\n");
     auto portVersionStreamBuffer = portVersionStream->ToVector();
     customOtr->AddFile("portVersion", (void*)portVersionStreamBuffer.data(), portVersionStream->GetLength());
