@@ -89,7 +89,6 @@ typedef struct DataU {
     std::string filePath;
     size_t size;
 } DataU;
-
 static void ExporterProgramEnd()
 {
     uint32_t crc = 0xFFFFFFFF;
@@ -485,6 +484,80 @@ static void ExporterProgramEnd()
             else
             {
                 printf("Warning: Could not find effect overlay table in code segment.\n");
+            }
+        }
+
+        // Kaleido overlay table: 2 entries (ovl_kaleido_scope, ovl_player_actor), stride 0x1C.
+        // The THA allocation for the kaleido buffer uses max(scope VRAM, player VRAM).
+        // Entry layout: loadedRamAddr(+0x00), vromStart(+0x04), vromEnd(+0x08), vramStart(+0x0C), vramEnd(+0x10), ...
+        //
+        // We validate matches by requiring BOTH entries to have NULL loadedRamAddr followed by their respective VROM
+        // pairs.  This eliminates false positives from stray code references.
+        auto* kaleidoStream = new MemoryStream();
+        BinaryWriter kaleidoWriter(kaleidoStream);
+        std::vector<char> kaleidoStreamBuffer;
+
+        uint32_t kaleidoVromEnd = 0;
+        uint32_t playerVromEnd = 0;
+        if (uint32_t kaleidoVromStart = 0, playerVromStart = 0;
+            !codeData.empty() &&
+            getDmaVromRange("ovl_kaleido_scope", kaleidoVromStart, kaleidoVromEnd) &&
+            getDmaVromRange("ovl_player_actor", playerVromStart, playerVromEnd))
+        {
+            auto buildNeedle = [](uint8_t out[12], const uint32_t vromStart, const uint32_t vromEnd) {
+                memset(out, 0, 4);
+                out[4]  = vromStart >> 24 & 0xFF; out[5]  = vromStart >> 16 & 0xFF;
+                out[6]  = vromStart >>  8 & 0xFF; out[7]  = vromStart >>  0 & 0xFF;
+                out[8]  = vromEnd   >> 24 & 0xFF; out[9]  = vromEnd   >> 16 & 0xFF;
+                out[10] = vromEnd   >>  8 & 0xFF; out[11] = vromEnd   >>  0 & 0xFF;
+            };
+
+            uint8_t needleScope[12] = {};
+            uint8_t needlePlayer[12] = {};
+            buildNeedle(needleScope, kaleidoVromStart, kaleidoVromEnd);
+            buildNeedle(needlePlayer, playerVromStart, playerVromEnd);
+
+            constexpr int kaleidoEntrySize = 0x1C;
+            int kaleidoTableStart = -1;
+
+            for (size_t j = 0; j + kaleidoEntrySize + 12 <= codeData.size(); j += 4)
+            {
+                if (memcmp(codeData.data() + j, needleScope, 12) == 0 &&
+                    memcmp(codeData.data() + j + kaleidoEntrySize, needlePlayer, 12) == 0)
+                {
+                    kaleidoTableStart = (int)j;
+                    break;
+                }
+            }
+
+            if (kaleidoTableStart >= 0)
+            {
+                constexpr int kaleidoEntryCount = 2;
+                uint32_t maxVramSize = 0;
+
+                for (int i = 0; i < kaleidoEntryCount; i++)
+                {
+                    int entryOffset = kaleidoTableStart + i * kaleidoEntrySize;
+                    uint32_t vramStart = BitConverter::ToUInt32BE(codeData, entryOffset + 0x0C);
+                    uint32_t vramEnd = BitConverter::ToUInt32BE(codeData, entryOffset + 0x10);
+                    uint32_t vramSize = vramEnd - vramStart;
+
+                    if (vramSize > maxVramSize)
+                        maxVramSize = vramSize;
+                }
+
+                kaleidoWriter.SetEndianness(Endianness::Big);
+                kaleidoWriter.Write(maxVramSize);
+                kaleidoWriter.Close();
+
+                printf("Adding kaleido overlay max VRAM size: 0x%X.\n", maxVramSize);
+                kaleidoStreamBuffer = kaleidoStream->ToVector();
+                archive->AddFile("misc/kaleido_vram_size", kaleidoStreamBuffer.data(),
+                                 kaleidoStream->GetLength());
+            }
+            else
+            {
+                printf("Warning: Could not find kaleido overlay table in code segment.\n");
             }
         }
 
