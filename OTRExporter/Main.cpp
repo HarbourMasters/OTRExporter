@@ -556,6 +556,7 @@ static void ExporterProgramEnd()
 
         // Arena node size: N64 ArenaNode is 0x10 on retail (no debug fields) and 0x30 on debug (with debug
         // fields under #if OOT_DEBUG).  The shadow arena needs this to match allocation overhead per-node.
+        std::vector<char> nodeStreamBuffer;
         {
             const uint32_t arenaNodeSize = rom.IsDebug() ? 0x30 : 0x10;
 
@@ -566,12 +567,14 @@ static void ExporterProgramEnd()
             nodeWriter.Close();
 
             printf("Adding arena node size: 0x%X (%s).\n", arenaNodeSize, rom.IsDebug() ? "debug" : "retail");
-            auto nodeStreamBuffer = nodeStream->ToVector();
+            nodeStreamBuffer = nodeStream->ToVector();
             archive->AddFile("misc/n64_memory/arena_node_size", nodeStreamBuffer.data(), nodeStream->GetLength());
         }
 
+
         // N64 LANGUAGE_MAX: determines the GI object segment size (0x1000 * LANGUAGE_MAX + 8).
         // NTSC builds (JPN + ENG) have LANGUAGE_MAX = 2.  PAL builds (ENG + GER + FRA) have LANGUAGE_MAX = 3.
+        std::vector<char> langStreamBuffer;
         {
             const uint32_t languageMax = rom.IsPal() ? 3 : 2;
 
@@ -582,7 +585,7 @@ static void ExporterProgramEnd()
             langWriter.Close();
 
             printf("Adding N64 LANGUAGE_MAX: %u (%s).\n", languageMax, rom.IsPal() ? "PAL" : "NTSC");
-            auto langStreamBuffer = langStream->ToVector();
+            langStreamBuffer = langStream->ToVector();
             archive->AddFile("misc/n64_memory/language_max", langStreamBuffer.data(), langStream->GetLength());
         }
 
