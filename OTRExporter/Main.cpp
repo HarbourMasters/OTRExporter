@@ -158,7 +158,7 @@ static void ExporterProgramEnd()
         auto portVersionStreamBuffer = portVersionStream->ToVector();
         archive->AddFile("portVersion", (void*)portVersionStreamBuffer.data(), portVersionStream->GetLength());
 
-        // Build a ZRom to access DMA file sizes and MQ status.
+        // Build a ZRom to access DMA file sizes and ROM info.
         ZRom rom(romPath);
         const auto& romVersion = rom.GetVersion();
 
@@ -187,17 +187,18 @@ static void ExporterProgramEnd()
         dmaWriter.SetEndianness(Endianness::Big);
         dmaWriter.Write(dmaEntryCount);
 
-        for (size_t i = 0; i < fileListLines.size(); i++)
+        for (size_t i = 0; i < fileListLines.size(); ++i)
         {
             auto fileName = StringHelper::Strip(fileListLines[i], "\r");
-            const int romOffset = romVersion.offset + (16 * i);
+            const int romOffset = romVersion.offset + 16 * i;
 
             const int virtStart = BitConverter::ToInt32BE(romData, romOffset + 0);
             const int virtEnd = BitConverter::ToInt32BE(romData, romOffset + 4);
             const int physStart = BitConverter::ToInt32BE(romData, romOffset + 8);
-            const int physEnd = BitConverter::ToInt32BE(romData, romOffset + 12);
 
-            if (physEnd == 0xFFFFFFFF && physStart == 0xFFFFFFFF) {
+            if (const int physEnd = BitConverter::ToInt32BE(romData, romOffset + 12); physEnd == 0xFFFFFFFF &&
+                physStart == 0xFFFFFFFF)
+            {
                 continue;
             }
 
@@ -209,7 +210,7 @@ static void ExporterProgramEnd()
 
         printf("Adding DMA file sizes (%u entries).\n", dmaEntryCount);
         auto dmaStreamBuffer = dmaStream->ToVector();
-        archive->AddFile("misc/dma_sizes", dmaStreamBuffer.data(), dmaStream->GetLength());
+        archive->AddFile("misc/n64_memory/dma_sizes", dmaStreamBuffer.data(), dmaStream->GetLength());
 
         // Export actor and effect overlay VRAM sizes from the code segment's overlay tables.
         // Find the tables dynamically by searching for known DMA entries within the code segment.
@@ -218,7 +219,7 @@ static void ExporterProgramEnd()
         // Look up a DMA file's VROM start/end by name from the DMA table in romData.
         auto getDmaVromRange = [&](const std::string& targetName, uint32_t& outStart, uint32_t& outEnd) -> bool
         {
-            for (size_t i = 0; i < fileListLines.size(); i++)
+            for (size_t i = 0; i < fileListLines.size(); ++i)
             {
                 if (auto name = StringHelper::Strip(fileListLines[i], "\r"); name == targetName)
                 {
@@ -228,6 +229,7 @@ static void ExporterProgramEnd()
                     return true;
                 }
             }
+
             return false;
         };
 
@@ -258,6 +260,7 @@ static void ExporterProgramEnd()
                 if (memcmp(codeData.data() + j, needle, 8) == 0)
                     return (int)j;
             }
+
             return -1;
         };
 
@@ -289,7 +292,7 @@ static void ExporterProgramEnd()
                 actorWriter.SetEndianness(Endianness::Big);
                 actorWriter.Write(actorCount);
 
-                for (uint32_t i = 0; i < actorCount; i++)
+                for (size_t i = 0; i < actorCount; ++i)
                 {
                     uint32_t entryOffset = actorTableStart + i * 0x20;
                     uint32_t vramStart = BitConverter::ToUInt32BE(codeData, entryOffset + 0x08);
@@ -300,7 +303,7 @@ static void ExporterProgramEnd()
                 actorWriter.Close();
                 printf("Adding actor overlay VRAM sizes (%u entries).\n", actorCount);
                 actorStreamBuffer = actorStream->ToVector();
-                archive->AddFile("misc/actor_overlay_sizes", actorStreamBuffer.data(),
+                archive->AddFile("misc/n64_memory/actor_overlay_sizes", actorStreamBuffer.data(),
                                  actorStream->GetLength());
 
                 instanceWriter.SetEndianness(Endianness::Big);
@@ -315,7 +318,7 @@ static void ExporterProgramEnd()
                     struct CodeResident { uint32_t actorId; uint32_t initInfo; };
                     std::vector<CodeResident> codeResidents;
 
-                    for (uint32_t i = 0; i < actorCount; i++)
+                    for (uint32_t i = 0; i < actorCount; ++i)
                     {
                         uint32_t entryOffset = actorTableStart + i * 0x20;
                         uint32_t vromS = BitConverter::ToUInt32BE(codeData, entryOffset + 0x00);
@@ -385,17 +388,6 @@ static void ExporterProgramEnd()
                             break;
                         }
                     }
-
-                    if (codeVramStart != 0)
-                    {
-                        printf("Derived codeVramStart = 0x%08X from %zu code-resident actors.\n",
-                               codeVramStart, codeResidents.size());
-                    }
-                    else if (!codeResidents.empty())
-                    {
-                        printf("Warning: Could not derive codeVramStart from %zu code-resident actors.\n",
-                               codeResidents.size());
-                    }
                 }
 
                 uint32_t resolved = 0;
@@ -442,7 +434,7 @@ static void ExporterProgramEnd()
                 instanceWriter.Close();
                 printf("Adding actor instance sizes (%u entries, %u resolved).\n", actorCount, resolved);
                 instanceStreamBuffer = instanceStream->ToVector();
-                archive->AddFile("misc/actor_instance_sizes", instanceStreamBuffer.data(),
+                archive->AddFile("misc/n64_memory/actor_instance_sizes", instanceStreamBuffer.data(),
                                  instanceStream->GetLength());
             }
             else
@@ -478,7 +470,7 @@ static void ExporterProgramEnd()
                 effectWriter.Close();
                 printf("Adding effect overlay VRAM sizes (%u entries).\n", effectCount);
                 effectStreamBuffer = effectStream->ToVector();
-                archive->AddFile("misc/effect_overlay_sizes", effectStreamBuffer.data(),
+                archive->AddFile("misc/n64_memory/effect_overlay_sizes", effectStreamBuffer.data(),
                                  effectStream->GetLength());
             }
             else
@@ -535,7 +527,7 @@ static void ExporterProgramEnd()
                 constexpr int kaleidoEntryCount = 2;
                 uint32_t maxVramSize = 0;
 
-                for (int i = 0; i < kaleidoEntryCount; i++)
+                for (size_t i = 0; i < kaleidoEntryCount; ++i)
                 {
                     int entryOffset = kaleidoTableStart + i * kaleidoEntrySize;
                     uint32_t vramStart = BitConverter::ToUInt32BE(codeData, entryOffset + 0x0C);
@@ -553,7 +545,7 @@ static void ExporterProgramEnd()
 
                 printf("Adding kaleido overlay max VRAM size: 0x%X.\n", maxVramSize);
                 kaleidoStreamBuffer = kaleidoStream->ToVector();
-                archive->AddFile("misc/kaleido_vram_size", kaleidoStreamBuffer.data(),
+                archive->AddFile("misc/n64_memory/kaleido_vram_size", kaleidoStreamBuffer.data(),
                                  kaleidoStream->GetLength());
             }
             else
@@ -564,24 +556,35 @@ static void ExporterProgramEnd()
 
         // Arena node size: N64 ArenaNode is 0x10 on retail (no debug fields) and 0x30 on debug (with debug
         // fields under #if OOT_DEBUG).  The shadow arena needs this to match allocation overhead per-node.
-        constexpr uint32_t ARENA_NODE_SIZE_RETAIL = 0x10;
-        constexpr uint32_t ARENA_NODE_SIZE_DEBUG  = 0x30;
+        {
+            const uint32_t arenaNodeSize = rom.IsDebug() ? 0x30 : 0x10;
 
-        crc = rom.GetVersion().crc;
-        const bool isDebug = crc == 0x871E1C92 || // OOT_PAL_GC_DBG1
-                crc == 0x87121EFE || // OOT_PAL_GC_DBG2
-                crc == 0x917D18F6;  // OOT_PAL_GC_MQ_DBG
-        const uint32_t arenaNodeSize = isDebug ? ARENA_NODE_SIZE_DEBUG : ARENA_NODE_SIZE_RETAIL;
-
-        auto* nodeStream = new MemoryStream();
+            auto* nodeStream = new MemoryStream();
             BinaryWriter nodeWriter(nodeStream);
             nodeWriter.SetEndianness(Endianness::Big);
-        nodeWriter.Write(arenaNodeSize);
-        nodeWriter.Close();
+            nodeWriter.Write(arenaNodeSize);
+            nodeWriter.Close();
 
-        printf("Adding arena node size: 0x%X (%s).\n", arenaNodeSize, isDebug ? "debug" : "retail");
-        auto nodeStreamBuffer = nodeStream->ToVector();
-        archive->AddFile("misc/arena_node_size", nodeStreamBuffer.data(), nodeStream->GetLength());
+            printf("Adding arena node size: 0x%X (%s).\n", arenaNodeSize, rom.IsDebug() ? "debug" : "retail");
+            auto nodeStreamBuffer = nodeStream->ToVector();
+            archive->AddFile("misc/n64_memory/arena_node_size", nodeStreamBuffer.data(), nodeStream->GetLength());
+        }
+
+        // N64 LANGUAGE_MAX: determines the GI object segment size (0x1000 * LANGUAGE_MAX + 8).
+        // NTSC builds (JPN + ENG) have LANGUAGE_MAX = 2.  PAL builds (ENG + GER + FRA) have LANGUAGE_MAX = 3.
+        {
+            const uint32_t languageMax = rom.IsPal() ? 3 : 2;
+
+            auto* langStream = new MemoryStream();
+            BinaryWriter langWriter(langStream);
+            langWriter.SetEndianness(Endianness::Big);
+            langWriter.Write(languageMax);
+            langWriter.Close();
+
+            printf("Adding N64 LANGUAGE_MAX: %u (%s).\n", languageMax, rom.IsPal() ? "PAL" : "NTSC");
+            auto langStreamBuffer = langStream->ToVector();
+            archive->AddFile("misc/n64_memory/language_max", langStreamBuffer.data(), langStream->GetLength());
+        }
 
         for (const auto& item : files)
         {
