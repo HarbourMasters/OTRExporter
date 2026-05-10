@@ -540,10 +540,11 @@ static void ExporterProgramEnd()
                     int entryOffset = kaleidoTableStart + i * kaleidoEntrySize;
                     uint32_t vramStart = BitConverter::ToUInt32BE(codeData, entryOffset + 0x0C);
                     uint32_t vramEnd = BitConverter::ToUInt32BE(codeData, entryOffset + 0x10);
-                    uint32_t vramSize = vramEnd - vramStart;
 
-                    if (vramSize > maxVramSize)
+                    if (uint32_t vramSize = vramEnd - vramStart; vramSize > maxVramSize)
+                    {
                         maxVramSize = vramSize;
+                    }
                 }
 
                 kaleidoWriter.SetEndianness(Endianness::Big);
@@ -560,6 +561,27 @@ static void ExporterProgramEnd()
                 printf("Warning: Could not find kaleido overlay table in code segment.\n");
             }
         }
+
+        // Arena node size: N64 ArenaNode is 0x10 on retail (no debug fields) and 0x30 on debug (with debug
+        // fields under #if OOT_DEBUG).  The shadow arena needs this to match allocation overhead per-node.
+        constexpr uint32_t ARENA_NODE_SIZE_RETAIL = 0x10;
+        constexpr uint32_t ARENA_NODE_SIZE_DEBUG  = 0x30;
+
+        crc = rom.GetVersion().crc;
+        const bool isDebug = crc == 0x871E1C92 || // OOT_PAL_GC_DBG1
+                crc == 0x87121EFE || // OOT_PAL_GC_DBG2
+                crc == 0x917D18F6;  // OOT_PAL_GC_MQ_DBG
+        const uint32_t arenaNodeSize = isDebug ? ARENA_NODE_SIZE_DEBUG : ARENA_NODE_SIZE_RETAIL;
+
+        auto* nodeStream = new MemoryStream();
+            BinaryWriter nodeWriter(nodeStream);
+            nodeWriter.SetEndianness(Endianness::Big);
+        nodeWriter.Write(arenaNodeSize);
+        nodeWriter.Close();
+
+        printf("Adding arena node size: 0x%X (%s).\n", arenaNodeSize, isDebug ? "debug" : "retail");
+        auto nodeStreamBuffer = nodeStream->ToVector();
+        archive->AddFile("misc/arena_node_size", nodeStreamBuffer.data(), nodeStream->GetLength());
 
         for (const auto& item : files)
         {
