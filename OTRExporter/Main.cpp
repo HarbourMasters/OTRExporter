@@ -558,7 +558,7 @@ static void ExporterProgramEnd()
         // fields under #if OOT_DEBUG).  The shadow arena needs this to match allocation overhead per-node.
         std::vector<char> nodeStreamBuffer;
         {
-            const bool isDebug = rom.IsDebug();
+            const bool isDebug = rom.IsN64() || rom.IsDebug();
             const uint32_t arenaNodeSize = isDebug ? 0x30 : 0x10;
 
             auto* nodeStream = new MemoryStream();
