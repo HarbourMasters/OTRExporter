@@ -558,8 +558,8 @@ static void ExporterProgramEnd()
         // fields under #if OOT_DEBUG).  The shadow arena needs this to match allocation overhead per-node.
         std::vector<char> nodeStreamBuffer;
         {
-            const bool isDebug = rom.IsN64() || rom.IsDebug();
-            const uint32_t arenaNodeSize = isDebug ? 0x30 : 0x10;
+            const bool hasDebugFields = rom.IsN64() || rom.IsDebug();
+            const uint32_t arenaNodeSize = hasDebugFields ? 0x30 : 0x10;
 
             auto* nodeStream = new MemoryStream();
             BinaryWriter nodeWriter(nodeStream);
@@ -567,27 +567,9 @@ static void ExporterProgramEnd()
             nodeWriter.Write(arenaNodeSize);
             nodeWriter.Close();
 
-            printf("Adding arena node size: 0x%X (%s).\n", arenaNodeSize, isDebug ? "N64/debug" : "GC retail");
+            printf("Adding arena node size: 0x%X (%s).\n", arenaNodeSize, hasDebugFields ? "N64/debug" : "GC retail");
             nodeStreamBuffer = nodeStream->ToVector();
             archive->AddFile("misc/n64_memory/arena_node_size", nodeStreamBuffer.data(), nodeStream->GetLength());
-        }
-
-
-        // N64 LANGUAGE_MAX: determines the GI object segment size (0x1000 * LANGUAGE_MAX + 8).
-        // NTSC builds (JPN + ENG) have LANGUAGE_MAX = 2.  PAL builds (ENG + GER + FRA) have LANGUAGE_MAX = 3.
-        std::vector<char> langStreamBuffer;
-        {
-            const uint32_t languageMax = rom.IsPal() ? 3 : 2;
-
-            auto* langStream = new MemoryStream();
-            BinaryWriter langWriter(langStream);
-            langWriter.SetEndianness(Endianness::Big);
-            langWriter.Write(languageMax);
-            langWriter.Close();
-
-            printf("Adding N64 LANGUAGE_MAX: %u (%s).\n", languageMax, rom.IsPal() ? "PAL" : "NTSC");
-            langStreamBuffer = langStream->ToVector();
-            archive->AddFile("misc/n64_memory/language_max", langStreamBuffer.data(), langStream->GetLength());
         }
 
         for (const auto& item : files)
