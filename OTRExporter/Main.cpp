@@ -165,7 +165,8 @@ static void ExporterProgramEnd()
         // Export DMA file sizes for the N64 memory model.
         // Parse the DMA table directly from romData using the version's offset and filelist.
         auto fileListFullPath = StringHelper::Sprintf("%s/%s",
-            Globals::Instance->fileListPath.string().c_str(), romVersion.listPath.c_str());
+                                                      Globals::Instance->fileListPath.string().c_str(),
+                                                      romVersion.listPath.c_str());
         auto fileListText = DiskFile::ReadAllText(fileListFullPath);
         auto fileListLines = StringHelper::Split(fileListText, "\n");
 
@@ -248,12 +249,12 @@ static void ExporterProgramEnd()
             uint8_t needle[8];
             needle[0] = vromStart >> 24 & 0xFF;
             needle[1] = vromStart >> 16 & 0xFF;
-            needle[2] = vromStart >>  8 & 0xFF;
-            needle[3] = vromStart >>  0 & 0xFF;
+            needle[2] = vromStart >> 8 & 0xFF;
+            needle[3] = vromStart >> 0 & 0xFF;
             needle[4] = vromEnd >> 24 & 0xFF;
             needle[5] = vromEnd >> 16 & 0xFF;
-            needle[6] = vromEnd >>  8 & 0xFF;
-            needle[7] = vromEnd >>  0 & 0xFF;
+            needle[6] = vromEnd >> 8 & 0xFF;
+            needle[7] = vromEnd >> 0 & 0xFF;
 
             for (size_t j = 0; j + 8 <= codeData.size(); j += 4)
             {
@@ -279,7 +280,7 @@ static void ExporterProgramEnd()
         std::vector<char> instanceStreamBuffer;
 
         uint32_t enTestVromEnd = 0;
-        if (uint32_t enTestVromStart = 0; codeData.size() > 0 && getDmaVromRange(
+        if (uint32_t enTestVromStart = 0; !codeData.empty() && getDmaVromRange(
             "ovl_En_Test", enTestVromStart, enTestVromEnd))
         {
             constexpr int enTestActorId = 2;
@@ -315,7 +316,12 @@ static void ExporterProgramEnd()
                 // cross-validate against every other code-resident actor.
                 uint32_t codeVramStart = 0;
                 {
-                    struct CodeResident { uint32_t actorId; uint32_t initInfo; };
+                    struct CodeResident
+                    {
+                        uint32_t actorId;
+                        uint32_t initInfo;
+                    };
+
                     std::vector<CodeResident> codeResidents;
 
                     for (uint32_t i = 0; i < actorCount; ++i)
@@ -325,8 +331,7 @@ static void ExporterProgramEnd()
                         if (uint32_t info = BitConverter::ToUInt32BE(codeData, entryOffset + 0x14); vromS == 0 &&
                             info >= 0x80000000)
                         {
-                            codeResidents.push_back({ i, info });
-                            printf("  Code-resident actor %u: initInfo=0x%08X\n", i, info);
+                            codeResidents.push_back({i, info});
                         }
                     }
 
@@ -496,12 +501,17 @@ static void ExporterProgramEnd()
             getDmaVromRange("ovl_kaleido_scope", kaleidoVromStart, kaleidoVromEnd) &&
             getDmaVromRange("ovl_player_actor", playerVromStart, playerVromEnd))
         {
-            auto buildNeedle = [](uint8_t out[12], const uint32_t vromStart, const uint32_t vromEnd) {
+            auto buildNeedle = [](uint8_t out[12], const uint32_t vromStart, const uint32_t vromEnd)
+            {
                 memset(out, 0, 4);
-                out[4]  = vromStart >> 24 & 0xFF; out[5]  = vromStart >> 16 & 0xFF;
-                out[6]  = vromStart >>  8 & 0xFF; out[7]  = vromStart >>  0 & 0xFF;
-                out[8]  = vromEnd   >> 24 & 0xFF; out[9]  = vromEnd   >> 16 & 0xFF;
-                out[10] = vromEnd   >>  8 & 0xFF; out[11] = vromEnd   >>  0 & 0xFF;
+                out[4] = vromStart >> 24 & 0xFF;
+                out[5] = vromStart >> 16 & 0xFF;
+                out[6] = vromStart >> 8 & 0xFF;
+                out[7] = vromStart >> 0 & 0xFF;
+                out[8] = vromEnd >> 24 & 0xFF;
+                out[9] = vromEnd >> 16 & 0xFF;
+                out[10] = vromEnd >> 8 & 0xFF;
+                out[11] = vromEnd >> 0 & 0xFF;
             };
 
             uint8_t needleScope[12] = {};
@@ -552,24 +562,6 @@ static void ExporterProgramEnd()
             {
                 printf("Warning: Could not find kaleido overlay table in code segment.\n");
             }
-        }
-
-        // Arena node size: N64 ArenaNode is 0x10 on retail (no debug fields) and 0x30 on debug (with debug
-        // fields under #if OOT_DEBUG).  The shadow arena needs this to match allocation overhead per-node.
-        std::vector<char> nodeStreamBuffer;
-        {
-            const bool hasDebugFields = rom.IsN64() || rom.IsDebug();
-            const uint32_t arenaNodeSize = hasDebugFields ? 0x30 : 0x10;
-
-            auto* nodeStream = new MemoryStream();
-            BinaryWriter nodeWriter(nodeStream);
-            nodeWriter.SetEndianness(Endianness::Big);
-            nodeWriter.Write(arenaNodeSize);
-            nodeWriter.Close();
-
-            printf("Adding arena node size: 0x%X (%s).\n", arenaNodeSize, hasDebugFields ? "N64/debug" : "GC retail");
-            nodeStreamBuffer = nodeStream->ToVector();
-            archive->AddFile("misc/n64_memory/arena_node_size", nodeStreamBuffer.data(), nodeStream->GetLength());
         }
 
         for (const auto& item : files)
