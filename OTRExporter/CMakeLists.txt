@@ -148,6 +148,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	.
 )
 
+find_package(tinyxml2 REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC tinyxml2::tinyxml2)
+
 find_package(nlohmann_json REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
 
