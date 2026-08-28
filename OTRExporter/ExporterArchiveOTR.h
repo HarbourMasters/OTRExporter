@@ -10,7 +10,7 @@
 #include <StormLib.h>
 #include "ExporterArchive.h"
 
-class ExporterArchiveOtr : public ExporterArchive {
+class ExporterArchiveOtr final : public ExporterArchive {
   public:
     ExporterArchiveOtr(const std::string& path, bool enableWriting);
     ~ExporterArchiveOtr();

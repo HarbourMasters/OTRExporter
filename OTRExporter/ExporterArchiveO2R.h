@@ -10,7 +10,7 @@
 #include <zip.h>
 #include "ExporterArchive.h"
 
-class ExporterArchiveO2R : public ExporterArchive {
+class ExporterArchiveO2R final : public ExporterArchive {
   public:
     ExporterArchiveO2R(const std::string& path, bool enableWriting);
     ~ExporterArchiveO2R();
